@@ -4,26 +4,16 @@ import android.view.MotionEvent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,10 +22,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -45,13 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -60,7 +46,11 @@ import ir.ehsannarmani.compose_charts.extensions.addRoundRect
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
+import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import kotlinx.coroutines.delay
@@ -71,36 +61,17 @@ import kotlinx.coroutines.launch
 fun ColumnChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
-    barsStroke: Dp = 15.dp,
-    barsSpacing: Dp = 6.dp,
-    barsRadius: Bars.Data.Radius = Bars.Data.Radius.None,
-    indicatorStyle: TextStyle = LocalTextStyle.current,
+    barProperties: BarProperties = BarProperties(),
     labelStyle: TextStyle = LocalTextStyle.current,
-    indicatorBuilder: (Double) -> String = {
-        "%.1f".format(it)
-    },
-    indicatorCount: Int = 4,
-    dividerColor: Color = Color.Gray,
-    drawGrid: Boolean = false,
-    gridColor: Color = dividerColor,
-    gridStroke: Dp = (.5).dp,
+    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
+    gridProperties: GridProperties = GridProperties(),
     animationMode: Bars.AnimationMode = Bars.AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
     hideLabelHelper: Boolean = false,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupEnabled: Boolean = true,
-    popupAnimationSpec: AnimationSpec<Float> = tween(400),
-    popupDuration: Long = 1500,
-    popupTextStyle: TextStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp),
-    popupBackgroundColor: Color = Color(0xff313131),
-    popupCornerRadius: Dp = 4.dp,
-    popupContentHorizontalPadding: Dp = 4.dp,
-    popupContentVerticalPadding: Dp = 2.dp,
+    popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
     barAlphaDecreaseOnPopup: Float = .4f,
-    popupContentBuilder:(value:Double)->String = {
-        "%.1f".format(it)
-    }
 ) {
 
     val density = LocalDensity.current
@@ -110,7 +81,7 @@ fun ColumnChart(
     val everyDataWidth = with(density) {
         data.map { rowData ->
             rowData.values.map {
-                (it.barStroke ?: barsStroke).toPx() + (it.barSpacing ?: barsSpacing).toPx()
+                (it.properties?.strokeWidth ?: barProperties.strokeWidth).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
             }.sum()
         }.average().toFloat()
     }
@@ -128,16 +99,20 @@ fun ColumnChart(
     }
 
     val indicators = remember {
-        maxValue.split(maxValue / indicatorCount)
+        maxValue.split(maxValue / indicatorProperties.count)
     }
     val indicatorAreaWidth = remember {
-        indicators.maxOf { textMeasurer.measure(indicatorBuilder(it)).size.width } + (16*density.density)
+        if (indicatorProperties.enabled){
+            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (16 * density.density)
+        }else{
+            0f
+        }
     }
 
     LaunchedEffect(selectedValue.value) {
         if (selectedValue.value != null) {
-            delay(popupDuration)
-            popupAnimation.animateTo(0f, animationSpec = popupAnimationSpec)
+            delay(popupProperties.duration)
+            popupAnimation.animateTo(0f, animationSpec = popupProperties.animationSpec)
             selectedValue.value = null
         }
     }
@@ -145,7 +120,7 @@ fun ColumnChart(
     ImplementRCAnimation(
         data = data,
         animationMode = animationMode,
-        spec = {it.animationSpec ?: animationSpec},
+        spec = { it.animationSpec ?: animationSpec },
         delay = animationDelay,
         before = {
             rectWithValue.clear()
@@ -165,7 +140,7 @@ fun ColumnChart(
             Canvas(modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
-                    if (!popupEnabled) return@pointerInput
+                    if (!popupProperties.enabled) return@pointerInput
                     detectDragGestures { change, dragAmount ->
                         rectWithValue
                             .lastOrNull { it.second.contains(change.position) }
@@ -180,7 +155,7 @@ fun ColumnChart(
                                     if (popupAnimation.value != 1f) {
                                         popupAnimation.animateTo(
                                             1f,
-                                            animationSpec = popupAnimationSpec
+                                            animationSpec = popupProperties.animationSpec
                                         )
                                     }
                                 }
@@ -188,7 +163,7 @@ fun ColumnChart(
                     }
                 }
                 .pointerInteropFilter { event ->
-                    if (event.action == MotionEvent.ACTION_DOWN && popupEnabled) {
+                    if (event.action == MotionEvent.ACTION_DOWN && popupProperties.enabled) {
                         val position = Offset(event.x, event.y)
                         rectWithValue
                             .lastOrNull { it.second.contains(position) }
@@ -202,7 +177,7 @@ fun ColumnChart(
                                     popupAnimation.snapTo(0f)
                                     popupAnimation.animateTo(
                                         1f,
-                                        animationSpec = popupAnimationSpec
+                                        animationSpec = popupProperties.animationSpec
                                     )
                                 }
                             }
@@ -210,23 +185,40 @@ fun ColumnChart(
                     false
                 }) {
 
-                val barsAreaWidth = size.width-(indicatorAreaWidth)
+                val barsAreaWidth = size.width - (indicatorAreaWidth)
 
 
-                indicators.forEachIndexed { index, indicator ->
-                    val measureResult = textMeasurer.measure(indicatorBuilder(indicator),style = indicatorStyle)
-                    drawText(
-                        textLayoutResult = measureResult,
-                        topLeft = Offset(x = 0f,y = (size.height - measureResult.size.height).spaceBetween(itemCount = indicators.count(),index))
-                    )
+                if (indicatorProperties.enabled){
+                    indicators.forEachIndexed { index, indicator ->
+                        val measureResult =
+                            textMeasurer.measure(indicatorProperties.contentBuilder(indicator), style = indicatorProperties.textStyle)
+                        drawText(
+                            textLayoutResult = measureResult,
+                            topLeft = Offset(
+                                x = 0f,
+                                y = (size.height - measureResult.size.height).spaceBetween(
+                                    itemCount = indicators.count(),
+                                    index
+                                )
+                            )
+                        )
+                    }
                 }
 
-                drawGridLines(count = indicatorCount,color = gridColor, strokeWidth = gridStroke, xPadding = indicatorAreaWidth.toFloat(),size = size.copy(width = barsAreaWidth), justDividers = !drawGrid)
+                drawGridLines(
+                    count = indicatorProperties.count,
+                    color = gridProperties.color,
+                    strokeWidth = gridProperties.strokeWidth,
+                    xPadding = indicatorAreaWidth,
+                    size = size.copy(width = barsAreaWidth),
+                    justDividers = !gridProperties.enabled,
+                    style = gridProperties.style
+                )
 
                 data.forEachIndexed { dataIndex, columnChart ->
                     columnChart.values.forEachIndexed { valueIndex, col ->
-                        val stroke = (col.barStroke ?: barsStroke).toPx()
-                        val spacing = (col.barSpacing ?: barsSpacing).toPx()
+                        val stroke = (col.properties?.strokeWidth ?: barProperties.strokeWidth).toPx()
+                        val spacing = (col.properties?.spacing ?: barProperties.spacing).toPx()
 
                         val barHeight = ((col.value * size.height) / maxValue) * col.animator.value
                         val everyBarWidth = (stroke + spacing)
@@ -236,14 +228,14 @@ fun ColumnChart(
                                 x = (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
                                     itemCount = data.count(),
                                     index = dataIndex
-                                )+indicatorAreaWidth,
+                                ) + indicatorAreaWidth,
                                 y = (size.height - barHeight.toFloat())
                             ),
                             size = Size(width = stroke, height = barHeight.toFloat()),
                         )
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(col.value to rect)
                         val path = Path()
-                        path.addRoundRect(rect = rect, radius = (col.barRadius ?: barsRadius))
+                        path.addRoundRect(rect = rect, radius = (col.properties?.radius ?: barProperties.radius))
                         val color = if (rect == selectedValue.value?.rect) {
                             col.color.copy(alpha = 1f - (barAlphaDecreaseOnPopup * popupAnimation.value))
                         } else {
@@ -258,8 +250,8 @@ fun ColumnChart(
 
                 if (selectedValue.value != null) {
                     val measure = textMeasurer.measure(
-                        popupContentBuilder(selectedValue.value!!.value),
-                        style = popupTextStyle.copy(color = popupTextStyle.color.copy(alpha = popupAnimation.value * 1f))
+                        popupProperties.contentBuilder(selectedValue.value!!.value),
+                        style = popupProperties.textStyle.copy(color = popupProperties.textStyle.color.copy(alpha = popupAnimation.value * 1f))
                     )
                     val rectSize = measure.size.toSize()
                     val rectPosition = selectedValue.value!!.offset.copy(
@@ -267,7 +259,7 @@ fun ColumnChart(
                         x = selectedValue.value!!.offset.x + rectSize.width / 3
                     )
                     val cornerRadius =
-                        CornerRadius(popupCornerRadius.toPx(), popupCornerRadius.toPx())
+                        CornerRadius(popupProperties.cornerRadius.toPx(), popupProperties.cornerRadius.toPx())
                     drawPath(
                         path = Path().apply {
                             addRoundRect(
@@ -275,8 +267,8 @@ fun ColumnChart(
                                     rect = Rect(
                                         offset = rectPosition,
                                         size = rectSize.copy(
-                                            width = (rectSize.width + (popupContentHorizontalPadding.toPx() * 2)) * popupAnimation.value,
-                                            height = rectSize.height + popupContentVerticalPadding.toPx() * 2
+                                            width = (rectSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)) * popupAnimation.value,
+                                            height = rectSize.height + popupProperties.contentVerticalPadding.toPx() * 2
                                         ),
                                     ),
                                     topRight = cornerRadius,
@@ -285,13 +277,13 @@ fun ColumnChart(
                                 )
                             )
                         },
-                        color = popupBackgroundColor
+                        color = popupProperties.containerColor
                     )
                     drawText(
                         textLayoutResult = measure,
                         topLeft = rectPosition.copy(
-                            x = rectPosition.x + popupContentHorizontalPadding.toPx(),
-                            y = rectPosition.y + popupContentVerticalPadding.toPx()
+                            x = rectPosition.x + popupProperties.contentHorizontalPadding.toPx(),
+                            y = rectPosition.y + popupProperties.contentVerticalPadding.toPx()
                         ),
                     )
                 }
@@ -303,12 +295,16 @@ fun ColumnChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = (indicatorAreaWidth/density.density).dp,
+                    start = (indicatorAreaWidth / density.density).dp,
                 ), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             data.forEach {
                 val measureResult = textMeasurer.measure(it.label, style = labelStyle)
-                Text(text = it.label, style = labelStyle,modifier=Modifier.padding(end = ((measureResult.size.width/2)/density.density).dp))
+                Text(
+                    text = it.label,
+                    style = labelStyle,
+                    modifier = Modifier.padding(end = ((measureResult.size.width / 2) / density.density).dp)
+                )
             }
         }
 

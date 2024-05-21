@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ir.ehsannarmani.compose_charts.Line
 import ir.ehsannarmani.compose_charts.models.Bars
 
 @Composable

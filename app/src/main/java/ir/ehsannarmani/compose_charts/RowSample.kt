@@ -19,7 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 
 @Composable
 fun RowSample() {
@@ -36,20 +39,26 @@ fun RowSample() {
                 .padding(horizontal = 22.dp)
             ,
             data = data.value,
-            barsRadius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
-            indicatorStyle = TextStyle(fontSize = 12.sp),
+            barProperties = BarProperties(
+                radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
+                spacing = 4.dp,
+                strokeWidth = 20.dp
+            ),
+            indicatorProperties = IndicatorProperties(
+                textStyle = TextStyle(fontSize = 12.sp),
+                count = 4
+            ),
+            gridProperties = GridProperties(
+                enabled = true,
+                strokeWidth = .2.dp
+            ),
             labelStyle = TextStyle(fontSize = 12.sp),
-            drawGrid = true,
-            gridStroke = (.2).dp,
             animationSpec = spring(
                 dampingRatio = .6f,
                 stiffness = Spring.StiffnessLow
             ),
             animationMode = Bars.AnimationMode.Together(delayBuilder = {it*100L}),
             animationDelay = 300,
-            indicatorCount = 4,
-            barsSpacing = 4.dp,
-            barsStroke = 20.dp,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {

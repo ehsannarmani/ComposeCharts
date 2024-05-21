@@ -15,9 +15,7 @@ data class Bars(
         val label: String? = null,
         val value: Double,
         val color: Color,
-        val barStroke: Dp? = null,
-        val barSpacing: Dp? = null,
-        val barRadius: Radius? = null,
+        val properties: BarProperties? = null,
         val animationSpec: AnimationSpec<Float>? = null,
         val animator:Animatable<Float, AnimationVector1D> = Animatable(0f)
     ) {
