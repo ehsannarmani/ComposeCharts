@@ -15,20 +15,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.StrokeStyle
 
 @Composable
 fun RowSample() {
 
     val data = remember {
-        mutableStateOf(generateBarData())
+        mutableStateOf(generateRowBarData())
     }
 
     Column(modifier=Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -42,7 +47,7 @@ fun RowSample() {
             barProperties = BarProperties(
                 radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
                 spacing = 4.dp,
-                strokeWidth = 20.dp
+                strokeWidth = 20.dp,
             ),
             indicatorProperties = IndicatorProperties(
                 textStyle = TextStyle(fontSize = 12.sp),
@@ -57,12 +62,12 @@ fun RowSample() {
                 dampingRatio = .6f,
                 stiffness = Spring.StiffnessLow
             ),
-            animationMode = Bars.AnimationMode.Together(delayBuilder = {it*100L}),
+            animationMode = AnimationMode.Together(delayBuilder = {it*100L}),
             animationDelay = 300,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
-            data.value = generateBarData()
+            data.value = generateRowBarData()
         }, shape = RoundedCornerShape(8.dp)) {
             Text(text = "Show Animation")
         }

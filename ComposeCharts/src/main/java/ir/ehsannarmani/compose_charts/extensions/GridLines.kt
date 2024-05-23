@@ -6,18 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
-import ir.ehsannarmani.compose_charts.models.GridLineStyle
+import ir.ehsannarmani.compose_charts.models.StrokeStyle
 
-fun DrawScope.drawGridLines(count:Int,color: Color,strokeWidth:Dp,size: Size? = null,xPadding:Float = 0f,justDividers:Boolean = false,style: GridLineStyle = GridLineStyle.Normal){
+fun DrawScope.drawGridLines(count:Int,color: Color,strokeWidth:Dp,size: Size? = null,xPadding:Float = 0f,justDividers:Boolean = false,style: StrokeStyle = StrokeStyle.Normal){
     val _size = size ?: this.size
-    val pathEffect = when(style){
-        is GridLineStyle.Normal->{
-            null
-        }
-        is GridLineStyle.Dashed->{
-            PathEffect.dashPathEffect(intervals = style.intervals, phase = style.phase)
-        }
-    }
+    val pathEffect = style.pathEffect
 
     if (!justDividers){
         for (i in 0 until count) {

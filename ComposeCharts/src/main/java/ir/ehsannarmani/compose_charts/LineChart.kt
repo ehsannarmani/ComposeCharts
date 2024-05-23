@@ -1,5 +1,6 @@
 package ir.ehsannarmani.compose_charts
 
+import android.animation.ValueAnimator
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import androidx.compose.animation.core.Animatable
@@ -14,12 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -27,9 +30,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -37,8 +44,8 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -50,10 +57,15 @@ import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.flatten
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
+import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.DotProperties
+import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -68,7 +80,7 @@ fun LineChart(
     data: List<Line>,
     curvedEdges:Boolean = true,
     animationDelay: Long = 300,
-    animationMode: Line.AnimationMode = Line.AnimationMode.Together(),
+    animationMode: AnimationMode = AnimationMode.Together(),
     gridProperties: GridProperties = GridProperties(lineCount = 5),
     indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
     drawDividers: Boolean = true,
@@ -76,13 +88,11 @@ fun LineChart(
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
     popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
-    showDots: Boolean = false,
-    dotsRadius: Float = 10f,
-    dotsBorderWidth: Float = 3f,
-    dotsColor: Color = Color.Unspecified,
-    dotsBorderColor: Color = Color.Unspecified,
+    dotsProperties: DotProperties = DotProperties(),
+    labelProperties: LabelProperties = LabelProperties(enabled = false)
 ) {
 
+    val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
     val pathMeasure = remember {
@@ -103,8 +113,29 @@ fun LineChart(
 
     val maxValue = data.maxOf { it.values.maxOf { it } }
 
+    val labelAreaHeight = remember {
+        if (labelProperties.enabled){
+            labelProperties.labels.maxOf { textMeasurer.measure(it, style = labelProperties.textStyle).size.height }+(labelProperties.verticalPadding.value*density.density).toInt()
+        }else{
+            0
+        }
+    }
+
+    val dotAnimators = remember {
+        mutableStateListOf<List<Animatable<Float,AnimationVector1D>>>()
+    }
+
     LaunchedEffect(data) {
         pathsOffsets.clear()
+        dotAnimators.clear()
+
+        data.forEach {
+            val animators = mutableListOf<Animatable<Float,AnimationVector1D>>()
+            it.values.forEach {
+                animators.add(Animatable(0f))
+            }
+            dotAnimators.add(animators)
+        }
     }
 
     LaunchedEffect(data) {
@@ -120,11 +151,11 @@ fun LineChart(
         launch {
             data.forEachIndexed { index, line ->
                 when (animationMode) {
-                    is Line.AnimationMode.OneByOne -> {
+                    is AnimationMode.OneByOne -> {
                         animateStroke(line)
                     }
 
-                    is Line.AnimationMode.Together -> {
+                    is AnimationMode.Together -> {
                         launch {
                             delay(animationMode.delayBuilder(index))
                             animateStroke(line)
@@ -136,11 +167,11 @@ fun LineChart(
         launch {
             data.forEachIndexed { index, line ->
                 when (animationMode) {
-                    is Line.AnimationMode.OneByOne -> {
+                    is AnimationMode.OneByOne -> {
                         animateGradient(line)
                     }
 
-                    is Line.AnimationMode.Together -> {
+                    is AnimationMode.Together -> {
                         launch {
                             delay(animationMode.delayBuilder(index))
                             animateGradient(line)
@@ -155,7 +186,6 @@ fun LineChart(
         mutableStateListOf<Offset>()
     }
 
-
     Column(modifier = modifier) {
         if (!hideLabelHelper) {
             LabelHelper(data = data.map { it.label to it.color })
@@ -164,7 +194,7 @@ fun LineChart(
         Row(modifier = Modifier.fillMaxSize()) {
             if (indicatorProperties.enabled) {
                 Column(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier.fillMaxHeight().padding(bottom = (labelAreaHeight/density.density).dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     (maxValue).split(maxValue / indicatorProperties.count).forEach {
@@ -215,20 +245,33 @@ fun LineChart(
                     )
                 }) {
 
+                if (labelProperties.enabled){
+                    labelProperties.labels.forEachIndexed { index, label ->
+                        val measureResult = textMeasurer.measure(label, style = labelProperties.textStyle)
+                        drawText(
+                            textLayoutResult = measureResult,
+                            topLeft = Offset((size.width-measureResult.size.width).spaceBetween(itemCount = labelProperties.labels.count(),index = index),size.height-labelAreaHeight+labelProperties.verticalPadding.toPx())
+                        )
+                    }
+                }
+                val chartAreaHeight = size.height-labelAreaHeight
+
                 if (drawDividers) {
                     drawGridLines(
                         count = gridProperties.lineCount,
                         color = gridProperties.color,
                         strokeWidth = gridProperties.strokeWidth,
                         justDividers = !gridProperties.enabled,
-                        style = gridProperties.style
+                        style = gridProperties.style,
+                        size = size.copy(height = chartAreaHeight)
                     )
                 }
                 data.forEachIndexed { index, line ->
                     val path = getLinePath(
                         dataPoints = line.values.map { it.toFloat() },
                         maxValue = maxValue.toFloat(),
-                        rounded =line.curvedEdges ?: curvedEdges
+                        rounded =line.curvedEdges ?: curvedEdges,
+                        size = size.copy(height = chartAreaHeight)
                     )
                     if (pathsOffsets.none { it.line == line }) {
                         pathsOffsets.add(
@@ -243,68 +286,60 @@ fun LineChart(
                         segmentedPath
                     )
 
+                    var pathEffect:PathEffect? = null
                     val stroke: Float = when (val drawStyle = line.drawStyle) {
-                        is Line.DrawStyle.Fill -> {
+                        is DrawStyle.Fill -> {
                             0f
                         }
 
-                        is Line.DrawStyle.Stroke -> {
+                        is DrawStyle.Stroke -> {
+                            pathEffect = drawStyle.strokeStyle.pathEffect
                             drawStyle.width.toPx()
                         }
                     }
                     drawPath(
                         path = segmentedPath,
-                        color = line.color,
-                        style = Stroke(width = stroke)
+                        brush = line.color,
+                        style = Stroke(width = stroke, pathEffect = pathEffect)
                     )
                     if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
                         drawGradient(
                             path = path,
                             color1 = line.firstGradientFillColor,
                             color2 = line.secondGradientFillColor,
-                            progress = line.gradientProgress.value
+                            progress = line.gradientProgress.value,
+                            size = size.copy(height = chartAreaHeight)
                         )
-                    } else if (line.drawStyle is Line.DrawStyle.Fill) {
+                    } else if (line.drawStyle is DrawStyle.Fill) {
+                        var fillColor = Color.Unspecified
+                        if (line.color is SolidColor){
+                           fillColor = line.color.value
+                        }
                         drawGradient(
                             path = path,
-                            color1 = line.color,
-                            color2 = line.color,
-                            progress = 1f
+                            color1 = fillColor,
+                            color2 = fillColor,
+                            progress = 1f,
+                            size = size.copy(height = chartAreaHeight)
                         )
                     }
 
-                    if ((line.showDots ?: showDots)) {
-                        line.values.forEachIndexed { valueIndex, value ->
-                            drawCircle(
-                                color = line.dotsBorderColor ?: dotsBorderColor,
-                                radius = ((line.dotsRadius ?: dotsRadius) + (line.dotsBorderWidth
-                                    ?: dotsBorderWidth)) ,
-                                center = Offset(
-                                    x = size.width.spaceBetween(
-                                        itemCount = line.values.count(),
-                                        index = valueIndex
-                                    ),
-                                    y = size.height - (size.height * value.toFloat() / maxValue).toFloat()
-                                )
-                            )
-                            drawCircle(
-                                color = line.dotsColor ?: dotsColor,
-                                radius = (line.dotsRadius ?: dotsRadius),
-                                center = Offset(
-                                    x = size.width.spaceBetween(
-                                        itemCount = line.values.count(),
-                                        index = valueIndex
-                                    ),
-                                    y = size.height - (size.height * value.toFloat() / maxValue).toFloat()
-                                )
-                            )
-                        }
+                    if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
+                        drawDots(
+                            dataPoints = line.values.mapIndexed { mapIndex,value-> (dotAnimators.getOrNull(index)?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat() },
+                            properties = line.dotProperties ?: dotsProperties,
+                            linePath = segmentedPath,
+                            maxValue = maxValue.toFloat(),
+                            pathMeasure = pathMeasure,
+                            scope = scope,
+                            size = size.copy(height = chartAreaHeight)
+                        )
                     }
 
 
                 }
                 popupPositions.forEachIndexed { index, offset ->
-                    val value = maxValue - ((offset.y * maxValue) / size.height)
+                    val value = maxValue - ((offset.y * maxValue) / chartAreaHeight)
                     val measureResult = textMeasurer.measure(
                         popupProperties.contentBuilder(value),
                         style = popupProperties.textStyle.copy(color = popupProperties.textStyle.color.copy(alpha = 1f * popupAnimation.value))
@@ -397,29 +432,86 @@ fun LineChart(
     }
 }
 
-fun DrawScope.getLinePath(dataPoints: List<Float>, maxValue: Float,rounded:Boolean = true): Path {
+fun DrawScope.drawDots(
+    dataPoints: List<Pair<Animatable<Float,AnimationVector1D>,Float>>,
+    properties: DotProperties,
+    linePath:Path,
+    maxValue: Float,
+    pathMeasure: PathMeasure,
+    scope:CoroutineScope,
+    size: Size? = null
+){
+    val _size = size ?: this.size
 
+    val pathEffect = properties.strokeStyle.pathEffect
+
+    pathMeasure.setPath(linePath,false)
+    val lastPosition = pathMeasure.getPosition(pathMeasure.length)
+    dataPoints.forEachIndexed { valueIndex, value ->
+        val dotOffset = Offset(
+            x = _size.width.spaceBetween(
+                itemCount = dataPoints.count(),
+                index = valueIndex
+            ),
+            y = _size.height - (_size.height * value.second / maxValue)
+        )
+        if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x-20 || !properties.animationEnabled){
+            if (!value.first.isRunning && properties.animationEnabled) {
+                scope.launch {
+                    value.first.animateTo(1f, animationSpec = properties.animationSpec)
+                }
+            }
+
+            val radius:Float
+            val strokeRadius:Float
+            if (properties.animationEnabled){
+                radius=(properties.radius + properties.strokeWidth/2)*value.first.value
+                strokeRadius= properties.radius*value.first.value
+            }else{
+                radius =  properties.radius + properties.strokeWidth/2
+                strokeRadius = properties.radius
+            }
+            drawCircle(
+                brush = properties.strokeColor,
+                radius = radius ,
+                center = dotOffset,
+                style = Stroke(width = properties.strokeWidth, pathEffect = pathEffect),
+            )
+            drawCircle(
+                brush = properties.color,
+                radius = strokeRadius,
+                center = dotOffset,
+            )
+        }
+    }
+}
+
+fun DrawScope.getLinePath(
+    dataPoints: List<Float>, maxValue: Float,rounded:Boolean = true,size: Size? = null
+): Path {
+
+    val _size = size ?: this.size
     val path = Path()
 
     val calculateHeight = { value: Float ->
-        (size.height * value) / maxValue
+        (_size.height * value) / maxValue
     }
 
-    path.moveTo(0f, size.height - calculateHeight(dataPoints[0]))
+    path.moveTo(0f, _size.height - calculateHeight(dataPoints[0]))
 
     if (rounded){
         for (i in 0 until dataPoints.size - 1) {
-            val x1 = (i * (size.width / (dataPoints.size - 1)))
-            val y1 = size.height - calculateHeight(dataPoints[i])
-            val x2 = ((i + 1) * (size.width / (dataPoints.size - 1)))
-            val y2 = size.height - calculateHeight(dataPoints[i + 1])
+            val x1 = (i * (_size.width / (dataPoints.size - 1)))
+            val y1 = _size.height - calculateHeight(dataPoints[i])
+            val x2 = ((i + 1) * (_size.width / (dataPoints.size - 1)))
+            val y2 = _size.height - calculateHeight(dataPoints[i + 1])
 
             val cx = (x1 + x2) / 2
             path.cubicTo(cx, y1, cx, y2, x2, y2)
         }
     }else{
         dataPoints.forEachIndexed { index, value ->
-            path.lineTo(size.width.spaceBetween(itemCount = dataPoints.count(),index = index),y = size.height-calculateHeight(value))
+            path.lineTo(_size.width.spaceBetween(itemCount = dataPoints.count(),index = index),y = _size.height-calculateHeight(value))
         }
     }
     return path
@@ -430,12 +522,14 @@ fun DrawScope.drawGradient(
     color1: Color,
     color2: Color,
     progress: Float,
+    size: Size? = null
 ) {
+    val _size = size ?: this.size
     drawIntoCanvas {
         it.nativeCanvas.drawPath(android.graphics.Path().apply {
             addPath(path.asAndroidPath())
-            lineTo(size.width, size.height)
-            lineTo(0f, size.height)
+            lineTo(_size.width, _size.height)
+            lineTo(0f, _size.height)
             close()
         }, android.graphics.Paint().apply {
             setShader(
@@ -443,7 +537,7 @@ fun DrawScope.drawGradient(
                     0f,
                     0f,
                     0f,
-                    size.height,
+                    _size.height,
                     color1.copy(alpha = color1.alpha * progress).toArgb(),
                     color2.toArgb(),
                     Shader.TileMode.MIRROR

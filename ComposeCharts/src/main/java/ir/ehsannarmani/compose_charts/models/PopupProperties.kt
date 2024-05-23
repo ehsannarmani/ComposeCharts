@@ -6,12 +6,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 data class PopupProperties(
     val enabled: Boolean = true,
     val animationSpec: AnimationSpec<Float> = tween(400),
     val duration: Long = 1500,
-    val textStyle: TextStyle,
+    val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
     val containerColor: Color = Color(0xff313131),
     val cornerRadius: Dp = 6.dp,
     val contentHorizontalPadding: Dp = 4.dp,

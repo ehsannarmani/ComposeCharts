@@ -1,6 +1,7 @@
 package ir.ehsannarmani.compose_charts.models
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 data class Pie(

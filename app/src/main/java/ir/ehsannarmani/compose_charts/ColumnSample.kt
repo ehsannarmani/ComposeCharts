@@ -15,16 +15,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 
-fun generateBarData():List<Bars>{
+fun generateColumnBarData():List<Bars>{
     return MutableList(3){
         Bars(
             label = "Jan",
@@ -32,12 +35,51 @@ fun generateBarData():List<Bars>{
                 Bars.Data(
                     label = "Linux",
                     value = (0..100).random().toDouble(),
-                    color = Color(0xFFFFCA28)
+                    color = Brush.verticalGradient(
+                        listOf(
+                            Color(0xFFE65100),
+                            Color(0xFFFFD54F),
+                        )
+                    )
                 ),
                 Bars.Data(
                     label = "Windows",
                     value = (0..100).random().toDouble(),
-                    color = Color(0xFF5C6BC0)
+                    color = Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF7E57C2),
+                            Color(0xFF7986CB),
+                        )
+                    )
+                ),
+            )
+        )
+    }
+}
+fun generateRowBarData():List<Bars>{
+    return MutableList(3){
+        Bars(
+            label = "Jan",
+            values = listOf(
+                Bars.Data(
+                    label = "Linux",
+                    value = (0..100).random().toDouble(),
+                    color = Brush.horizontalGradient(
+                        listOf(
+                            Color(0xFFFFD54F),
+                            Color(0xFFE65100),
+                        )
+                    )
+                ),
+                Bars.Data(
+                    label = "Windows",
+                    value = (0..100).random().toDouble(),
+                    color = Brush.horizontalGradient(
+                        listOf(
+                            Color(0xFF7986CB),
+                            Color(0xFF7E57C2),
+                        )
+                    )
                 ),
             )
         )
@@ -48,7 +90,7 @@ fun generateBarData():List<Bars>{
 fun ColumnSample() {
 
     val data = remember {
-        mutableStateOf(generateBarData())
+        mutableStateOf(generateColumnBarData())
     }
 
     Column(modifier=Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -74,12 +116,12 @@ fun ColumnSample() {
                 dampingRatio = Spring.DampingRatioMediumBouncy,
                 stiffness = Spring.StiffnessLow
             ),
-            animationMode = Bars.AnimationMode.Together(delayBuilder = {it*100L}),
+            animationMode = AnimationMode.Together(delayBuilder = {it*100L}),
             animationDelay = 300,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = {
-            data.value = generateBarData()
+            data.value = generateColumnBarData()
         }, shape = RoundedCornerShape(8.dp)) {
             Text(text = "Show Animation")
         }

@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 
 data class GridProperties(
     val enabled: Boolean = true,
-    val style: GridLineStyle = GridLineStyle.Normal,
+    val style: StrokeStyle = StrokeStyle.Normal,
     val color: Color = Color.Gray,
     val strokeWidth: Dp = (.5).dp,
     val lineCount:Int = 5

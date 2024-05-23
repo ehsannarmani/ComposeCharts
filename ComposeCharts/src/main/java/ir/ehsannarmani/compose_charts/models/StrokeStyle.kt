@@ -1,8 +1,10 @@
 package ir.ehsannarmani.compose_charts.models
 
-sealed class GridLineStyle{
-    data object Normal:GridLineStyle()
-    data class Dashed(val intervals:FloatArray = floatArrayOf(10f,10f), val phase:Float = 10f):GridLineStyle() {
+import androidx.compose.ui.graphics.PathEffect
+
+sealed class StrokeStyle{
+    data object Normal:StrokeStyle()
+    data class Dashed(val intervals:FloatArray = floatArrayOf(10f,10f), val phase:Float = 10f):StrokeStyle() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -21,4 +23,16 @@ sealed class GridLineStyle{
             return result
         }
     }
+
+    val pathEffect:PathEffect? get() {
+        return when(this){
+            is StrokeStyle.Normal->{
+                null
+            }
+            is StrokeStyle.Dashed->{
+                PathEffect.dashPathEffect(intervals = intervals, phase = phase)
+            }
+        }
+    }
+
 }

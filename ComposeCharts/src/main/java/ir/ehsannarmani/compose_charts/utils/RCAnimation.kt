@@ -4,6 +4,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.Bars
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ImplementRCAnimation(
     data:List<Bars>,
-    animationMode: Bars.AnimationMode,
+    animationMode: AnimationMode,
     spec: (Bars.Data)->AnimationSpec<Float>,
     delay:Long,
     before:()->Unit
@@ -32,11 +33,11 @@ fun ImplementRCAnimation(
                     )
                 }
                 when (animationMode) {
-                    is Bars.AnimationMode.OneByOne -> {
+                    is AnimationMode.OneByOne -> {
                         animate()
                     }
 
-                    is Bars.AnimationMode.Together -> {
+                    is AnimationMode.Together -> {
                         launch {
                             delay(animationMode.delayBuilder((colIndex * columnChart.values.count()) + dataIndex))
                             animate()

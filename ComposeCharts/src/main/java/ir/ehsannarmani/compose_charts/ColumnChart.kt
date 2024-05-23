@@ -46,6 +46,7 @@ import ir.ehsannarmani.compose_charts.extensions.addRoundRect
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
+import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
@@ -65,7 +66,7 @@ fun ColumnChart(
     labelStyle: TextStyle = LocalTextStyle.current,
     indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
     gridProperties: GridProperties = GridProperties(),
-    animationMode: Bars.AnimationMode = Bars.AnimationMode.Together(),
+    animationMode: AnimationMode = AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
     hideLabelHelper: Boolean = false,
@@ -236,14 +237,16 @@ fun ColumnChart(
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(col.value to rect)
                         val path = Path()
                         path.addRoundRect(rect = rect, radius = (col.properties?.radius ?: barProperties.radius))
-                        val color = if (rect == selectedValue.value?.rect) {
-                            col.color.copy(alpha = 1f - (barAlphaDecreaseOnPopup * popupAnimation.value))
+                        val alpha = if (rect == selectedValue.value?.rect) {
+                            1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
                         } else {
-                            col.color
+                            1f
                         }
                         drawPath(
                             path = path,
-                            color = color
+                            brush = col.color,
+                            alpha = alpha,
+                            style = (col.properties?.style ?: barProperties.style).getStyle(density.density)
                         )
                     }
                 }
@@ -277,7 +280,7 @@ fun ColumnChart(
                                 )
                             )
                         },
-                        color = popupProperties.containerColor
+                        color = popupProperties.containerColor,
                     )
                     drawText(
                         textLayoutResult = measure,

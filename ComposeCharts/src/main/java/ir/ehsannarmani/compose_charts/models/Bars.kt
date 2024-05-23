@@ -3,6 +3,7 @@ package ir.ehsannarmani.compose_charts.models
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -14,7 +15,7 @@ data class Bars(
     data class Data(
         val label: String? = null,
         val value: Double,
-        val color: Color,
+        val color: Brush,
         val properties: BarProperties? = null,
         val animationSpec: AnimationSpec<Float>? = null,
         val animator:Animatable<Float, AnimationVector1D> = Animatable(0f)
@@ -29,9 +30,5 @@ data class Bars(
                 val bottomRight: Dp = 0.dp
             ) : Radius()
         }
-    }
-    sealed class AnimationMode{
-        data class Together(val delayBuilder:(index:Int)->Long = {0}):AnimationMode()
-        data object OneByOne:AnimationMode()
     }
 }

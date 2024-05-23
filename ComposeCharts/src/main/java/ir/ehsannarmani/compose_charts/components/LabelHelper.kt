@@ -15,14 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.Bars
 
 @Composable
 fun LabelHelper(
-    data: List<Pair<String, Color>>
+    data: List<Pair<String, Brush>>
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier) {
         items(data) { (label, color) ->
@@ -48,5 +50,5 @@ fun LabelHelper(
 fun RCChartLabelHelper(data:List<Bars>) {
     val labels = data.map { it.values.map { it.label } }.flatten().toSet().toList()
     val colors = labels.map { label-> data.map { it.values.find { it.label == label }?.color }.firstOrNull() }
-    LabelHelper(data = labels.mapIndexed { index, label -> label.orEmpty() to (colors[index] ?: Color.Unspecified)  })
+    LabelHelper(data = labels.mapIndexed { index, label -> label.orEmpty() to (colors[index] ?: SolidColor(Color.Unspecified))  })
 }
