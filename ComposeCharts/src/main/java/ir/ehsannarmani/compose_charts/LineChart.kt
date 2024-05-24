@@ -62,6 +62,7 @@ import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
@@ -83,8 +84,8 @@ fun LineChart(
     animationMode: AnimationMode = AnimationMode.Together(),
     gridProperties: GridProperties = GridProperties(lineCount = 5),
     indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
+    labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     drawDividers: Boolean = true,
-    hideLabelHelper: Boolean = false,
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
     popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
@@ -187,8 +188,8 @@ fun LineChart(
     }
 
     Column(modifier = modifier) {
-        if (!hideLabelHelper) {
-            LabelHelper(data = data.map { it.label to it.color })
+        if (labelHelperProperties.enabled) {
+            LabelHelper(data = data.map { it.label to it.color }, textStyle = labelHelperProperties.textStyle)
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
         Row(modifier = Modifier.fillMaxSize()) {

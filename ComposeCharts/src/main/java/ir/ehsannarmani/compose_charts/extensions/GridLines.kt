@@ -33,8 +33,8 @@ fun DrawScope.drawGridLines(count:Int,color: Color,strokeWidth:Dp,size: Size? = 
         }
         drawLine(
             color = color,
-            start = Offset(_size.width, 0f),
-            end = Offset(_size.width, _size.height),
+            start = Offset(this.size.width, 0f),
+            end = Offset(this.size.width, _size.height),
             strokeWidth = strokeWidth.toPx(),
             pathEffect = pathEffect
         )

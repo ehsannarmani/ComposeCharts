@@ -51,6 +51,7 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
@@ -66,10 +67,10 @@ fun ColumnChart(
     labelStyle: TextStyle = LocalTextStyle.current,
     indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
     gridProperties: GridProperties = GridProperties(),
+    labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     animationMode: AnimationMode = AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
-    hideLabelHelper: Boolean = false,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
     popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
     barAlphaDecreaseOnPopup: Float = .4f,
@@ -128,8 +129,8 @@ fun ColumnChart(
         }
     )
     Column(modifier = modifier) {
-        if (!hideLabelHelper) {
-            RCChartLabelHelper(data = data)
+        if (labelHelperProperties.enabled) {
+            RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
             Spacer(modifier = Modifier.height(24.dp))
         }
         Row(
@@ -306,7 +307,6 @@ fun ColumnChart(
                 Text(
                     text = it.label,
                     style = labelStyle,
-                    modifier = Modifier.padding(end = ((measureResult.size.width / 2) / density.density).dp)
                 )
             }
         }

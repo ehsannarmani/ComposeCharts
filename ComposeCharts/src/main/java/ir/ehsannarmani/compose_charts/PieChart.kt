@@ -8,6 +8,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.AnimationVector4D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +33,7 @@ import androidx.core.graphics.toRect
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.math.atan2
 
 @Composable
 fun PieChart(
@@ -126,6 +128,14 @@ fun PieChart(
     Canvas(modifier = modifier
         .pointerInput(Unit) {
             detectTapGestures { offset ->
+                val centerX = size.width / 2
+                val centerY = size.height / 2
+                val dx = offset.x - centerX
+                val dy = offset.y - centerY
+               Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())).toFloat().also {
+                   println("degree: $it")
+               }
+
                 pieces
                     .firstOrNull { it.second.contains(offset) }
                     ?.let {
@@ -138,7 +148,15 @@ fun PieChart(
             }
         }
     ) {
-        val radius = size.width / 2
+        val radius:Float = when(style){
+            is Pie.Style.Fill->{
+                (minOf(size.width,size.height)/2)
+            }
+
+            is Pie.Style.Stroke->{
+                (minOf(size.width,size.height)/2) - (style.width/2)
+            }
+        }
         val total = details.sumOf { it.pie.data } // 360 degree for total
         details.forEachIndexed { index, detail ->
             val degree = (detail.pie.data * 360) / total
@@ -182,7 +200,7 @@ fun PieChart(
             val rect = RectF()
             piecePath
                 .asAndroidPath()
-                .computeBounds(rect, true)
+                .computeBounds(rect,true)
 
             pieces.add(detail.id to rect.toRect().toComposeRect())
 
@@ -194,6 +212,8 @@ fun PieChart(
         }
     }
 }
+
+
 
 private data class PieDetails(
     val id: String = UUID.randomUUID().toString(),

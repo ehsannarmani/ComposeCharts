@@ -18,13 +18,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.Bars
 
 @Composable
 fun LabelHelper(
-    data: List<Pair<String, Brush>>
+    data: List<Pair<String, Brush>>,
+    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier) {
         items(data) { (label, color) ->
@@ -40,15 +42,21 @@ fun LabelHelper(
                         .clip(CircleShape)
                         .background(color)
                 )
-                Text(text = label, fontSize = 13.sp)
+                Text(text = label, style = textStyle)
             }
         }
     }
 }
 
 @Composable
-fun RCChartLabelHelper(data:List<Bars>) {
+fun RCChartLabelHelper(
+    data:List<Bars>,
+    textStyle: TextStyle =  TextStyle.Default.copy(fontSize = 13.sp)
+) {
     val labels = data.map { it.values.map { it.label } }.flatten().toSet().toList()
     val colors = labels.map { label-> data.map { it.values.find { it.label == label }?.color }.firstOrNull() }
-    LabelHelper(data = labels.mapIndexed { index, label -> label.orEmpty() to (colors[index] ?: SolidColor(Color.Unspecified))  })
+    LabelHelper(
+        data = labels.mapIndexed { index, label -> label.orEmpty() to (colors[index] ?: SolidColor(Color.Unspecified))  },
+        textStyle = textStyle
+    )
 }
