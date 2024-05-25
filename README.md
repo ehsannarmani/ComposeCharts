@@ -368,7 +368,7 @@ LineChart(
    animationMode = AnimationMode.Together(delayBuilder = { index-> index*200 })
 )
 ```
-[!NOTE]
+> [!NOTE]
 > In the last example, every animation will be start 200ms after previous animations start.
 
 <hr/>
