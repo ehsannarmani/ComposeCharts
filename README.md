@@ -449,11 +449,13 @@ val indicatorProperties = IndicatorProperties(
 ### Grid Lines: `GridProperties`
 > Usage: In every chart you can set properties of grid lines
 
-#### `enabled`: set false to hide them
-#### `style`: determine grid line style: `StrokeStyle.Normal` `StrokeStyle.Dashed()`
-#### `color`: determine grid line color
-#### `thickness`: determine grid line width
-#### `lineCount`: determine count of lines (set this equal to your indicators count to make lines in right position with counter)
+| Property    | Type        | Default              | Description         |
+|-------------|-------------|----------------------|---------------------|
+| `enabled`   | Boolean     | `true`               | determine grid lines visibility 
+| `style`     | StrokeStyle | `StrokeStyle.Normal` | determine grid lines style 
+| `color`     | Color       | `Color.Gray`         | determine grid lines color 
+| `thickness` | Dp          | `(0.5).dp`           | determine grid lines width
+| `lineCount` | Int         | `5`                  | determine count of lines (set this equal to your indicators count to make lines in right position with counter)
 
 #### Example:
 ```kotlin
