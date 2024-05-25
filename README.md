@@ -377,10 +377,10 @@ LineChart(
 
 | Property       | Type             | Default               | Description         |
 |----------------|------------------|-----------------------|---------------------|
-| `thickness`    | Dp               | `20`                    | determine bar width 
-| `spacing`      | Dp               | `4`                     | determine space between data bars when you have more than one bar in a data 
-| `cornerRadius` | Bars.Data.Radius | `Bars.Data.Radius.None` | determine space between data bars when you have more than one bar in a data 
-| `style`        | DrawStyle        | `DrawStyle.Fill`        | determine bar style 
+| `thickness`    | Dp               | `20`                    | specifies bar width 
+| `spacing`      | Dp               | `4`                     | specifies space between data bars when you have more than one bar in a data 
+| `cornerRadius` | Bars.Data.Radius | `Bars.Data.Radius.None` | specifies space between data bars when you have more than one bar in a data 
+| `style`        | DrawStyle        | `DrawStyle.Fill`        | specifies bar style 
 
 #### Example:
 ```kotlin
@@ -398,14 +398,14 @@ val barProperties = BarProperties(
 
 | Property           | Type                 | Default                      | Description         |
 |--------------------|----------------------|------------------------------|---------------------|
-| `enabled`          | Boolean              | `false`                        | determine dots visibility 
-| `radius`           | Float                | `10f`                          | determine dot size 
-| `color`            | Brush                |` SolidColor(Color.Unspecified) `| determine dot color 
-| `strokeWidth`      | Float                | `3f`                           | determine dot stroke width
-| `strokeColor`      | Brush                |` SolidColor(Color.Unspecified) `| determine dot stroke color
-| `strokeStyle`      | StrokeStyle          | `StrokeStyle.Normal`           | determine dot stroke style
+| `enabled`          | Boolean              | `false`                        | specifies dots visibility 
+| `radius`           | Float                | `10f`                          | specifies dot size 
+| `color`            | Brush                |` SolidColor(Color.Unspecified) `| specifies dot color 
+| `strokeWidth`      | Float                | `3f`                           | specifies dot stroke width
+| `strokeColor`      | Brush                |` SolidColor(Color.Unspecified) `| specifies dot stroke color
+| `strokeStyle`      | StrokeStyle          | `StrokeStyle.Normal`           | specifies dot stroke style
 | `animationEnabled` | Boolean              | `true`                         | set `false` if you want to show dots without delay and animation
-| `animationSpec`    | AnimationSpec<Float> |`tween(300)`| determine dots visibility animation spec
+| `animationSpec`    | AnimationSpec<Float> |`tween(300)`| specifies dots visibility animation spec
 
 #### Example:
 ```kotlin
@@ -427,10 +427,10 @@ val dotProperties = DotProperties(
 
 | Property         | Type               | Default                | Description         |
 |------------------|--------------------|------------------------|---------------------|
-| `enabled`        | Boolean            | `true`                 | determine indicator visiblity 
-| `textStyle`      | TextStyle          | `TextStyle.Default`    | determine counter style 
-| `count`          | Int                | `4`                    | determine counters count 
-| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`| determine counter content creation template 
+| `enabled`        | Boolean            | `true`                 | specifies indicator visiblity 
+| `textStyle`      | TextStyle          | `TextStyle.Default`    | specifies counter style 
+| `count`          | Int                | `4`                    | specifies counters count 
+| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`| specifies counter content creation template 
 
 #### Example:
 ```kotlin
@@ -451,11 +451,11 @@ val indicatorProperties = IndicatorProperties(
 
 | Property    | Type        | Default              | Description         |
 |-------------|-------------|----------------------|---------------------|
-| `enabled`   | Boolean     | `true`               | determine grid lines visibility 
-| `style`     | StrokeStyle | `StrokeStyle.Normal` | determine grid lines style 
-| `color`     | Color       | `Color.Gray`         | determine grid lines color 
-| `thickness` | Dp          | `(0.5).dp`           | determine grid lines width
-| `lineCount` | Int         | `5`                  | determine count of lines (set this equal to your indicators count to make lines in right position with counter)
+| `enabled`   | Boolean     | `true`               | specifies grid lines visibility 
+| `style`     | StrokeStyle | `StrokeStyle.Normal` | specifies grid lines style 
+| `color`     | Color       | `Color.Gray`         | specifies grid lines color 
+| `thickness` | Dp          | `(0.5).dp`           | specifies grid lines width
+| `lineCount` | Int         | `5`                  | specifies count of lines (set this equal to your indicators count to make lines in right position with counter)
 
 #### Example:
 ```kotlin
@@ -474,10 +474,10 @@ val gridProperties = GridProperties(
 
 | Property          | Type         | Default             | Description                 |
 |-------------------|--------------|---------------------|-----------------------------|
-| `enabled`         | Boolean      | `true`              | determine labels visibility 
-| `textStyle`       | TextStyle    | `TextStyle.Default` | determine label textStyle   
-| `verticalPadding` | Dp           | `12.dp`             | determine vertical padding of labels area  
-| `labels`          | List<String> | `emptyList()`       | In line charts determine chart labels  
+| `enabled`         | Boolean      | `true`              | specifies labels visibility 
+| `textStyle`       | TextStyle    | `TextStyle.Default` | specifies label textStyle   
+| `verticalPadding` | Dp           | `12.dp`             | specifies vertical padding of labels area  
+| `labels`          | List<String> | `emptyList()`       | In line charts specifies chart labels  
 
 #### Example:
 ```kotlin
@@ -496,8 +496,8 @@ val labelProperties = LabelProperties(
 
 | Property          | Type         | Default             | Description                 |
 |-------------------|--------------|---------------------|-----------------------------|
-| `enabled`         | Boolean      | `true`              | determine label helpers visibility 
-| `textStyle`       | TextStyle    | `TextStyle.Default` | determine label helper textStyle
+| `enabled`         | Boolean      | `true`              | specifies label helpers visibility 
+| `textStyle`       | TextStyle    | `TextStyle.Default` | specifies label helper textStyle
 
 #### Example:
 ```kotlin
@@ -514,15 +514,15 @@ val labelHelperProperties = LabelHelperProperties(
 
 | Property                   | Type                 | Default                 | Description                 |
 |----------------------------|----------------------|-------------------------|-----------------------------|
-| `enabled`                  | Boolean              | `true`                  | determine popup visibility 
-| `animationSpec`            | AnimationSpec<Float> | `tween(400)`            | determine popup visibility animation spec   
-| `duration`                 | Long                 | `1500`                  | in column/row charts, determine how long the popup will be visible  
-| `textStyle`                | TextStyle            | `TextStyle.Default`     | determine popup text style  
-| `containerColor`           | Color                | `Color(0xff313131)`     | determine popup background color  
-| `cornerRadius`             | Dp                   | `6.dp`                  | determine popup corner radius  
-| `contentHorizontalPadding` | Dp                   | `4.dp`                  | determine popup horizontal padding  
-| `contentVerticalPadding`   | Dp                   | `2.dp`                  | determine popup vertical padding  
-| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | determine counter content creation template
+| `enabled`                  | Boolean              | `true`                  | specifies popup visibility 
+| `animationSpec`            | AnimationSpec<Float> | `tween(400)`            | specifies popup visibility animation spec   
+| `duration`                 | Long                 | `1500`                  | in column/row charts, specifies how long the popup will be visible  
+| `textStyle`                | TextStyle            | `TextStyle.Default`     | specifies popup text style  
+| `containerColor`           | Color                | `Color(0xff313131)`     | specifies popup background color  
+| `cornerRadius`             | Dp                   | `6.dp`                  | specifies popup corner radius  
+| `contentHorizontalPadding` | Dp                   | `4.dp`                  | specifies popup horizontal padding  
+| `contentVerticalPadding`   | Dp                   | `2.dp`                  | specifies popup vertical padding  
+| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | specifies popup content creation template
 
 #### Example:
 ```kotlin
