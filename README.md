@@ -348,6 +348,7 @@ LineChart(
     ),
 )
 ```
+<hr/>
 
 ## Animation Mode:
 #### In Row/Column/Line charts you can set running animations at the same time types:
