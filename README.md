@@ -351,22 +351,25 @@ LineChart(
 
 ## Animation Mode:
 #### In Row/Column/Line charts you can set running animations at the same time types:
-1. `AnimationMode.OneByOne`: Animations will run one by one, for example in line charts, lines will be drawn after previous line animation finished.
+| Mode              | Description |
+|-------------------|--------------|
+| `OneByOne`        | Animations will run one by one, for example in line charts, lines will be drawn after previous line animation finished.      |
+| `Together`        | By default, animations will run async, but you can set delay for next animations    | 
+
+#### Example:
 ```kotlin
 LineChart(
    ...,
    animationMode = AnimationMode.OneByOne
 )
-```
-2. `AnimationMode.Together`: By default, animations will run async, but you can set delay for next animations:
-```kotlin
-val animationMode = AnimationMode.Together(delayBuilder = { index-> index*200 })
+
 LineChart(
    ...,
-   animationMode = animationMode
+   animationMode = AnimationMode.Together(delayBuilder = { index-> index*200 })
 )
 ```
-#### In this example, every animation will be start 200ms after previous animations start.
+[!NOTE]
+> In the last example, every animation will be start 200ms after previous animations start.
 
 <hr/>
 
