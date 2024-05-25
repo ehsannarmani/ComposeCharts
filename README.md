@@ -372,13 +372,16 @@ LineChart(
 
 ## Chart Properties:
 
-### Bar's: `BarProperties`
+### `BarProperties`
 > Usage: In Column/Row Charts you can set bar properties with this property
 
-#### `thickness`: determine bar width
-#### `spacing`: determine space between data bars when you have more than one bar in a data, <a href='#column-chart'>example<a/>
-#### `cornerRadius`: determine bar corner radius
-#### `style`: determine bar style: `DrawStyle.Fill` `DrawStyle.Stroke(...)`
+| Property       | Type             | Default               | Description         |
+|----------------|------------------|-----------------------|---------------------|
+| `thickness`    | Dp               | 20                    | determine bar width 
+| `spacing`      | Dp               | 4                     | determine space between data bars when you have more than one bar in a data 
+| `cornerRadius` | Bars.Data.Radius | Bars.Data.Radius.None | determine space between data bars when you have more than one bar in a data 
+| `style`        | DrawStyle        | DrawStyle.Fill        | determine bar style 
+
 #### Example:
 ```kotlin
 val barProperties = BarProperties(
