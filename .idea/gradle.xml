@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/ComposeCharts" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/compose-charts" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />
