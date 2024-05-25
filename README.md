@@ -47,9 +47,11 @@ PieChart(
        data = data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
    },
    selectedScale = 1.2f,
-   spaceDegreeAnimEnterSpec = floatSpec,
+   scaleAnimEnterSpec = spring<Float>(
+       dampingRatio = Spring.DampingRatioMediumBouncy,
+       stiffness = Spring.StiffnessLow
+   ),
    colorAnimEnterSpec = tween(300),
-   scaleAnimEnterSpec = floatSpec,
    colorAnimExitSpec = tween(300),
    scaleAnimExitSpec = tween(300),
    spaceDegreeAnimExitSpec = tween(300),
