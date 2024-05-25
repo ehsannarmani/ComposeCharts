@@ -8,12 +8,8 @@ plugins {
 afterEvaluate {
     publishing {
         publications {
-            // Creates a Maven publication called "release".
-            create<MavenPublication>("maven") {
-                // Applies the component for the release build variant.
+            create<MavenPublication>("release") {
                 from(components.findByName("release"))
-
-                // You can then customize attributes of the publication as shown below.
                 groupId = "com.github.ehsannarmani"
                 artifactId = "compose-charts"
                 version = "0.0.1"
