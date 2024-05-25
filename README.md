@@ -7,12 +7,14 @@
 ## Table of Contents
 
 1. [Quick Start](#quick-start)
-1. [All Charts](#documentation)
-1. [Examples](#examples)
+2. [All Charts](#documentation)
+3. [Examples](#examples)
    1. Pie Chart
    2. Line Chart
    3. Row Chart
    4. Column Chart
+4. [Animation Mode](#animation-mode)
+5. [Chart Properties](#chart-properties)
 
 ### Gradle Setup
 ```gradle
@@ -346,6 +348,27 @@ LineChart(
     ),
 )
 ```
+
+## Animation Mode:
+#### In Row/Column/Line charts you can set running animations at the same time types:
+1. `AnimationMode.OneByOne`: Animations will run one by one, for example in line charts, lines will be drawn after previous line animation finished.
+```kotlin
+LineChart(
+   ...,
+   animationMode = AnimationMode.OneByOne
+)
+```
+2. `AnimationMode.Together`: By default, animations will run async, but you can set delay for next animations:
+```kotlin
+val animationMode = AnimationMode.Together(delayBuilder = { index-> index*200 })
+LineChart(
+   ...,
+   animationMode = animationMode
+)
+```
+#### In this example, every animation will be start 200ms after previous animations start.
+
+<hr/>
 
 ## Chart Properties:
 
