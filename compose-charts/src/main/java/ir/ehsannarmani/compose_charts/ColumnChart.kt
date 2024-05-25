@@ -83,7 +83,7 @@ fun ColumnChart(
     val everyDataWidth = with(density) {
         data.map { rowData ->
             rowData.values.map {
-                (it.properties?.strokeWidth ?: barProperties.strokeWidth).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
+                (it.properties?.thickness ?: barProperties.thickness).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
             }.sum()
         }.average().toFloat()
     }
@@ -210,7 +210,7 @@ fun ColumnChart(
                 drawGridLines(
                     count = indicatorProperties.count,
                     color = gridProperties.color,
-                    strokeWidth = gridProperties.strokeWidth,
+                    strokeWidth = gridProperties.thickness,
                     xPadding = indicatorAreaWidth,
                     size = size.copy(width = barsAreaWidth),
                     justDividers = !gridProperties.enabled,
@@ -219,7 +219,7 @@ fun ColumnChart(
 
                 data.forEachIndexed { dataIndex, columnChart ->
                     columnChart.values.forEachIndexed { valueIndex, col ->
-                        val stroke = (col.properties?.strokeWidth ?: barProperties.strokeWidth).toPx()
+                        val stroke = (col.properties?.thickness ?: barProperties.thickness).toPx()
                         val spacing = (col.properties?.spacing ?: barProperties.spacing).toPx()
 
                         val barHeight = ((col.value * size.height) / maxValue) * col.animator.value
@@ -237,7 +237,7 @@ fun ColumnChart(
                         )
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(col.value to rect)
                         val path = Path()
-                        path.addRoundRect(rect = rect, radius = (col.properties?.radius ?: barProperties.radius))
+                        path.addRoundRect(rect = rect, radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius))
                         val alpha = if (rect == selectedValue.value?.rect) {
                             1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
                         } else {

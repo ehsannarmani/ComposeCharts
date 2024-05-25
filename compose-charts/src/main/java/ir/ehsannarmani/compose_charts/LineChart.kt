@@ -1,6 +1,5 @@
 package ir.ehsannarmani.compose_charts
 
-import android.animation.ValueAnimator
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import androidx.compose.animation.core.Animatable
@@ -22,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -31,7 +29,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -261,7 +258,7 @@ fun LineChart(
                     drawGridLines(
                         count = gridProperties.lineCount,
                         color = gridProperties.color,
-                        strokeWidth = gridProperties.strokeWidth,
+                        strokeWidth = gridProperties.thickness,
                         justDividers = !gridProperties.enabled,
                         style = gridProperties.style,
                         size = size.copy(height = chartAreaHeight)

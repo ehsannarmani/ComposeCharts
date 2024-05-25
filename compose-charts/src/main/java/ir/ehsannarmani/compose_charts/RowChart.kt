@@ -85,7 +85,7 @@ fun RowChart(
     val everyDataHeight = with(density) {
         data.map { rowData ->
             rowData.values.map {
-                (it.properties?.strokeWidth ?: barProperties.strokeWidth).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
+                (it.properties?.thickness ?: barProperties.thickness).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
             }.sum()
         }.average().toFloat()
     }
@@ -207,7 +207,7 @@ fun RowChart(
                 drawGridLines(
                     count = indicatorProperties.count,
                     color = gridProperties.color,
-                    strokeWidth = gridProperties.strokeWidth,
+                    strokeWidth = gridProperties.thickness,
                     size = size.copy(height = barAreaHeight, width = barAreaWidth),
                     justDividers = !gridProperties.enabled,
                     style = gridProperties.style
@@ -215,7 +215,7 @@ fun RowChart(
                 data.forEachIndexed { dataIndex, bars ->
                     bars.values.forEachIndexed { barIndex, bar ->
 
-                        val stroke = (bar.properties?.strokeWidth ?: barProperties.strokeWidth).toPx()
+                        val stroke = (bar.properties?.thickness ?: barProperties.thickness).toPx()
                         val spacing = (bar.properties?.spacing ?: barProperties.spacing).toPx()
                         val width = ((barAreaWidth * bar.value) / maxValue) * bar.animator.value
 
@@ -235,7 +235,7 @@ fun RowChart(
                         val path = Path()
 
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(bar.value to rect)
-                        path.addRoundRect(rect = rect, radius = (bar.properties?.radius ?: barProperties.radius))
+                        path.addRoundRect(rect = rect, radius = (bar.properties?.cornerRadius ?: barProperties.cornerRadius))
 
                         val alpha = if (rect == selectedValue.value?.rect) {
                             1f - (barAlphaDecreaseOnPopup * popupAnimation.value)

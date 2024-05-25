@@ -8,6 +8,6 @@ data class GridProperties(
     val enabled: Boolean = true,
     val style: StrokeStyle = StrokeStyle.Normal,
     val color: Color = Color.Gray,
-    val strokeWidth: Dp = (.5).dp,
+    val thickness: Dp = (.5).dp,
     val lineCount:Int = 5
 )

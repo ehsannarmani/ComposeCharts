@@ -4,24 +4,17 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -32,12 +25,10 @@ import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
-import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
-import ir.ehsannarmani.compose_charts.models.StrokeStyle
 import ir.ehsannarmani.compose_charts.ui.theme.ubuntu
 
 @Composable
@@ -139,9 +130,9 @@ fun RowScope.RowSample() {
                 ,
                 data = data,
                 barProperties = BarProperties(
-                    radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
+                    cornerRadius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
                     spacing = 4.dp,
-                    strokeWidth = 20.dp,
+                    thickness = 20.dp,
                 ),
                 indicatorProperties = IndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
@@ -149,7 +140,7 @@ fun RowScope.RowSample() {
                 ),
                 gridProperties = GridProperties(
                     enabled = true,
-                    strokeWidth = .2.dp
+                    thickness = .2.dp
                 ),
                 labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                 animationSpec = spring(
@@ -343,15 +334,15 @@ fun RowScope.RowSample2() {
                 ,
                 data = data,
                 barProperties = BarProperties(
-                    radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
+                    cornerRadius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
                     spacing = 1.dp,
-                    strokeWidth = 5.dp
+                    thickness = 5.dp
                 ),
                 indicatorProperties = IndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties = GridProperties(enabled = true, strokeWidth = (.2).dp),
+                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
                 labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -412,14 +403,14 @@ fun RowScope.RowSample3() {
                 data = data,
                 barProperties = BarProperties(
                     spacing = 1.dp,
-                    strokeWidth = 10.dp,
+                    thickness = 10.dp,
                 ),
                 indicatorProperties = IndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4,
 
                 ),
-                gridProperties = GridProperties(enabled = true, strokeWidth = (.2).dp),
+                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
                 labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,

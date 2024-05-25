@@ -352,9 +352,9 @@ LineChart(
 ### Bar's: `BarProperties`
 > Usage: In Column/Row Charts you can set bar properties with this property
 
-#### `strokeWidth`: determine bar width
+#### `thickness`: determine bar width
 #### `spacing`: determine space between data bars when you have more than one bar in a data, <a href='#column-chart'>example<a/>
-#### `radius`: determine bar corner radius
+#### `cornerRadius`: determine bar corner radius
 #### `style`: determine bar style: `DrawStyle.Fill` `DrawStyle.Stroke(...)`
 
 <hr/>
@@ -390,7 +390,7 @@ LineChart(
 #### `enabled`: set false to hide them
 #### `style`: determine grid line style: `StrokeStyle.Normal` `StrokeStyle.Dashed()`
 #### `color`: determine grid line color
-#### `strokeWidth`: determine grid line width
+#### `thickness`: determine grid line width
 #### `line count`: determine count of lines (set this equal to your indicators count to make lines in right position with counter)
 
 
