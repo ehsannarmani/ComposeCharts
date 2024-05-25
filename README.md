@@ -75,6 +75,8 @@ PieChart(
 )
 ```
 
+<hr/>
+
 ### Column Chart:
 <div>
    <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column1.gif?raw=true" width="300">
@@ -142,6 +144,8 @@ ColumnChart(
 )
 ```
 
+<hr/>
+
 ### Row Chart:
 <div>
    <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row1.gif?raw=true" width="250">
@@ -182,6 +186,8 @@ RowChart(
     ),
 )
 ```
+
+<hr/>
 
 ### Line Chart:
 <div>
@@ -340,6 +346,17 @@ LineChart(
     ),
 )
 ```
+
+## Chart Properties:
+
+### Bar Properties: `BarProperties`
+#### Usage: In Column/Row Charts you can set bar properties with this property
+
+> `strokeWidth`: determine bar width
+> `spacing`: determine space between data bars when you have more than one bar in a data
+> `strokeWidth`: determine bar width
+> `strokeWidth`: determine bar width
+
 
 
 
