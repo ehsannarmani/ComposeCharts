@@ -1,5 +1,4 @@
 <h1>Compose Charts</h1>
-<hr/>
 
 ![banner](https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/banner.png?raw=true)
 ![mockup](https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/mokup.png?raw=true)
