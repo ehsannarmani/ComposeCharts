@@ -396,14 +396,17 @@ val barProperties = BarProperties(
 ### Dots: `DotProperties`
 > Usage: In Line Charts you can set data dot shape properties with this property
 
-#### `enabled`: set false to hide them
-#### `radius`: determine dot size
-#### `color`: determine dot color
-#### `strokeWidth`: determine dot stroke width
-#### `strokeColor`: determine dot stroke color
-#### `strokeStyle`: determine dot stroke style: `StrokeStyle.Normal` `StrokeStyle.Dashed(...)`
-#### `animationEnabled`: set false if you want to show dots without delay and animation
-#### `animationSpec`: determine dots visibility animation spec
+| Property           | Type                 | Default                       | Description         |
+|--------------------|----------------------|-------------------------------|---------------------|
+| `enabled`          | Boolean              | false                         | determine dots visibility 
+| `radius`           | Float                | 10f                           | determine dot size 
+| `color`            | Brush                | SolidColor(Color.Unspecified) | determine dot color 
+| `strokeWidth`      | Float                | 3f                            | determine dot stroke width
+| `strokeColor`      | Brush                | SolidColor(Color.Unspecified) | determine dot stroke color
+| `strokeStyle`      | StrokeStyle          | StrokeStyle.Normal            | determine dot stroke style
+| `animationEnabled` | Boolean              | true                          | set `false` if you want to show dots without delay and animation
+| `animationSpec`    | AnimationSpec<Float> | tween(300)                    | determine dots visibility animation spec
+
 #### Example:
 ```kotlin
 val dotProperties = DotProperties(
