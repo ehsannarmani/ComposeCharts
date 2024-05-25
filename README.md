@@ -425,12 +425,12 @@ val dotProperties = DotProperties(
 ### Indicators: `IndicatorProperties`
 > Usage: In every chart you can set properties of counters next to the chart
 
-| Property         | Type                     | Default               | Description         |
-|------------------|--------------------------|-----------------------|---------------------|
-| `enabled`        | Boolean                  | `true`                  | determine indicator visiblity 
-| `textStyle`      | TextStyle                | `TextStyle.Default`     | determine counter style 
-| `count`          | Int                      | `4`                     | determine counters count 
-| `contentBuilder` | Function (Double):String |` { "%.2f".format(it) } `| determine counter content creation template 
+| Property         | Type               | Default                | Description         |
+|------------------|--------------------|------------------------|---------------------|
+| `enabled`        | Boolean            | `true`                 | determine indicator visiblity 
+| `textStyle`      | TextStyle          | `TextStyle.Default`    | determine counter style 
+| `count`          | Int                | `4`                    | determine counters count 
+| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`| determine counter content creation template 
 
 #### Example:
 ```kotlin
