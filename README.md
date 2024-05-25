@@ -6,13 +6,13 @@
 
 ## Table of Contents
 
-1. [Quick Start](#quick-start)
-2. [All Charts](#documentation)
+1. [Gradle Setup](#gradle-setup)
+2. [All Charts](#all-charts)
 3. [Examples](#examples)
-   1. Pie Chart
-   2. Line Chart
-   3. Row Chart
-   4. Column Chart
+   1. [Pie Chart](#pie-chart)
+   2. [Row Chart](#row-chart)
+   4. [Column Chart](#column-chart)
+   5. [Line Chart](#line-chart)
 4. [Animation Mode](#animation-mode)
 5. [Chart Properties](#chart-properties)
 
