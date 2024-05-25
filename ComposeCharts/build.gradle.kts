@@ -16,6 +16,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = "com.github.ehsannarmani"
                 artifactId = "compose-charts"
+                version = "0.0.1"
             }
         }
     }
