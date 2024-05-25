@@ -349,13 +349,86 @@ LineChart(
 
 ## Chart Properties:
 
-### Bar Properties: `BarProperties`
-#### Usage: In Column/Row Charts you can set bar properties with this property
+### Bar's: `BarProperties`
+> Usage: In Column/Row Charts you can set bar properties with this property
 
-> `strokeWidth`: determine bar width
-> `spacing`: determine space between data bars when you have more than one bar in a data
-> `strokeWidth`: determine bar width
-> `strokeWidth`: determine bar width
+#### `strokeWidth`: determine bar width
+#### `spacing`: determine space between data bars when you have more than one bar in a data, <a href='#column-chart'>example<a/>
+#### `radius`: determine bar corner radius
+#### `style`: determine bar style: `DrawStyle.Fill` `DrawStyle.Stroke(...)`
+
+<hr/>
+
+### Dots: `DotProperties`
+> Usage: In Line Charts you can set data dot shape properties with this property
+
+#### `enabled`: set false to hide them
+#### `radius`: determine dot size
+#### `color`: determine dot color
+#### `strokeWidth`: determine dot stroke width
+#### `strokeColor`: determine dot stroke color
+#### `strokeStyle`: determine dot stroke style: `StrokeStyle.Normal` `StrokeStyle.Dashed(...)`
+#### `animationEnabled`: set false if you want to show dots without delay and animation
+#### `animationSpec`: determine dots visibility animation spec
+
+<hr/>
+
+### Indicators: `IndicatorProperties`
+> Usage: In every chart you can set properties of counters next to the chart
+
+#### `enabled`: set false to hide them
+#### `textStyle`: determine counter style
+#### `count`: determine counters count
+#### `contentBuilder`: you can build counter content with this property
+
+
+<hr/>
+
+### Grid Lines: `GridProperties`
+> Usage: In every chart you can set properties of grid lines
+
+#### `enabled`: set false to hide them
+#### `style`: determine grid line style: `StrokeStyle.Normal` `StrokeStyle.Dashed()`
+#### `color`: determine grid line color
+#### `strokeWidth`: determine grid line width
+#### `line count`: determine count of lines (set this equal to your indicators count to make lines in right position with counter)
+
+
+<hr/>
+
+### Labels: `LabelProperties`
+> Usage: In every chart you can set properties of the labels (Apr, Jan, ...)
+
+#### `enabled`: set false to hide them
+#### `textStyle`: determine label textStyle
+#### `verticalPadding`: determine vertical padding of labels area
+#### `labels`: In line charts use this property to define chart labels
+
+<hr/>
+
+### Label Helpers: `LabelHelperProperties`
+> Usage: In every chart you can set properties of the labels helper which positioned in top of chart
+
+#### `enabled`: set false to hide them
+#### `textStyle`: determine label helper textStyle
+
+<hr/>
+
+### Popups: `PopupProperties`
+> Usage: In every chart you can set properties of popup which shown when user click or drag on chart
+
+#### `enabled`: set false to hide them
+#### `animationSpec`: determine popup visibility animation spec
+#### `duration`: in column/row charts, determine how long the popup will be visible
+#### `textSyle`: determine popup text style
+#### `containerColor`: determine popup background color
+#### `cornerRadius`: determine popup corner radius
+#### `contentHorizontalPadding`: determine popup horizontal padding
+#### `contentVerticalPadding`: determine popup vertical padding
+#### `contentBuilder`: you can build popup content with this property
+
+
+
 
 
 
