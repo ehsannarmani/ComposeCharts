@@ -60,8 +60,11 @@ PieChart(
 > [!NOTE]
 > You can change chart style to stroke:
 
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie2.gif?raw=true" width="300">
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie3.gif?raw=true" width="300">
+<div>
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie2.gif?raw=true" width="300">
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie3.gif?raw=true" width="300">
+</div>
+<br/>
 
 ```kotlin
 PieChart(
@@ -73,8 +76,11 @@ PieChart(
 ```
 
 ### Column Chart:
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column1.gif?raw=true" width="300">
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column2.gif?raw=true" width="300">
+<div>
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column1.gif?raw=true" width="300">
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column2.gif?raw=true" width="300">
+</div>
+<br/>
 
 ```kotlin
 ColumnChart(
@@ -137,9 +143,13 @@ ColumnChart(
 ```
 
 ### Row Chart:
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row1.gif?raw=true" width="250">
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row2.gif?raw=true" width="250">
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row3.gif?raw=true" width="250">
+<div>
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row1.gif?raw=true" width="250">
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row2.gif?raw=true" width="250">
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row3.gif?raw=true" width="250">
+</div>
+<br>
+
 
 ```kotlin
 RowChart(
@@ -174,8 +184,11 @@ RowChart(
 ```
 
 ### Line Chart:
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/line2.gif?raw=true" width="250">
-<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/line8.gif?raw=true" width="250">
+<div>
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/line2.gif?raw=true" width="250">
+   <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/line8.gif?raw=true" width="250">
+</div>
+<br>
 
 ```kotlin
 LineChart(
