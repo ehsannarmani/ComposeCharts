@@ -472,10 +472,12 @@ val gridProperties = GridProperties(
 ### Labels: `LabelProperties`
 > Usage: In every chart you can set properties of the labels (Apr, Jan, ...)
 
-#### `enabled`: set false to hide them
-#### `textStyle`: determine label textStyle
-#### `verticalPadding`: determine vertical padding of labels area
-#### `labels`: In line charts use this property to define chart labels
+| Property          | Type         | Default             | Description                 |
+|-------------------|--------------|---------------------|-----------------------------|
+| `enabled`         | Boolean      | `true`              | determine labels visibility 
+| `textStyle`       | TextStyle    | `TextStyle.Default` | determine label textStyle   
+| `verticalPadding` | Dp           | `12.dp`             | determine vertical padding of labels area  
+| `labels`          | List<String> | `emptyList()`       | In line charts determine chart labels  
 
 #### Example:
 ```kotlin
@@ -492,8 +494,10 @@ val labelProperties = LabelProperties(
 ### Label Helpers: `LabelHelperProperties`
 > Usage: In every chart you can set properties of the labels helper which positioned in top of chart
 
-#### `enabled`: set false to hide them
-#### `textStyle`: determine label helper textStyle
+| Property          | Type         | Default             | Description                 |
+|-------------------|--------------|---------------------|-----------------------------|
+| `enabled`         | Boolean      | `true`              | determine label helpers visibility 
+| `textStyle`       | TextStyle    | `TextStyle.Default` | determine label helper textStyle
 
 #### Example:
 ```kotlin
@@ -508,15 +512,17 @@ val labelHelperProperties = LabelHelperProperties(
 ### Popups: `PopupProperties`
 > Usage: In every chart you can set properties of popup which shown when user click or drag on chart
 
-#### `enabled`: set false to hide them
-#### `animationSpec`: determine popup visibility animation spec
-#### `duration`: in column/row charts, determine how long the popup will be visible
-#### `textSyle`: determine popup text style
-#### `containerColor`: determine popup background color
-#### `cornerRadius`: determine popup corner radius
-#### `contentHorizontalPadding`: determine popup horizontal padding
-#### `contentVerticalPadding`: determine popup vertical padding
-#### `contentBuilder`: you can build popup content with this property
+| Property                   | Type                 | Default                 | Description                 |
+|----------------------------|----------------------|-------------------------|-----------------------------|
+| `enabled`                  | Boolean              | `true`                  | determine popup visibility 
+| `animationSpec`            | AnimationSpec<Float> | `tween(400)`            | determine popup visibility animation spec   
+| `duration`                 | Long                 | `1500`                  | in column/row charts, determine how long the popup will be visible  
+| `textStyle`                | TextStyle            | `TextStyle.Default`     | determine popup text style  
+| `containerColor`           | Color                | `Color(0xff313131)`     | determine popup background color  
+| `cornerRadius`             | Dp                   | `6.dp`                  | determine popup corner radius  
+| `contentHorizontalPadding` | Dp                   | `4.dp`                  | determine popup horizontal padding  
+| `contentVerticalPadding`   | Dp                   | `2.dp`                  | determine popup vertical padding  
+| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | determine counter content creation template
 
 #### Example:
 ```kotlin
