@@ -55,7 +55,6 @@ PieChart(
    colorAnimExitSpec = tween(300),
    scaleAnimExitSpec = tween(300),
    spaceDegreeAnimExitSpec = tween(300),
-   selectedPaddingDegree = 0f,
    style = Pie.Style.Fill
 )
 ```
