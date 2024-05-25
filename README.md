@@ -379,7 +379,15 @@ LineChart(
 #### `spacing`: determine space between data bars when you have more than one bar in a data, <a href='#column-chart'>example<a/>
 #### `cornerRadius`: determine bar corner radius
 #### `style`: determine bar style: `DrawStyle.Fill` `DrawStyle.Stroke(...)`
-
+#### Example:
+```kotlin
+val barProperties = BarProperties(
+   thickness = 15.dp,
+   spacing = 4.dp,
+   cornerRadius = Bars.Data.Radius.Circular(6.dp),
+   style = DrawStyle.Fill
+)
+```
 <hr/>
 
 ### Dots: `DotProperties`
@@ -393,7 +401,19 @@ LineChart(
 #### `strokeStyle`: determine dot stroke style: `StrokeStyle.Normal` `StrokeStyle.Dashed(...)`
 #### `animationEnabled`: set false if you want to show dots without delay and animation
 #### `animationSpec`: determine dots visibility animation spec
-
+#### Example:
+```kotlin
+val dotProperties = DotProperties(
+   enabled = true,
+   radius = 10f,
+   color = SolidColor(Color.Red),
+   strokeWidth = 3f,
+   strokeColor = Color.White,
+   strokeStyle = StrokeStyle.Normal,
+   animationEnabled = true,
+   animationSpec = tween(500)
+)
+```
 <hr/>
 
 ### Indicators: `IndicatorProperties`
@@ -403,7 +423,17 @@ LineChart(
 #### `textStyle`: determine counter style
 #### `count`: determine counters count
 #### `contentBuilder`: you can build counter content with this property
-
+#### Example:
+```kotlin
+val indicatorProperties = IndicatorProperties(
+   enabled = true,
+   textStyle = MaterialTheme.typography.labelSmall,
+   count = 5,
+   contentBuilder = { indicator->
+        "%.2f".format(indicator)+" Million"
+   }
+)
+```
 
 <hr/>
 
@@ -414,9 +444,18 @@ LineChart(
 #### `style`: determine grid line style: `StrokeStyle.Normal` `StrokeStyle.Dashed()`
 #### `color`: determine grid line color
 #### `thickness`: determine grid line width
-#### `line count`: determine count of lines (set this equal to your indicators count to make lines in right position with counter)
+#### `lineCount`: determine count of lines (set this equal to your indicators count to make lines in right position with counter)
 
-
+#### Example:
+```kotlin
+val gridProperties = GridProperties(
+   enabled = true,
+   style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
+   color = Color.Gray,
+   thickness = (.5).dp,
+   lineCount = 5
+)
+```
 <hr/>
 
 ### Labels: `LabelProperties`
@@ -427,6 +466,16 @@ LineChart(
 #### `verticalPadding`: determine vertical padding of labels area
 #### `labels`: In line charts use this property to define chart labels
 
+#### Example:
+```kotlin
+val labelProperties = LabelProperties(
+   enabled = true,
+   textStyle = MaterialTheme.typography.labelSmall,
+   verticalPadding = 16.dp,
+   labels = listOf("Apr","Mar",...)
+)
+```
+
 <hr/>
 
 ### Label Helpers: `LabelHelperProperties`
@@ -434,6 +483,14 @@ LineChart(
 
 #### `enabled`: set false to hide them
 #### `textStyle`: determine label helper textStyle
+
+#### Example:
+```kotlin
+val labelHelperProperties = LabelHelperProperties(
+   enabled = true,
+   textStyle = MaterialTheme.typography.labelMedium
+)
+```
 
 <hr/>
 
@@ -450,7 +507,22 @@ LineChart(
 #### `contentVerticalPadding`: determine popup vertical padding
 #### `contentBuilder`: you can build popup content with this property
 
-
+#### Example:
+```kotlin
+val popupProperties = PopupProperties(
+   enabled = true,
+   animationSpec = tween(300),
+   duration = 2000L,
+   textStyle = MaterialTheme.typography.labelSmall,
+   containerColor = Color.White,
+   cornerRadius = 8.dp,
+   contentHorizontalPadding = 4.dp,
+   contentVerticalPadding = 2.dp,
+   contentBuilder = { value->
+      "%.1f".format(value)+"Million"
+   }
+)
+```
 
 
 
