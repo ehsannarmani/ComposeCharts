@@ -5,15 +5,13 @@ plugins {
 }
 
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components.findByName("release"))
-                groupId = "com.github.ehsannarmani"
-                artifactId = "compose-charts"
-                version = "0.0.1"
-            }
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            from(components.findByName("release"))
+            groupId = "com.github.ehsannarmani"
+            artifactId = "compose-charts"
+            version = "0.0.1"
         }
     }
 }
