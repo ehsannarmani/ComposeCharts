@@ -377,10 +377,10 @@ LineChart(
 
 | Property       | Type             | Default               | Description         |
 |----------------|------------------|-----------------------|---------------------|
-| `thickness`    | Dp               | 20                    | determine bar width 
-| `spacing`      | Dp               | 4                     | determine space between data bars when you have more than one bar in a data 
-| `cornerRadius` | Bars.Data.Radius | Bars.Data.Radius.None | determine space between data bars when you have more than one bar in a data 
-| `style`        | DrawStyle        | DrawStyle.Fill        | determine bar style 
+| `thickness`    | Dp               | `20`                    | determine bar width 
+| `spacing`      | Dp               | `4`                     | determine space between data bars when you have more than one bar in a data 
+| `cornerRadius` | Bars.Data.Radius | `Bars.Data.Radius.None` | determine space between data bars when you have more than one bar in a data 
+| `style`        | DrawStyle        | `DrawStyle.Fill`        | determine bar style 
 
 #### Example:
 ```kotlin
@@ -398,14 +398,14 @@ val barProperties = BarProperties(
 
 | Property           | Type                 | Default                       | Description         |
 |--------------------|----------------------|-------------------------------|---------------------|
-| `enabled`          | Boolean              | false                         | determine dots visibility 
-| `radius`           | Float                | 10f                           | determine dot size 
-| `color`            | Brush                | SolidColor(Color.Unspecified) | determine dot color 
-| `strokeWidth`      | Float                | 3f                            | determine dot stroke width
-| `strokeColor`      | Brush                | SolidColor(Color.Unspecified) | determine dot stroke color
-| `strokeStyle`      | StrokeStyle          | StrokeStyle.Normal            | determine dot stroke style
-| `animationEnabled` | Boolean              | true                          | set `false` if you want to show dots without delay and animation
-| `animationSpec`    | AnimationSpec<Float> | tween(300)                    | determine dots visibility animation spec
+| `enabled`          | Boolean              | `false`                         | determine dots visibility 
+| `radius`           | Float                | `10f`                           | determine dot size 
+| `color`            | Brush                |` SolidColor(Color.Unspecified) `| determine dot color 
+| `strokeWidth`      | Float                | `3f`                            | determine dot stroke width
+| `strokeColor`      | Brush                |` SolidColor(Color.Unspecified) `| determine dot stroke color
+| `strokeStyle`      | StrokeStyle          | `StrokeStyle.Normal`            | determine dot stroke style
+| `animationEnabled` | Boolean              | `true`                          | set `false` if you want to show dots without delay and animation
+| `animationSpec`    | AnimationSpec<Float> |` tween(300)                    `| determine dots visibility animation spec
 
 #### Example:
 ```kotlin
@@ -425,10 +425,13 @@ val dotProperties = DotProperties(
 ### Indicators: `IndicatorProperties`
 > Usage: In every chart you can set properties of counters next to the chart
 
-#### `enabled`: set false to hide them
-#### `textStyle`: determine counter style
-#### `count`: determine counters count
-#### `contentBuilder`: you can build counter content with this property
+| Property         | Type                     | Default               | Description         |
+|------------------|--------------------------|-----------------------|---------------------|
+| `enabled`        | Boolean                  | `true`                  | determine indicator visiblity 
+| `textStyle`      | TextStyle                | `TextStyle.Default`     | determine counter style 
+| `count`          | Int                      | `4`                     | determine counters count 
+| `contentBuilder` | Function (Double):String |` { "%.2f".format(it) } `| determine counter content creation template 
+
 #### Example:
 ```kotlin
 val indicatorProperties = IndicatorProperties(
