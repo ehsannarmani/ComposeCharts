@@ -331,7 +331,7 @@ LineChart(
 ```
 
 > [!NOTE]
-> You make chart fill color:
+> You can make chart fill color:
 
 <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/line9.gif?raw=true" width="250">
 
@@ -544,6 +544,13 @@ val popupProperties = PopupProperties(
    }
 )
 ```
+
+<hr/>
+
+## Todos:
+1. [ ] Add Candle Stick Chart
+2. [ ] Add Circle Progress Chart
+3. [ ] Support MultiPlatform 
 
 
 
