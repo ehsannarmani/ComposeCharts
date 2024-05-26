@@ -119,7 +119,7 @@ ColumnChart(
 ```
 
 > [!NOTE]
-> You set how many data you want for every bar you want:
+> You can set how many data you want for every bar:
 
 <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column3.gif?raw=true" width="300">
 
