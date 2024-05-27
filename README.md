@@ -15,14 +15,15 @@
 4. [Animation Mode](#animation-mode)
 5. [Chart Properties](#chart-properties)
 
-### Gradle Setup
+### Gradle Setup 
+[![](https://jitpack.io/v/ehsannarmani/ComposeCharts.svg)](https://jitpack.io/#ehsannarmani/ComposeCharts)
 ```gradle
 repositories {
     maven("https://jitpack.io")
 }
 
 dependencies {
-    implementation ("com.github.ehsannarmani:ComposeCharts:0.0.1")
+    implementation ("com.github.ehsannarmani:ComposeCharts:latest_version")
 }
 ```
 ### All Charts:
