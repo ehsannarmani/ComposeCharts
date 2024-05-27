@@ -5,15 +5,25 @@
 
 ## Table of Contents
 
-1. [Gradle Setup](#gradle-setup)
-2. [All Charts](#all-charts)
-3. [Examples](#examples)
-   1. [Pie Chart](#pie-chart)
-   2. [Row Chart](#row-chart)
-   4. [Column Chart](#column-chart)
-   5. [Line Chart](#line-chart)
-4. [Animation Mode](#animation-mode)
-5. [Chart Properties](#chart-properties)
+- [Gradle Setup](#gradle-setup)
+- [All Charts](#all-charts)
+- [Examples](#examples)
+   - [Pie Chart](#pie-chart)
+   - [Row Chart](#row-chart)
+   - [Column Chart](#column-chart)
+   - [Line Chart](#line-chart)
+- [Animation Mode](#animation-mode)
+- [Chart Properties](#chart-properties)
+   - [Bars](#bars-barproperties)
+   - [Dots](#dots-dotproperties)
+   - [Indicators](#indicators-indicatorproperties)
+   - [Grid Lines](#grid-lines-gridproperties)
+   - [Axis](#axis-axisproperties)
+   - [Dividers](#dividers-dividerproperties)
+   - [Lines](#line-lineproperties)
+   - [Labels](#labels-labelproperties)
+   - [Label Helpers](#label-helpers-labelhelperproperties)
+   - [Popups](#popups-popupproperties)
 
 ### Gradle Setup 
 [![](https://jitpack.io/v/ehsannarmani/ComposeCharts.svg)](https://jitpack.io/#ehsannarmani/ComposeCharts)
@@ -411,7 +421,7 @@ LineChart(
 
 ## Chart Properties:
 
-### `BarProperties`
+### Bars: `BarProperties`
 > Usage: In Column/Row Charts you can set bar properties with this property
 
 | Property       | Type             | Default               | Description         |
