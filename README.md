@@ -219,6 +219,37 @@ LineChart(
     }),
 )
 ```
+<hr/>
+
+> [!NOTE]
+> You can set min & max value for all charts and show zero line:
+
+<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/zero_line.gif?raw=true" width="250">
+
+#### Example:
+
+```angular2html
+LineChart(
+    data = listOf(
+         Line(
+            label = "Temperature",
+            values = listOf(28.0,41.0,-5.0,10.0,35.0),
+            color = Brush.radialGradient(...),
+            ...
+         )
+    ),
+    ...,
+    zeroLineProperties = LineProperties(
+        enabled = true,
+        color = SolidColor(Color.Red),
+    ),
+    minValue = -20.0,
+    maxValue = 100.0
+)
+```
+> Max value by default is highest value of chart data and Min value is 0 when there is no value under the zero, otherwise it's the lowest data.
+
+<hr/>
 
 > [!NOTE]
 > You can set gradient color for lines:
@@ -238,6 +269,7 @@ LineChart(
     ...
 )
 ```
+<hr/>
 
 > [!NOTE]
 > You can add how many lines you want:
@@ -304,6 +336,7 @@ LineChart(
     curvedEdges = false
 )
 ```
+<hr/>
 
 > [!NOTE]
 > You can make chart line dashed:
@@ -330,6 +363,7 @@ LineChart(
     ),
 )
 ```
+<hr/>
 
 > [!NOTE]
 > You can make chart fill color:
@@ -454,22 +488,85 @@ val indicatorProperties = IndicatorProperties(
 ### Grid Lines: `GridProperties`
 > Usage: In every chart you can set properties of grid lines
 
-| Property    | Type        | Default              | Description         |
-|-------------|-------------|----------------------|---------------------|
-| `enabled`   | Boolean     | `true`               | specifies grid lines visibility 
-| `style`     | StrokeStyle | `StrokeStyle.Normal` | specifies grid lines style 
-| `color`     | Color       | `Color.Gray`         | specifies grid lines color 
-| `thickness` | Dp          | `(0.5).dp`           | specifies grid lines width
-| `lineCount` | Int         | `5`                  | specifies count of lines (set this equal to your indicators count to make lines in right position with counter)
+| Property          | Type           | Default              | Description         |
+|-------------------|----------------|----------------------|---------------------|
+| `enabled`         | Boolean        | `true`               | specifies grid lines visibility 
+| `xAxisProperties` | AxisProperties | `AxisProperties(..)` | specifies grid horizontal lines properties 
+| `yAxisProperties` | AxisProperties | `AxisProperties(..)` | specifies grid vertical lines properties 
 
 #### Example:
 ```kotlin
 val gridProperties = GridProperties(
    enabled = true,
+   xAxisProperties = AxisProperties(
+      ...
+   ),
+   yAxisProperties = AxisProperties(
+      ...
+   )
+)
+```
+<hr/>
+
+### Axis: `AxisProperties`
+
+| Property    | Type        | Default              | Description         |
+|-------------|-------------|----------------------|---------------------|
+| `enabled`   | Boolean     | `true`               | specifies axis line visibility 
+| `style`     | StrokeStyle | `StrokeStyle.Normal` | specifies axis line style 
+| `color`     | Color       | `Color.Gray`         | specifies axis line color 
+| `thickness` | Dp          | `(0.5).dp`           | specifies axis line stroke width
+| `lineCount` | Int         | `5`                  | specifies count of axis lines
+
+#### Example:
+```kotlin
+val axisProperties = AxisProperties(
+   enabled = true,
    style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
    color = Color.Gray,
    thickness = (.5).dp,
    lineCount = 5
+)
+```
+<hr/>
+
+### Dividers: `DividerProperties`
+> Usage: In every chart you can set properties of dividers between labels and chart, indicators and chart
+
+| Property          | Type            | Default              | Description         |
+|-------------------|-----------------|----------------------|---------------------|
+| `enabled`         | Boolean         | `true`               | specifies dividers visibility 
+| `xAxisProperties` | LineProperties  | `LineProperties(..)` | specifies horizontal divider properties 
+| `yAxisProperties` | LineProperties  | `LineProperties(..)` | specifies vertical divider properties 
+
+#### Example:
+```kotlin
+val dividerProperties = DividerProperties(
+   enabled = true,
+   xAxisProperties = LineProperties(
+      ...
+   ),
+   yAxisProperties = LineProperties(
+      ...
+   )
+)
+```
+### Line: `LineProperties`
+
+| Property    | Type        | Default              | Description         |
+|-------------|-------------|----------------------|---------------------|
+| `enabled`   | Boolean     | `true`               | specifies axis line visibility 
+| `style`     | StrokeStyle | `StrokeStyle.Normal` | specifies axis line style 
+| `color`     | Color       | `Color.Gray`         | specifies axis line color 
+| `thickness` | Dp          | `(0.5).dp`           | specifies axis line stroke width
+
+#### Example:
+```kotlin
+val lineProperties = LineProperties(
+   enabled = true,
+   style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
+   color = Color.Gray,
+   thickness = (.5).dp,
 )
 ```
 <hr/>
