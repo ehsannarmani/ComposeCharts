@@ -2,57 +2,74 @@ package ir.ehsannarmani.compose_charts.extensions
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.Dp
-import ir.ehsannarmani.compose_charts.models.StrokeStyle
+import ir.ehsannarmani.compose_charts.models.DividerProperties
+import ir.ehsannarmani.compose_charts.models.GridProperties
 
-fun DrawScope.drawGridLines(count:Int,color: Color,strokeWidth:Dp,size: Size? = null,xPadding:Float = 0f,justDividers:Boolean = false,style: StrokeStyle = StrokeStyle.Normal){
+fun DrawScope.drawGridLines(
+    dividersProperties: DividerProperties,
+    gridEnabled: Boolean,
+    xAxisProperties: GridProperties.AxisProperties,
+    yAxisProperties: GridProperties.AxisProperties,
+    size: Size? = null,
+    xPadding: Float = 0f,
+) {
+
     val _size = size ?: this.size
-    val pathEffect = style.pathEffect
 
-    if (!justDividers){
-        for (i in 0 until count) {
-            val everyHeight = _size.height / count
-            val everyWidth = _size.width / count
+    val xAxisPathEffect = xAxisProperties.style.pathEffect
+    val yAxisPathEffect = yAxisProperties.style.pathEffect
+
+
+    if (xAxisProperties.enabled && gridEnabled) {
+        for (i in 0 until xAxisProperties.lineCount - 1) {
+            val y = _size.height.spaceBetween(itemCount = xAxisProperties.lineCount, index = i)
             drawLine(
-                color = color,
-                start = Offset(0f+xPadding, everyHeight * i),
-                end = Offset(_size.width+xPadding, everyHeight * i),
-                strokeWidth = strokeWidth.toPx(),
-                pathEffect = pathEffect
-            )
-            drawLine(
-                color = color,
-                start = Offset((everyWidth * i)+xPadding, 0f),
-                end = Offset((everyWidth * i)+xPadding, _size.height),
-                strokeWidth = strokeWidth.toPx(),
-                pathEffect = pathEffect
+                brush = xAxisProperties.color,
+                start = Offset(0f + xPadding, y),
+                end = Offset(_size.width + xPadding, y),
+                strokeWidth = xAxisProperties.thickness.toPx(),
+                pathEffect = xAxisPathEffect
             )
         }
+    }
+    if (yAxisProperties.enabled && gridEnabled) {
+        for (i in 1 until yAxisProperties.lineCount) {
+            val x = _size.width.spaceBetween(itemCount = yAxisProperties.lineCount, index = i)
+            drawLine(
+                brush = xAxisProperties.color,
+                start = Offset(x + xPadding, 0f),
+                end = Offset(x + xPadding, _size.height),
+                strokeWidth = xAxisProperties.thickness.toPx(),
+                pathEffect = yAxisPathEffect
+            )
+        }
+    }
+    if (yAxisProperties.enabled && gridEnabled) {
         drawLine(
-            color = color,
+            brush = yAxisProperties.color,
             start = Offset(this.size.width, 0f),
             end = Offset(this.size.width, _size.height),
-            strokeWidth = strokeWidth.toPx(),
-            pathEffect = pathEffect
+            strokeWidth = yAxisProperties.thickness.toPx(),
+            pathEffect = yAxisPathEffect
         )
     }
-    drawLine(
-        color = color,
-        start = Offset(0f+xPadding,_size.height),
-        end = Offset(_size.width+xPadding,_size.height),
-        strokeWidth = strokeWidth.toPx(),
-        pathEffect = pathEffect
-    )
-    if (justDividers){
+    if (dividersProperties.xAxisProperties.enabled && dividersProperties.enabled) {
         drawLine(
-            color = color,
-            start = Offset(0f+xPadding,0f),
-            end = Offset(0f+xPadding,_size.height),
-            strokeWidth = strokeWidth.toPx(),
-            pathEffect = pathEffect
+            brush = dividersProperties.xAxisProperties.color,
+            start = Offset(0f + xPadding, _size.height),
+            end = Offset(_size.width + xPadding, _size.height),
+            strokeWidth = dividersProperties.xAxisProperties.thickness.toPx(),
+            pathEffect = dividersProperties.xAxisProperties.style.pathEffect
+        )
+    }
+    if (dividersProperties.yAxisProperties.enabled && dividersProperties.enabled) {
+        drawLine(
+            brush = dividersProperties.yAxisProperties.color,
+            start = Offset(0f + xPadding, 0f),
+            end = Offset(0f + xPadding, _size.height),
+            strokeWidth = dividersProperties.yAxisProperties.thickness.toPx(),
+            pathEffect = dividersProperties.yAxisProperties.style.pathEffect
         )
     }
 }

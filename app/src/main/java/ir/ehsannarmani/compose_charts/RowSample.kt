@@ -28,8 +28,15 @@ import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.ui.theme.ubuntu
+
+val rowGridProperties = GridProperties(
+    enabled = true,
+    xAxisProperties = GridProperties.AxisProperties(thickness = .2.dp, color = SolidColor(Color.Gray.copy(alpha = .6f))),
+    yAxisProperties = GridProperties.AxisProperties(thickness = .2.dp, color = SolidColor(Color.Gray.copy(alpha = .6f))),
+)
 
 @Composable
 fun RowScope.RowSample() {
@@ -138,11 +145,11 @@ fun RowScope.RowSample() {
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties = GridProperties(
+                gridProperties = rowGridProperties,
+                labelProperties = LabelProperties(
                     enabled = true,
-                    thickness = .2.dp
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
                 ),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                 animationSpec = spring(
                     dampingRatio = .6f,
                     stiffness = Spring.StiffnessLow
@@ -342,8 +349,11 @@ fun RowScope.RowSample2() {
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                gridProperties =  rowGridProperties,
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -410,8 +420,11 @@ fun RowScope.RowSample3() {
                     count = 4,
 
                 ),
-                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                gridProperties = rowGridProperties,
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow

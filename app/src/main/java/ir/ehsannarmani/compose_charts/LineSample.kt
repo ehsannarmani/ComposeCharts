@@ -22,6 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.StrokeStyle
@@ -30,10 +31,35 @@ import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
+import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.ui.theme.ubuntu
 
-
+val gridProperties = GridProperties(
+    xAxisProperties = GridProperties.AxisProperties(
+        thickness = .2.dp,
+        color = SolidColor(Color.Gray.copy(alpha = .5f)),
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
+    ),
+    yAxisProperties = GridProperties.AxisProperties(
+        thickness = .2.dp,
+        color = SolidColor(Color.Gray.copy(alpha = .5f)),
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
+    ),
+)
+val dividerProperties = DividerProperties(
+    xAxisProperties = LineProperties(
+        thickness = .2.dp,
+        color = SolidColor(Color.Gray.copy(alpha = .5f)),
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
+    ),
+    yAxisProperties = LineProperties(
+        thickness = .2.dp,
+        color = SolidColor(Color.Gray.copy(alpha = .5f)),
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
+    )
+)
 @Composable
 fun RowScope.LineSample() {
     val data = remember {
@@ -106,13 +132,8 @@ fun RowScope.LineSample() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.Gray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -144,11 +165,11 @@ fun RowScope.LineSample2() {
     val data = remember {
         listOf(
             Line(
-                label = "Windows",
+                label = "Temperature",
                 values = listOf(
                     28.0,
                     41.0,
-                    7.0,
+                    -15.0,
                     27.0,
                     54.0
                 ),
@@ -178,12 +199,19 @@ fun RowScope.LineSample2() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.Gray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
+                gridProperties = gridProperties.copy(
+                    yAxisProperties = GridProperties.AxisProperties(enabled = false),
+                    xAxisProperties = gridProperties.xAxisProperties.copy(
+                        thickness = .5.dp
+                    )
+                ),
+                dividerProperties = DividerProperties(
+                    yAxisProperties = LineProperties(enabled = false),
+                    xAxisProperties = LineProperties(
+                        thickness = .5.dp,
+                        color = SolidColor(Color.Gray.copy(alpha = .5f)),
+                        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
+                    )
                 ),
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
@@ -192,9 +220,14 @@ fun RowScope.LineSample2() {
                         fontFamily = ubuntu
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        "%.1f".format(it) + " °C"
                     },
                     containerColor = Color(0xff414141)
+                ),
+                zeroLineProperties = ZeroLineProperties(
+                    enabled = true,
+                    color = SolidColor(Color(0xFFAD1457)),
+                    thickness = 1.dp,
                 ),
                 indicatorProperties = IndicatorProperties(
                     textStyle = TextStyle(
@@ -202,11 +235,13 @@ fun RowScope.LineSample2() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
-                    }
+                        "%.1f".format(it) + " °C"
+                    },
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
-                curvedEdges = false
+                curvedEdges = false,
+                maxValue = 100.0,
+                minValue = -20.0
             )
         }
     }
@@ -277,13 +312,8 @@ fun RowScope.LineSample3() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -365,13 +395,8 @@ fun RowScope.LineSample4() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -436,13 +461,8 @@ fun RowScope.LineSample5() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -546,13 +566,8 @@ fun RowScope.LineSample6() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -626,13 +641,8 @@ fun RowScope.LineSample7() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -697,7 +707,8 @@ fun RowScope.LineSample8() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                drawDividers = false,
+                dividerProperties = DividerProperties(enabled = false),
+                gridProperties = GridProperties(enabled = false),
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -751,13 +762,8 @@ fun RowScope.LineSample9() {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                gridProperties = GridProperties(
-                    enabled = true,
-                    thickness = .5.dp,
-                    color = Color.DarkGray.copy(alpha = .5f),
-                    style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
-                    lineCount = 4
-                ),
+                gridProperties = gridProperties,
+                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,

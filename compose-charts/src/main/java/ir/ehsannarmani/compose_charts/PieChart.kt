@@ -52,6 +52,13 @@ fun PieChart(
     style: Pie.Style = Pie.Style.Fill
 ) {
 
+    require(data.isNotEmpty()){
+        "Chart data is empty"
+    }
+    require(data.none { it.data < 0 }){
+        "Data must be at least 0"
+    }
+
     val scope = rememberCoroutineScope()
 
     var details by remember {
@@ -66,8 +73,8 @@ fun PieChart(
     }
 
     LaunchedEffect(data) {
-        if (details.isNotEmpty()) {
-            details = data.mapIndexed { mapIndex, chart ->
+        details = if (details.isNotEmpty()) {
+            data.mapIndexed { mapIndex, chart ->
                 PieDetails(
                     id = details[mapIndex].id,
                     pie = chart,
@@ -77,7 +84,7 @@ fun PieChart(
                 )
             }
         } else {
-            details = data.map { PieDetails(pie = it) }
+            data.map { PieDetails(pie = it) }
         }
     }
 

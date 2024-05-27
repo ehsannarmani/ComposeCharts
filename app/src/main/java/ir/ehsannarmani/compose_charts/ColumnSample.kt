@@ -27,8 +27,17 @@ import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.ui.theme.ubuntu
+
+
+val columnGridProperties = GridProperties(
+    enabled = true,
+    xAxisProperties = GridProperties.AxisProperties(thickness = .2.dp, color = SolidColor(Color.Gray.copy(alpha = .6f))),
+    yAxisProperties = GridProperties.AxisProperties(thickness = .2.dp, color = SolidColor(Color.Gray.copy(alpha = .6f))),
+)
 
 @Composable
 fun RowScope.ColumnSample() {
@@ -75,7 +84,7 @@ fun RowScope.ColumnSample() {
                     ),
                     Bars.Data(
                         label = "Windows",
-                        value = 50.0,
+                        value = 45.0,
                         color = Brush.verticalGradient(
                             listOf(
                                 Color(0xFF7E57C2),
@@ -135,8 +144,11 @@ fun RowScope.ColumnSample() {
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                gridProperties = columnGridProperties,
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -154,7 +166,8 @@ fun RowScope.ColumnSample() {
                     },
                     containerColor = Color(0xff414141),
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White))
+                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                maxValue = 120.0
             )
         }
     }
@@ -329,8 +342,11 @@ fun RowScope.ColumnSample2() {
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                gridProperties = columnGridProperties,
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -391,8 +407,11 @@ fun RowScope.ColumnSample3() {
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4,
                 ),
-                gridProperties = GridProperties(enabled = true, thickness = (.2).dp),
-                labelStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                gridProperties = columnGridProperties,
+                labelProperties = LabelProperties(
+                    enabled = true,
+                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow

@@ -8,6 +8,6 @@ import androidx.compose.ui.unit.sp
 data class LabelProperties(
     val enabled:Boolean,
     val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-    val verticalPadding:Dp = 12.dp,
+    val padding:Dp = 12.dp,
     val labels:List<String> = listOf()
 )

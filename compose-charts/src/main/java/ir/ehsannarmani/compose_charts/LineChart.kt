@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -43,6 +42,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -55,6 +55,7 @@ import ir.ehsannarmani.compose_charts.extensions.flatten
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
@@ -63,6 +64,7 @@ import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,19 +78,39 @@ private data class PathOffset(
 fun LineChart(
     modifier: Modifier = Modifier,
     data: List<Line>,
-    curvedEdges:Boolean = true,
+    curvedEdges: Boolean = true,
     animationDelay: Long = 300,
     animationMode: AnimationMode = AnimationMode.Together(),
-    gridProperties: GridProperties = GridProperties(lineCount = 5),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
+    dividerProperties: DividerProperties = DividerProperties(),
+    gridProperties: GridProperties = GridProperties(),
+    zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
+    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
-    drawDividers: Boolean = true,
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
+    popupProperties: PopupProperties = PopupProperties(
+        textStyle = TextStyle.Default.copy(
+            color = Color.White,
+            fontSize = 12.sp
+        )
+    ),
     dotsProperties: DotProperties = DotProperties(),
-    labelProperties: LabelProperties = LabelProperties(enabled = false)
+    labelProperties: LabelProperties = LabelProperties(enabled = false),
+    maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it } ?: 0.0 } ?: 0.0,
+    minValue: Double = if (data.any { it.values.any { it < 0.0 } }) data.minOfOrNull {
+        it.values.minOfOrNull { it } ?: 0.0
+    } ?: 0.0 else 0.0,
 ) {
+
+    require(data.isNotEmpty()) {
+        "Chart data is empty"
+    }
+    require(minValue <= data.minOf { it.values.minOf { it } }){
+        "Chart data must be at least $minValue (Specified Min Value)"
+    }
+    require(maxValue >= data.maxOf { it.values.maxOf { it } }){
+        "Chart data must be at most $maxValue (Specified Max Value)"
+    }
 
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
@@ -105,34 +127,47 @@ fun LineChart(
         Animatable(0f)
     }
 
+    val zeroLineAnimation = remember {
+        Animatable(0f)
+    }
+
     val rectOffsets = remember {
         mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
     }
-
-    val maxValue = data.maxOf { it.values.maxOf { it } }
-
     val labelAreaHeight = remember {
-        if (labelProperties.enabled){
-            labelProperties.labels.maxOf { textMeasurer.measure(it, style = labelProperties.textStyle).size.height }+(labelProperties.verticalPadding.value*density.density).toInt()
-        }else{
+        if (labelProperties.enabled) {
+            labelProperties.labels.maxOf {
+                textMeasurer.measure(
+                    it,
+                    style = labelProperties.textStyle
+                ).size.height
+            } + (labelProperties.padding.value * density.density).toInt()
+        } else {
             0
         }
     }
 
     val dotAnimators = remember {
-        mutableStateListOf<List<Animatable<Float,AnimationVector1D>>>()
+        mutableStateListOf<List<Animatable<Float, AnimationVector1D>>>()
     }
 
     LaunchedEffect(data) {
         pathsOffsets.clear()
         dotAnimators.clear()
-
-        data.forEach {
-            val animators = mutableListOf<Animatable<Float,AnimationVector1D>>()
-            it.values.forEach {
-                animators.add(Animatable(0f))
+        if (zeroLineProperties.enabled) {
+            zeroLineAnimation.snapTo(0f)
+        }
+        launch {
+            data.forEach {
+                val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
+                it.values.forEach {
+                    animators.add(Animatable(0f))
+                }
+                dotAnimators.add(animators)
             }
-            dotAnimators.add(animators)
+        }
+        if (zeroLineProperties.enabled) {
+            zeroLineAnimation.animateTo(1f, animationSpec = zeroLineProperties.animationSpec)
         }
     }
 
@@ -186,17 +221,28 @@ fun LineChart(
 
     Column(modifier = modifier) {
         if (labelHelperProperties.enabled) {
-            LabelHelper(data = data.map { it.label to it.color }, textStyle = labelHelperProperties.textStyle)
+            LabelHelper(
+                data = data.map { it.label to it.color },
+                textStyle = labelHelperProperties.textStyle
+            )
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
         Row(modifier = Modifier.fillMaxSize()) {
             if (indicatorProperties.enabled) {
                 Column(
-                    modifier = Modifier.fillMaxHeight().padding(bottom = (labelAreaHeight/density.density).dp),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(bottom = (labelAreaHeight / density.density).dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    (maxValue).split(maxValue / indicatorProperties.count).forEach {
-                        Text(text = indicatorProperties.contentBuilder(it), style = indicatorProperties.textStyle)
+                    (maxValue).split(
+                        step = (maxValue - minValue) / indicatorProperties.count,
+                        minValue = minValue
+                    ).forEach {
+                        BasicText(
+                            text = indicatorProperties.contentBuilder(it),
+                            style = indicatorProperties.textStyle
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.width(18.dp))
@@ -242,33 +288,56 @@ fun LineChart(
                         }
                     )
                 }) {
+                val chartAreaHeight = size.height - labelAreaHeight
 
-                if (labelProperties.enabled){
+                val drawZeroLine = {
+                    val zeroY = chartAreaHeight - (0.0f).heightFor(
+                        minValue = minValue.toFloat(),
+                        maxValue = maxValue.toFloat(),
+                        totalHeight = chartAreaHeight
+                    )
+                    drawLine(
+                        brush = zeroLineProperties.color,
+                        start = Offset(x = 0f, y = zeroY),
+                        end = Offset(x = size.width * zeroLineAnimation.value, y = zeroY),
+                        pathEffect = zeroLineProperties.style.pathEffect,
+                        strokeWidth = zeroLineProperties.thickness.toPx()
+                    )
+                }
+
+                if (labelProperties.enabled) {
                     labelProperties.labels.forEachIndexed { index, label ->
-                        val measureResult = textMeasurer.measure(label, style = labelProperties.textStyle)
+                        val measureResult =
+                            textMeasurer.measure(label, style = labelProperties.textStyle)
                         drawText(
                             textLayoutResult = measureResult,
-                            topLeft = Offset((size.width-measureResult.size.width).spaceBetween(itemCount = labelProperties.labels.count(),index = index),size.height-labelAreaHeight+labelProperties.verticalPadding.toPx())
+                            topLeft = Offset(
+                                (size.width - measureResult.size.width).spaceBetween(
+                                    itemCount = labelProperties.labels.count(),
+                                    index = index
+                                ),
+                                size.height - labelAreaHeight + labelProperties.padding.toPx()
+                            )
                         )
                     }
                 }
-                val chartAreaHeight = size.height-labelAreaHeight
 
-                if (drawDividers) {
-                    drawGridLines(
-                        count = gridProperties.lineCount,
-                        color = gridProperties.color,
-                        strokeWidth = gridProperties.thickness,
-                        justDividers = !gridProperties.enabled,
-                        style = gridProperties.style,
-                        size = size.copy(height = chartAreaHeight)
-                    )
+                drawGridLines(
+                    dividersProperties = dividerProperties,
+                    xAxisProperties = gridProperties.xAxisProperties,
+                    yAxisProperties = gridProperties.yAxisProperties,
+                    size = size.copy(height = chartAreaHeight),
+                    gridEnabled = gridProperties.enabled
+                )
+                if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+                    drawZeroLine()
                 }
                 data.forEachIndexed { index, line ->
                     val path = getLinePath(
                         dataPoints = line.values.map { it.toFloat() },
                         maxValue = maxValue.toFloat(),
-                        rounded =line.curvedEdges ?: curvedEdges,
+                        minValue = minValue.toFloat(),
+                        rounded = line.curvedEdges ?: curvedEdges,
                         size = size.copy(height = chartAreaHeight)
                     )
                     if (pathsOffsets.none { it.line == line }) {
@@ -284,7 +353,7 @@ fun LineChart(
                         segmentedPath
                     )
 
-                    var pathEffect:PathEffect? = null
+                    var pathEffect: PathEffect? = null
                     val stroke: Float = when (val drawStyle = line.drawStyle) {
                         is DrawStyle.Fill -> {
                             0f
@@ -310,8 +379,8 @@ fun LineChart(
                         )
                     } else if (line.drawStyle is DrawStyle.Fill) {
                         var fillColor = Color.Unspecified
-                        if (line.color is SolidColor){
-                           fillColor = line.color.value
+                        if (line.color is SolidColor) {
+                            fillColor = line.color.value
                         }
                         drawGradient(
                             path = path,
@@ -324,7 +393,11 @@ fun LineChart(
 
                     if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
                         drawDots(
-                            dataPoints = line.values.mapIndexed { mapIndex,value-> (dotAnimators.getOrNull(index)?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat() },
+                            dataPoints = line.values.mapIndexed { mapIndex, value ->
+                                (dotAnimators.getOrNull(
+                                    index
+                                )?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat()
+                            },
                             properties = line.dotProperties ?: dotsProperties,
                             linePath = segmentedPath,
                             maxValue = maxValue.toFloat(),
@@ -333,14 +406,23 @@ fun LineChart(
                             size = size.copy(height = chartAreaHeight)
                         )
                     }
-
-
+                }
+                if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+                    drawZeroLine()
                 }
                 popupPositions.forEachIndexed { index, offset ->
-                    val value = maxValue - ((offset.y * maxValue) / chartAreaHeight)
+                    val value = (maxValue + minValue) - offset.y.valueFor(
+                        minValue = minValue,
+                        maxValue = maxValue,
+                        totalHeight = chartAreaHeight
+                    )
                     val measureResult = textMeasurer.measure(
                         popupProperties.contentBuilder(value),
-                        style = popupProperties.textStyle.copy(color = popupProperties.textStyle.color.copy(alpha = 1f * popupAnimation.value))
+                        style = popupProperties.textStyle.copy(
+                            color = popupProperties.textStyle.color.copy(
+                                alpha = 1f * popupAnimation.value
+                            )
+                        )
                     )
                     var rectSize = measureResult.size.toSize()
                     rectSize = rectSize.copy(
@@ -351,7 +433,7 @@ fun LineChart(
                     val nextItem = popupPositions.getOrNull(index + 1)
                     val conflictDetected =
                         ((nextItem != null) && offset.y in nextItem.y - rectSize.height..nextItem.y + rectSize.height) ||
-                                (offset.x+rectSize.width) > size.width
+                                (offset.x + rectSize.width) > size.width
 
 
                     val rectOffset = if (conflictDetected) {
@@ -431,19 +513,19 @@ fun LineChart(
 }
 
 fun DrawScope.drawDots(
-    dataPoints: List<Pair<Animatable<Float,AnimationVector1D>,Float>>,
+    dataPoints: List<Pair<Animatable<Float, AnimationVector1D>, Float>>,
     properties: DotProperties,
-    linePath:Path,
+    linePath: Path,
     maxValue: Float,
     pathMeasure: PathMeasure,
-    scope:CoroutineScope,
+    scope: CoroutineScope,
     size: Size? = null
-){
+) {
     val _size = size ?: this.size
 
     val pathEffect = properties.strokeStyle.pathEffect
 
-    pathMeasure.setPath(linePath,false)
+    pathMeasure.setPath(linePath, false)
     val lastPosition = pathMeasure.getPosition(pathMeasure.length)
     dataPoints.forEachIndexed { valueIndex, value ->
         val dotOffset = Offset(
@@ -453,25 +535,25 @@ fun DrawScope.drawDots(
             ),
             y = _size.height - (_size.height * value.second / maxValue)
         )
-        if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x-20 || !properties.animationEnabled){
+        if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
             if (!value.first.isRunning && properties.animationEnabled) {
                 scope.launch {
                     value.first.animateTo(1f, animationSpec = properties.animationSpec)
                 }
             }
 
-            val radius:Float
-            val strokeRadius:Float
-            if (properties.animationEnabled){
-                radius=(properties.radius + properties.strokeWidth/2)*value.first.value
-                strokeRadius= properties.radius*value.first.value
-            }else{
-                radius =  properties.radius + properties.strokeWidth/2
+            val radius: Float
+            val strokeRadius: Float
+            if (properties.animationEnabled) {
+                radius = (properties.radius + properties.strokeWidth / 2) * value.first.value
+                strokeRadius = properties.radius * value.first.value
+            } else {
+                radius = properties.radius + properties.strokeWidth / 2
                 strokeRadius = properties.radius
             }
             drawCircle(
                 brush = properties.strokeColor,
-                radius = radius ,
+                radius = radius,
                 center = dotOffset,
                 style = Stroke(width = properties.strokeWidth, pathEffect = pathEffect),
             )
@@ -485,19 +567,27 @@ fun DrawScope.drawDots(
 }
 
 fun DrawScope.getLinePath(
-    dataPoints: List<Float>, maxValue: Float,rounded:Boolean = true,size: Size? = null
+    dataPoints: List<Float>,
+    maxValue: Float,
+    minValue: Float,
+    rounded: Boolean = true,
+    size: Size? = null
 ): Path {
 
     val _size = size ?: this.size
     val path = Path()
 
     val calculateHeight = { value: Float ->
-        (_size.height * value) / maxValue
+        value.heightFor(
+            maxValue = maxValue,
+            minValue = minValue,
+            totalHeight = _size.height
+        )
     }
 
     path.moveTo(0f, _size.height - calculateHeight(dataPoints[0]))
 
-    if (rounded){
+    if (rounded) {
         for (i in 0 until dataPoints.size - 1) {
             val x1 = (i * (_size.width / (dataPoints.size - 1)))
             val y1 = _size.height - calculateHeight(dataPoints[i])
@@ -507,9 +597,12 @@ fun DrawScope.getLinePath(
             val cx = (x1 + x2) / 2
             path.cubicTo(cx, y1, cx, y2, x2, y2)
         }
-    }else{
+    } else {
         dataPoints.forEachIndexed { index, value ->
-            path.lineTo(_size.width.spaceBetween(itemCount = dataPoints.count(),index = index),y = _size.height-calculateHeight(value))
+            path.lineTo(
+                _size.width.spaceBetween(itemCount = dataPoints.count(), index = index),
+                y = _size.height - calculateHeight(value)
+            )
         }
     }
     return path
@@ -543,5 +636,30 @@ fun DrawScope.drawGradient(
             )
         })
     }
+}
+
+
+/**
+ * This function calculates height from total height for a specific value
+ */
+private fun Float.heightFor(
+    maxValue: Float,
+    minValue: Float,
+    totalHeight: Float
+): Float {
+    val range = maxValue - minValue
+    val percentage = (this - minValue) / range
+    val height = totalHeight * percentage
+    return height
+}
+
+/**
+ * This function is reverse of Float.heightFor, calculates value from total value for a specific height
+ */
+private fun Float.valueFor(minValue: Double, maxValue: Double, totalHeight: Float): Double {
+    val percentage = this / totalHeight
+    val range = maxValue - minValue
+    val value = minValue + percentage * range
+    return value
 }
 

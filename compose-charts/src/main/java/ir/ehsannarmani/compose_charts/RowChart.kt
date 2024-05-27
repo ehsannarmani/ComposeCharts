@@ -15,8 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -50,9 +49,12 @@ import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
@@ -65,22 +67,31 @@ fun RowChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
-    labelStyle: TextStyle = LocalTextStyle.current,
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
+    labelProperties: LabelProperties = LabelProperties(enabled = true, textStyle = TextStyle.Default),
+    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
+    dividerProperties:DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     animationMode: AnimationMode = AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
+    popupProperties: PopupProperties = PopupProperties(textStyle = TextStyle.Default.copy(color = Color.White, fontSize = 12.sp)),
     barAlphaDecreaseOnPopup: Float = .4f,
+    maxValue:Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
 ) {
+    require(data.isNotEmpty()){
+        "Chart data is empty"
+    }
+    require(data.all { it.values.none { it.value < 0.0 } }){
+        "Chart data must be at least 0"
+    }
+    require(maxValue >= data.maxOf { it.values.maxOf { it.value } }){
+        "Chart data must be at most $maxValue (Specified Max Value)"
+    }
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
-
-    val maxValue = data.maxOf { it.values.maxOf { it.value } }
 
     val everyDataHeight = with(density) {
         data.map { rowData ->
@@ -103,7 +114,10 @@ fun RowChart(
     }
 
     val indicators = remember {
-        maxValue.split(maxValue / indicatorProperties.count)
+        maxValue.split(
+            step = maxValue / indicatorProperties.count,
+            minValue = 0.0
+        )
     }
     val indicatorAreaHeight = remember {
         if (indicatorProperties.enabled){
@@ -137,17 +151,17 @@ fun RowChart(
             Spacer(modifier = Modifier.height(24.dp))
         }
         Row(modifier=Modifier.fillMaxSize()) {
-            if (indicatorProperties.enabled){
+            if (labelProperties.enabled){
                 Column(modifier= Modifier
                     .fillMaxHeight()
                     .padding(bottom = (indicatorAreaHeight/density.density).dp)
                     .padding(vertical = (((everyDataHeight) / data.count()) / density.density).dp)
                     , verticalArrangement = Arrangement.SpaceBetween) {
                     data.forEach {
-                        Text(text = it.label,style = labelStyle)
+                        BasicText(text = it.label,style = labelProperties.textStyle)
                     }
                 }
-                Spacer(modifier = Modifier.width(22.dp))
+                Spacer(modifier = Modifier.width(labelProperties.padding))
             }
             Canvas(modifier = Modifier
                 .fillMaxSize()
@@ -205,12 +219,11 @@ fun RowChart(
                 val barAreaWidth = size.width
 
                 drawGridLines(
-                    count = indicatorProperties.count,
-                    color = gridProperties.color,
-                    strokeWidth = gridProperties.thickness,
                     size = size.copy(height = barAreaHeight, width = barAreaWidth),
-                    justDividers = !gridProperties.enabled,
-                    style = gridProperties.style
+                    xAxisProperties = gridProperties.xAxisProperties,
+                    yAxisProperties = gridProperties.yAxisProperties,
+                    dividersProperties = dividerProperties,
+                    gridEnabled = gridProperties.enabled
                 )
                 data.forEachIndexed { dataIndex, bars ->
                     bars.values.forEachIndexed { barIndex, bar ->
@@ -250,18 +263,20 @@ fun RowChart(
                         )
                     }
                 }
-                indicators.reversed().forEachIndexed { index, indicator ->
-                    val measureResult =
-                        textMeasurer.measure(indicatorProperties.contentBuilder(indicator), style = indicatorProperties.textStyle)
-                    drawText(
-                        textLayoutResult = measureResult,
-                        topLeft = Offset(
-                            x = (barAreaWidth - measureResult.size.width).spaceBetween(
-                                itemCount = indicators.count(),
-                                index = index
-                            ), y = size.height - indicatorAreaHeight/2
+                if (indicatorProperties.enabled){
+                    indicators.reversed().forEachIndexed { index, indicator ->
+                        val measureResult =
+                            textMeasurer.measure(indicatorProperties.contentBuilder(indicator), style = indicatorProperties.textStyle)
+                        drawText(
+                            textLayoutResult = measureResult,
+                            topLeft = Offset(
+                                x = (barAreaWidth - measureResult.size.width).spaceBetween(
+                                    itemCount = indicators.count(),
+                                    index = index
+                                ), y = size.height - indicatorAreaHeight/2
+                            )
                         )
-                    )
+                    }
                 }
 
 

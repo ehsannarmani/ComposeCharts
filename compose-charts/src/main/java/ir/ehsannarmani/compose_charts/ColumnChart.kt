@@ -14,8 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -49,9 +48,12 @@ import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
@@ -64,21 +66,30 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
-    labelStyle: TextStyle = LocalTextStyle.current,
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = LocalTextStyle.current),
+    labelProperties: LabelProperties = LabelProperties(textStyle = TextStyle.Default, enabled = true),
+    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     animationMode: AnimationMode = AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupProperties: PopupProperties = PopupProperties(textStyle = LocalTextStyle.current.copy(color = Color.White, fontSize = 12.sp)),
+    popupProperties: PopupProperties = PopupProperties(textStyle = TextStyle.Default.copy(color = Color.White, fontSize = 12.sp)),
     barAlphaDecreaseOnPopup: Float = .4f,
+    maxValue:Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
 ) {
+    require(data.isNotEmpty()){
+        "Chart data is empty"
+    }
+    require(data.all { it.values.none { it.value < 0.0 } }){
+        "Chart data must be at least 0"
+    }
+    require(maxValue >= data.maxOf { it.values.maxOf { it.value } }){
+        "Chart data must be at most $maxValue (Specified Max Value)"
+    }
 
     val density = LocalDensity.current
-
-    val maxValue = data.maxOf { it.values.maxOf { it.value } }
 
     val everyDataWidth = with(density) {
         data.map { rowData ->
@@ -101,7 +112,10 @@ fun ColumnChart(
     }
 
     val indicators = remember {
-        maxValue.split(maxValue / indicatorProperties.count)
+        maxValue.split(
+            step = maxValue / indicatorProperties.count,
+            minValue = 0.0
+        )
     }
     val indicatorAreaWidth = remember {
         if (indicatorProperties.enabled){
@@ -208,13 +222,12 @@ fun ColumnChart(
                 }
 
                 drawGridLines(
-                    count = indicatorProperties.count,
-                    color = gridProperties.color,
-                    strokeWidth = gridProperties.thickness,
                     xPadding = indicatorAreaWidth,
                     size = size.copy(width = barsAreaWidth),
-                    justDividers = !gridProperties.enabled,
-                    style = gridProperties.style
+                    dividersProperties = dividerProperties,
+                    xAxisProperties = gridProperties.xAxisProperties,
+                    yAxisProperties = gridProperties.yAxisProperties,
+                    gridEnabled = gridProperties.enabled
                 )
 
                 data.forEachIndexed { dataIndex, columnChart ->
@@ -294,20 +307,21 @@ fun ColumnChart(
 
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = (indicatorAreaWidth / density.density).dp,
-                ), horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            data.forEach {
-                val measureResult = textMeasurer.measure(it.label, style = labelStyle)
-                Text(
-                    text = it.label,
-                    style = labelStyle,
-                )
+        if (labelProperties.enabled){
+            Spacer(modifier = Modifier.height(labelProperties.padding))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = (indicatorAreaWidth / density.density).dp,
+                    ), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                data.forEach {
+                    BasicText(
+                        text = it.label,
+                        style = labelProperties.textStyle,
+                    )
+                }
             }
         }
 

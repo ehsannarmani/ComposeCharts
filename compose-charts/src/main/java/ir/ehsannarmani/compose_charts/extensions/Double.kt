@@ -1,11 +1,21 @@
 package ir.ehsannarmani.compose_charts.extensions
 
-fun Double.split(step:Double):List<Double>{
+import kotlin.math.min
+
+fun Double.split(
+    step:Double,
+    minValue:Double
+):List<Double>{
     var current = this
     val result = mutableListOf<Double>()
-    while (current >= 0){
+    while (true){
         result.add(current)
-        current -= step
+        current = (current-step)
+        if (current <= minValue) {
+            result.add(current.coerceAtLeast(minValue))
+            break
+        }
     }
+    println("Min value: $minValue,step: $step, result: $result")
     return result
 }
