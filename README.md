@@ -238,7 +238,7 @@ LineChart(
 
 #### Example:
 
-```angular2html
+```kotlin
 LineChart(
     data = listOf(
          Line(
