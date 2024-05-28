@@ -157,6 +157,38 @@ ColumnChart(
 )
 ```
 
+> [!TIP]
+> You can set negative values for this chart and define max value and min value:
+
+<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/column_negative.gif?raw=true" width="250">
+
+#### Example:
+
+```kotlin
+ColumnChart(
+    data = listOf(
+        Bars(
+            label = "1", values = listOf(
+               Bars.Data(value = -40.0, color = Color.Blue)
+            )
+        ),
+        Bars(
+            label = "2", values = listOf(
+               Bars.Data(value = 50.0, color = Color.Blue)
+            )
+        ),
+        ...
+    ),
+    maxValue = 75.0,
+    minValue = -75.0
+    ...
+)
+```
+
+> [!NOTE]
+> By default, max value is the highest value of given data, min value is 0 when there is no value under the zero in given data, otherwise if there is value under zero, min value will be (-maxValue)
+
+
 <hr/>
 
 ### Row Chart:
@@ -199,6 +231,38 @@ RowChart(
     ),
 )
 ```
+
+> [!TIP]
+> You can set negative values for this chart and define max value and min value:
+
+<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/row_negative.gif?raw=true" width="250">
+
+#### Example:
+
+```kotlin
+RowChart(
+    data = listOf(
+        Bars(
+            label = "1", values = listOf(
+               Bars.Data(value = -40.0, color = Color.Blue)
+            )
+        ),
+        Bars(
+            label = "2", values = listOf(
+               Bars.Data(value = 50.0, color = Color.Blue)
+            )
+        ),
+        ...
+    ),
+    maxValue = 75.0,
+    minValue = -75.0
+    ...
+)
+```
+
+> [!NOTE]
+> By default, max value is the highest value of given data, min value is 0 when there is no value under the zero in given data, otherwise if there is value under zero, min value will be (-maxValue)
+
 
 <hr/>
 
