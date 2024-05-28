@@ -58,8 +58,10 @@ import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
+import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -67,27 +69,39 @@ fun RowChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
-    labelProperties: LabelProperties = LabelProperties(enabled = true, textStyle = TextStyle.Default),
+    labelProperties: LabelProperties = LabelProperties(
+        enabled = true,
+        textStyle = TextStyle.Default
+    ),
     indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
-    dividerProperties:DividerProperties = DividerProperties(),
+    dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     animationMode: AnimationMode = AnimationMode.Together(),
     animationSpec: AnimationSpec<Float> = snap(),
     animationDelay: Long = 200,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
-    popupProperties: PopupProperties = PopupProperties(textStyle = TextStyle.Default.copy(color = Color.White, fontSize = 12.sp)),
+    popupProperties: PopupProperties = PopupProperties(
+        textStyle = TextStyle.Default.copy(
+            color = Color.White,
+            fontSize = 12.sp
+        )
+    ),
     barAlphaDecreaseOnPopup: Float = .4f,
-    maxValue:Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
+    maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
+    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0
 ) {
-    require(data.isNotEmpty()){
+    require(data.isNotEmpty()) {
         "Chart data is empty"
     }
-    require(data.all { it.values.none { it.value < 0.0 } }){
-        "Chart data must be at least 0"
-    }
-    require(maxValue >= data.maxOf { it.values.maxOf { it.value } }){
+    require(maxValue >= data.maxOf { it.values.maxOf { it.value } }) {
         "Chart data must be at most $maxValue (Specified Max Value)"
+    }
+    require(minValue <= 0) {
+        "Min value in column chart must be 0 or lower."
+    }
+    require(minValue <= data.minOf { it.values.minOf { it.value } }) {
+        "Chart data must be at least $minValue (Specified Min Value)"
     }
 
     val scope = rememberCoroutineScope()
@@ -96,7 +110,9 @@ fun RowChart(
     val everyDataHeight = with(density) {
         data.map { rowData ->
             rowData.values.map {
-                (it.properties?.thickness ?: barProperties.thickness).toPx() + (it.properties?.spacing ?: barProperties.spacing).toPx()
+                (it.properties?.thickness
+                    ?: barProperties.thickness).toPx() + (it.properties?.spacing
+                    ?: barProperties.spacing).toPx()
             }.sum()
         }.average().toFloat()
     }
@@ -115,14 +131,14 @@ fun RowChart(
 
     val indicators = remember {
         maxValue.split(
-            step = maxValue / indicatorProperties.count,
-            minValue = 0.0
+            step = (maxValue - minValue) / indicatorProperties.count,
+            minValue = minValue
         )
     }
     val indicatorAreaHeight = remember {
-        if (indicatorProperties.enabled){
+        if (indicatorProperties.enabled) {
             indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.height }
-        }else{
+        } else {
             0
         }
     }
@@ -145,20 +161,22 @@ fun RowChart(
         }
     )
 
-    Column(modifier=modifier) {
-        if (labelHelperProperties.enabled){
+    Column(modifier = modifier) {
+        if (labelHelperProperties.enabled) {
             RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
             Spacer(modifier = Modifier.height(24.dp))
         }
-        Row(modifier=Modifier.fillMaxSize()) {
-            if (labelProperties.enabled){
-                Column(modifier= Modifier
-                    .fillMaxHeight()
-                    .padding(bottom = (indicatorAreaHeight/density.density).dp)
-                    .padding(vertical = (((everyDataHeight) / data.count()) / density.density).dp)
-                    , verticalArrangement = Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            if (labelProperties.enabled) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(bottom = (indicatorAreaHeight / density.density).dp)
+                        .padding(vertical = (((everyDataHeight) / data.count()) / density.density).dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
                     data.forEach {
-                        BasicText(text = it.label,style = labelProperties.textStyle)
+                        BasicText(text = it.label, style = labelProperties.textStyle)
                     }
                 }
                 Spacer(modifier = Modifier.width(labelProperties.padding))
@@ -169,18 +187,20 @@ fun RowChart(
                     if (!popupProperties.enabled) return@pointerInput
                     detectDragGestures { change, dragAmount ->
                         rectWithValue
-                            .lastOrNull { it.second.contains(change.position) }
-                            ?.let {
+                            .lastOrNull { (value,rect)->
+                                change.position.y in rect.top .. rect.bottom
+                            }
+                            ?.let { (value,rect)->
                                 selectedValue.value = SelectedBar(
-                                    value = it.first,
-                                    rect = it.second,
+                                    value = value,
+                                    rect = rect,
                                     offset = Offset(
-                                        x = it.second.right,
-                                        y = it.second.top
+                                        x = if (value > 0) rect.right else rect.left,
+                                        y = rect.top
                                     )
                                 )
                                 scope.launch {
-                                    if (popupAnimation.value != 1f) {
+                                    if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
                                         popupAnimation.animateTo(
                                             1f,
                                             animationSpec = popupProperties.animationSpec
@@ -195,13 +215,13 @@ fun RowChart(
                         val position = Offset(event.x, event.y)
                         rectWithValue
                             .lastOrNull { it.second.contains(position) }
-                            ?.let {
+                            ?.let {(value,rect)->
                                 selectedValue.value = SelectedBar(
-                                    value = it.first,
-                                    rect = it.second,
+                                    value = value,
+                                    rect = rect,
                                     offset = Offset(
-                                        x = it.second.right,
-                                        y = it.second.top
+                                        x = if (value > 0) rect.right else rect.left,
+                                        y = rect.top
                                     )
                                 )
                                 scope.launch {
@@ -218,6 +238,13 @@ fun RowChart(
                 val barAreaHeight = size.height - indicatorAreaHeight
                 val barAreaWidth = size.width
 
+                val zeroX = size.width - calculateOffset(
+                    maxValue = maxValue.toFloat(),
+                    minValue = minValue.toFloat(),
+                    total = size.width,
+                    value = 0.0f
+                )
+
                 drawGridLines(
                     size = size.copy(height = barAreaHeight, width = barAreaWidth),
                     xAxisProperties = gridProperties.xAxisProperties,
@@ -230,25 +257,30 @@ fun RowChart(
 
                         val stroke = (bar.properties?.thickness ?: barProperties.thickness).toPx()
                         val spacing = (bar.properties?.spacing ?: barProperties.spacing).toPx()
-                        val width = ((barAreaWidth * bar.value) / maxValue) * bar.animator.value
+                        var width = ((barAreaWidth * bar.value) / (maxValue-minValue)) * bar.animator.value
 
                         val everyBarHeight = (stroke + spacing)
 
+                        val barY = (everyBarHeight * barIndex) + (barAreaHeight - everyDataHeight).spaceBetween(
+                            itemCount = data.count(),
+                            index = dataIndex
+                        )
+                        val barX = if (bar.value > 0) size.width-zeroX else (size.width-zeroX-width.absoluteValue.toFloat()).coerceAtLeast(0f)
                         val rect = Rect(
-                            offset = Offset(
-                                x = 0f,
-                                y = (everyBarHeight * barIndex) + (barAreaHeight - everyDataHeight).spaceBetween(
-                                    itemCount = data.count(),
-                                    index = dataIndex
-                                )
-                            ),
-                            size = Size(height = stroke, width = width.toFloat())
+                            offset = Offset(x = barX, y = barY),
+                            size = Size(height = stroke, width = width.absoluteValue.toFloat())
                         )
 
                         val path = Path()
 
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(bar.value to rect)
-                        path.addRoundRect(rect = rect, radius = (bar.properties?.cornerRadius ?: barProperties.cornerRadius))
+
+                        var radius = (bar.properties?.cornerRadius ?: barProperties.cornerRadius)
+                        if (bar.value < 0){
+                            radius = radius.reverse(horizontal = true)
+                        }
+
+                        path.addRoundRect(rect = rect, radius = radius)
 
                         val alpha = if (rect == selectedValue.value?.rect) {
                             1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
@@ -259,21 +291,25 @@ fun RowChart(
                             path = path,
                             brush = bar.color,
                             alpha = alpha,
-                            style = (bar.properties?.style ?: barProperties.style).getStyle(density.density)
+                            style = (bar.properties?.style
+                                ?: barProperties.style).getStyle(density.density)
                         )
                     }
                 }
-                if (indicatorProperties.enabled){
+                if (indicatorProperties.enabled) {
                     indicators.reversed().forEachIndexed { index, indicator ->
                         val measureResult =
-                            textMeasurer.measure(indicatorProperties.contentBuilder(indicator), style = indicatorProperties.textStyle)
+                            textMeasurer.measure(
+                                indicatorProperties.contentBuilder(indicator),
+                                style = indicatorProperties.textStyle
+                            )
                         drawText(
                             textLayoutResult = measureResult,
                             topLeft = Offset(
                                 x = (barAreaWidth - measureResult.size.width).spaceBetween(
                                     itemCount = indicators.count(),
                                     index = index
-                                ), y = size.height - indicatorAreaHeight/2
+                                ), y = size.height - indicatorAreaHeight / 2
                             )
                         )
                     }
@@ -283,29 +319,49 @@ fun RowChart(
                 if (selectedValue.value != null) {
                     val measure = textMeasurer.measure(
                         popupProperties.contentBuilder(selectedValue.value!!.value),
-                        style = popupProperties.textStyle.copy(color = popupProperties.textStyle.color.copy(alpha = popupAnimation.value * 1f))
+                        style = popupProperties.textStyle.copy(
+                            color = popupProperties.textStyle.color.copy(
+                                alpha = popupAnimation.value * 1f
+                            )
+                        )
                     )
-                    val rectSize = measure.size.toSize()
-                    val rectPosition = selectedValue.value!!.offset.copy(
-                        y = selectedValue.value!!.offset.y - (rectSize.height/1.5f),
-                        x = selectedValue.value!!.offset.x - rectSize.width
+                    val textSize = measure.size.toSize()
+                    val popupSize = Size(
+                        width = (textSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)),
+                        height = textSize.height + popupProperties.contentVerticalPadding.toPx() * 2
                     )
-                    val cornerRadius =
-                        CornerRadius(popupProperties.cornerRadius.toPx(), popupProperties.cornerRadius.toPx())
+                    val value = selectedValue.value!!.value
+                    val barRect = selectedValue.value!!.rect
+                    val barHeight = barRect.bottom-barRect.top
+                    val barWidth = barRect.right-barRect.left
+                    var popupPosition = selectedValue.value!!.offset.copy(
+                        y = selectedValue.value!!.offset.y-popupSize.height+(barHeight/2),
+                        x = selectedValue.value!!.offset.x - (barWidth/10)
+                    )
+                    if (value < 0){
+                        popupPosition = popupPosition.copy(
+                            x = selectedValue.value!!.offset.x - popupSize.width + barWidth/10
+                        )
+                    }
+                    val outOfCanvas = popupPosition.x+popupSize.width > size.width
+                    if (outOfCanvas){
+                        popupPosition = popupPosition.copy(
+                            x = (selectedValue.value!!.offset.x - popupSize.width)-20f
+                        )
+                    }
+                    val cornerRadius = CornerRadius(popupProperties.cornerRadius.toPx(), popupProperties.cornerRadius.toPx())
                     drawPath(
                         path = Path().apply {
                             addRoundRect(
                                 RoundRect(
                                     rect = Rect(
-                                        offset = rectPosition,
-                                        size = rectSize.copy(
-                                            width = (rectSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)) * popupAnimation.value,
-                                            height = rectSize.height + popupProperties.contentVerticalPadding.toPx() * 2
-                                        ),
+                                        offset = popupPosition,
+                                        size = popupSize.copy(width = popupSize.width*popupAnimation.value,),
                                     ),
                                     topRight = cornerRadius,
                                     topLeft = cornerRadius,
-                                    bottomRight = cornerRadius,
+                                    bottomRight = if (outOfCanvas || value < 0) CornerRadius.Zero else cornerRadius,
+                                    bottomLeft = if (!outOfCanvas && value > 0) CornerRadius.Zero else cornerRadius,
                                 )
                             )
                         },
@@ -313,9 +369,9 @@ fun RowChart(
                     )
                     drawText(
                         textLayoutResult = measure,
-                        topLeft = rectPosition.copy(
-                            x = rectPosition.x + popupProperties.contentHorizontalPadding.toPx(),
-                            y = rectPosition.y + popupProperties.contentVerticalPadding.toPx()
+                        topLeft = popupPosition.copy(
+                            x = popupPosition.x + popupProperties.contentHorizontalPadding.toPx(),
+                            y = popupPosition.y + popupProperties.contentVerticalPadding.toPx()
                         ),
                     )
                 }

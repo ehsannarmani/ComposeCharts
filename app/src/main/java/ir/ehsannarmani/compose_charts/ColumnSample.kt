@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -49,7 +51,7 @@ fun RowScope.ColumnSample() {
                 values = listOf(
                     Bars.Data(
                         label = "Linux",
-                        value = 50.0,
+                        value = -50.0,
                         color = Brush.verticalGradient(
                             listOf(
                                 Color(0xFFE65100),
@@ -167,7 +169,6 @@ fun RowScope.ColumnSample() {
                     containerColor = Color(0xff414141),
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
-                maxValue = 120.0
             )
         }
     }
@@ -372,15 +373,17 @@ fun RowScope.ColumnSample2() {
 @Composable
 fun RowScope.ColumnSample3() {
 
-    val barColor = SolidColor(Color(0xFF42A5F5))
+    val positiveBarColor = SolidColor(Color(0xFF42A5F5))
+    val negativeBarColor = SolidColor(Color(0x9742A5F5))
     val data = remember {
-        MutableList(14){
+        MutableList(20){
+            val value = (-50..40).random().toDouble()
             Bars(
                 label = (it+1).toString(),
                 values = listOf(
                     Bars.Data(
-                        value = (10..80).random().toDouble(),
-                        color = barColor,
+                        value = value,
+                        color = if (value < 0) negativeBarColor else positiveBarColor ,
                     ),
                 )
             )
@@ -410,7 +413,7 @@ fun RowScope.ColumnSample3() {
                 gridProperties = columnGridProperties,
                 labelProperties = LabelProperties(
                     enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
+                    textStyle = TextStyle(fontSize = 11.sp, fontFamily = ubuntu, color = Color.White)
                 ),
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -429,7 +432,9 @@ fun RowScope.ColumnSample3() {
                     containerColor = Color(0xff414141),
                 ),
                 animationDelay = 300,
-                labelHelperProperties = LabelHelperProperties(enabled = false, textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White))
+                labelHelperProperties = LabelHelperProperties(enabled = false, textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                minValue = -75.0,
+                maxValue = 75.0
             )
         }
     }

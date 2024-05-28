@@ -65,6 +65,8 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
+import ir.ehsannarmani.compose_charts.utils.calculateValue
+import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -291,10 +293,11 @@ fun LineChart(
                 val chartAreaHeight = size.height - labelAreaHeight
 
                 val drawZeroLine = {
-                    val zeroY = chartAreaHeight - (0.0f).heightFor(
+                    val zeroY = chartAreaHeight - calculateOffset(
                         minValue = minValue.toFloat(),
                         maxValue = maxValue.toFloat(),
-                        totalHeight = chartAreaHeight
+                        total = chartAreaHeight,
+                        value = 0.0f
                     )
                     drawLine(
                         brush = zeroLineProperties.color,
@@ -411,10 +414,11 @@ fun LineChart(
                     drawZeroLine()
                 }
                 popupPositions.forEachIndexed { index, offset ->
-                    val value = (maxValue + minValue) - offset.y.valueFor(
+                    val value = (maxValue + minValue) - calculateValue(
                         minValue = minValue,
                         maxValue = maxValue,
-                        totalHeight = chartAreaHeight
+                        total = chartAreaHeight,
+                        offset = offset.y
                     )
                     val measureResult = textMeasurer.measure(
                         popupProperties.contentBuilder(value),
@@ -578,10 +582,11 @@ fun DrawScope.getLinePath(
     val path = Path()
 
     val calculateHeight = { value: Float ->
-        value.heightFor(
+        calculateOffset(
             maxValue = maxValue,
             minValue = minValue,
-            totalHeight = _size.height
+            total = _size.height,
+            value = value
         )
     }
 
@@ -636,30 +641,5 @@ fun DrawScope.drawGradient(
             )
         })
     }
-}
-
-
-/**
- * This function calculates height from total height for a specific value
- */
-private fun Float.heightFor(
-    maxValue: Float,
-    minValue: Float,
-    totalHeight: Float
-): Float {
-    val range = maxValue - minValue
-    val percentage = (this - minValue) / range
-    val height = totalHeight * percentage
-    return height
-}
-
-/**
- * This function is reverse of Float.heightFor, calculates value from total value for a specific height
- */
-private fun Float.valueFor(minValue: Double, maxValue: Double, totalHeight: Float): Double {
-    val percentage = this / totalHeight
-    val range = maxValue - minValue
-    val value = minValue + percentage * range
-    return value
 }
 

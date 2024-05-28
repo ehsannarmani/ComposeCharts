@@ -382,15 +382,17 @@ fun RowScope.RowSample2() {
 }
 @Composable
 fun RowScope.RowSample3() {
-    val barColor = SolidColor(Color(0xFF42A5F5))
+    val positiveBarColor = SolidColor(Color(0xFF42A5F5))
+    val negativeBarColor = SolidColor(Color(0x9742A5F5))
     val data = remember {
-        MutableList(10){
+        MutableList(15){
+            val value = (-50..40).random().toDouble()
             Bars(
                 label = (it+1).toString(),
                 values = listOf(
                     Bars.Data(
-                        value = (10..80).random().toDouble(),
-                        color = barColor,
+                        value = value,
+                        color = if (value < 0) negativeBarColor else positiveBarColor ,
                     ),
                 )
             )
@@ -416,9 +418,8 @@ fun RowScope.RowSample3() {
                     thickness = 10.dp,
                 ),
                 indicatorProperties = IndicatorProperties(
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
+                    textStyle = TextStyle(fontSize = 11.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4,
-
                 ),
                 gridProperties = rowGridProperties,
                 labelProperties = LabelProperties(
@@ -447,6 +448,8 @@ fun RowScope.RowSample3() {
                     },
                     containerColor = Color(0xff414141),
                 ),
+                minValue = -75.0,
+                maxValue = 75.0
             )
         }
     }

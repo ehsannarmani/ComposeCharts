@@ -29,6 +29,31 @@ data class Bars(
                 val bottomLeft: Dp = 0.dp,
                 val bottomRight: Dp = 0.dp
             ) : Radius()
+
+            fun reverse(horizontal:Boolean = false):Radius{
+                return when(this){
+                    is Circular, is None->{
+                        this
+                    }
+                    is Rectangle->{
+                        if (horizontal){
+                            copy(
+                                topLeft = topRight,
+                                topRight = topLeft,
+                                bottomLeft = bottomRight,
+                                bottomRight = bottomLeft
+                            )
+                        }else{
+                            copy(
+                                topLeft = bottomLeft,
+                                topRight = bottomRight,
+                                bottomLeft = topLeft,
+                                bottomRight = topRight
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

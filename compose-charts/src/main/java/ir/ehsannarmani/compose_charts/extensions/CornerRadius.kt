@@ -9,7 +9,10 @@ import ir.ehsannarmani.compose_charts.models.Bars
 
 
 context(DrawScope)
-fun Path.addRoundRect(rect: Rect,radius: Bars.Data.Radius){
+fun Path.addRoundRect(
+    rect: Rect,
+    radius: Bars.Data.Radius
+){
     when (radius) {
         is Bars.Data.Radius.None -> {
             addRect(rect)
