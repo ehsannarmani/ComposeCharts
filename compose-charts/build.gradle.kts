@@ -12,7 +12,7 @@ afterEvaluate {
                 from(components.findByName("release"))
                 groupId = "com.github.ehsannarmani"
                 artifactId = "compose-charts"
-                version = "0.0.3"
+                version = "0.0.4"
             }
         }
     }
