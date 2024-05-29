@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
@@ -99,7 +100,7 @@ fun ColumnChart(
     require(minValue <= 0) {
         "Min value in column chart must be 0 or lower."
     }
-    require(minValue <= data.minOf { it.values.minOf { it.value } }){
+    require(minValue <= data.minOf { it.values.minOf { it.value } }) {
         "Chart data must be at least $minValue (Specified Min Value)"
     }
 
@@ -175,14 +176,17 @@ fun ColumnChart(
                     if (!popupProperties.enabled) return@pointerInput
                     detectDragGestures { change, dragAmount ->
                         rectWithValue
-                            .lastOrNull { (value,rect)->
-                                change.position.x in rect.left .. rect.right
+                            .lastOrNull { (value, rect) ->
+                                change.position.x in rect.left..rect.right
                             }
-                            ?.let {(value,rect)->
+                            ?.let { (value, rect) ->
                                 selectedValue.value = SelectedBar(
                                     value = value,
                                     rect = rect,
-                                    offset = Offset(rect.left, if (value < 0) rect.bottom else rect.top)
+                                    offset = Offset(
+                                        rect.left,
+                                        if (value < 0) rect.bottom else rect.top
+                                    )
                                 )
                                 scope.launch {
                                     if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
@@ -202,11 +206,14 @@ fun ColumnChart(
                             .lastOrNull {
                                 it.second.contains(position)
                             }
-                            ?.let {(value,rect)->
+                            ?.let { (value, rect) ->
                                 selectedValue.value = SelectedBar(
                                     value = value,
                                     rect = rect,
-                                    offset = Offset(rect.left, if (value < 0) rect.bottom else rect.top)
+                                    offset = Offset(
+                                        rect.left,
+                                        if (value < 0) rect.bottom else rect.top
+                                    )
                                 )
                                 scope.launch {
                                     popupAnimation.snapTo(0f)
@@ -268,10 +275,11 @@ fun ColumnChart(
                         val everyBarWidth = (stroke + spacing)
 
 
-                        val barX = (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
-                            itemCount = data.count(),
-                            index = dataIndex
-                        ) + indicatorAreaWidth
+                        val barX =
+                            (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
+                                itemCount = data.count(),
+                                index = dataIndex
+                            ) + indicatorAreaWidth
                         val rect = Rect(
                             offset = Offset(
                                 x = barX,
@@ -283,7 +291,7 @@ fun ColumnChart(
                         val path = Path()
 
                         var radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius)
-                        if (col.value < 0){
+                        if (col.value < 0) {
                             radius = radius.reverse()
                         }
 
@@ -302,70 +310,12 @@ fun ColumnChart(
                         )
                     }
                 }
-                if (selectedValue.value != null) {
-                    val measure = textMeasurer.measure(
-                        popupProperties.contentBuilder(selectedValue.value!!.value),
-                        style = popupProperties.textStyle.copy(
-                            color = popupProperties.textStyle.color.copy(
-                                alpha = popupAnimation.value * 1f
-                            )
-                        )
-                    )
-
-                    val textSize = measure.size.toSize()
-                    val popupSize = Size(
-                        width = (textSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)) ,
-                        height = textSize.height + popupProperties.contentVerticalPadding.toPx() * 2
-                    )
-                    val value = selectedValue.value!!.value
-                    val barRect = selectedValue.value!!.rect
-                    val barWidth = barRect.right-barRect.left
-                    val barHeight = barRect.bottom-barRect.top
-                    var popupPosition = selectedValue.value!!.offset.copy(
-                        y = selectedValue.value!!.offset.y - popupSize.height + barHeight/10,
-                        x = selectedValue.value!!.offset.x + barWidth/ 2
-                    )
-                    if (value < 0){
-                        popupPosition = popupPosition.copy(
-                            y= selectedValue.value!!.offset.y - barHeight/10
-                        )
-                    }
-                    val outOfCanvas = popupPosition.x+popupSize.width > size.width
-                    if (outOfCanvas){
-                       popupPosition = popupPosition.copy(
-                           x = (selectedValue.value!!.offset.x - popupSize.width)+ barWidth/ 2
-                       )
-                    }
-                    val cornerRadius =
-                        CornerRadius(
-                            popupProperties.cornerRadius.toPx(),
-                            popupProperties.cornerRadius.toPx()
-                        )
-                    drawPath(
-                        path = Path().apply {
-                            addRoundRect(
-                                RoundRect(
-                                    rect = Rect(
-                                        offset = popupPosition,
-                                        size = popupSize.copy(
-                                            width = popupSize.width*popupAnimation.value
-                                        ),
-                                    ),
-                                    topRight = if (selectedValue.value!!.value < 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
-                                    topLeft = if (selectedValue.value!!.value < 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius ,
-                                    bottomRight = if (selectedValue.value!!.value > 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
-                                    bottomLeft = if (selectedValue.value!!.value > 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius
-                                )
-                            )
-                        },
-                        color = popupProperties.containerColor,
-                    )
-                    drawText(
-                        textLayoutResult = measure,
-                        topLeft = popupPosition.copy(
-                            x = popupPosition.x + popupProperties.contentHorizontalPadding.toPx(),
-                            y = popupPosition.y + popupProperties.contentVerticalPadding.toPx()
-                        ),
+                selectedValue.value?.let { selectedValue ->
+                    drawPopup(
+                        selectedBar = selectedValue,
+                        properties = popupProperties,
+                        textMeasurer = textMeasurer,
+                        progress = popupAnimation.value
                     )
                 }
 
@@ -390,4 +340,76 @@ fun ColumnChart(
         }
 
     }
+}
+
+private fun DrawScope.drawPopup(
+    selectedBar: SelectedBar,
+    properties: PopupProperties,
+    textMeasurer: TextMeasurer,
+    progress: Float,
+) {
+    val measure = textMeasurer.measure(
+        properties.contentBuilder(selectedBar.value),
+        style = properties.textStyle.copy(
+            color = properties.textStyle.color.copy(
+                alpha = 1f * progress
+            )
+        )
+    )
+
+    val textSize = measure.size.toSize()
+    val popupSize = Size(
+        width = (textSize.width + (properties.contentHorizontalPadding.toPx() * 2)),
+        height = textSize.height + properties.contentVerticalPadding.toPx() * 2
+    )
+    val value = selectedBar.value
+    val barRect = selectedBar.rect
+    val barWidth = barRect.right - barRect.left
+    val barHeight = barRect.bottom - barRect.top
+    var popupPosition = selectedBar.offset.copy(
+        y = selectedBar.offset.y - popupSize.height + barHeight / 10,
+        x = selectedBar.offset.x + barWidth / 2
+    )
+    if (value < 0) {
+        popupPosition = popupPosition.copy(
+            y = selectedBar.offset.y - barHeight / 10
+        )
+    }
+    val outOfCanvas = popupPosition.x + popupSize.width > size.width
+    if (outOfCanvas) {
+        popupPosition = popupPosition.copy(
+            x = (selectedBar.offset.x - popupSize.width) + barWidth / 2
+        )
+    }
+    val cornerRadius =
+        CornerRadius(
+            properties.cornerRadius.toPx(),
+            properties.cornerRadius.toPx()
+        )
+    drawPath(
+        path = Path().apply {
+            addRoundRect(
+                RoundRect(
+                    rect = Rect(
+                        offset = popupPosition,
+                        size = popupSize.copy(
+                            width = popupSize.width * progress
+                        ),
+                    ),
+                    topRight = if (selectedBar.value < 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    topLeft = if (selectedBar.value < 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    bottomRight = if (selectedBar.value > 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    bottomLeft = if (selectedBar.value > 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius
+                )
+            )
+        },
+        color = properties.containerColor,
+    )
+    drawText(
+        textLayoutResult = measure,
+        topLeft = popupPosition.copy(
+            x = popupPosition.x + properties.contentHorizontalPadding.toPx(),
+            y = popupPosition.y + properties.contentVerticalPadding.toPx()
+        ),
+    )
 }

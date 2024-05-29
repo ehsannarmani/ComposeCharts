@@ -31,6 +31,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalDensity
@@ -54,7 +55,6 @@ import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.LineProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
@@ -121,7 +121,7 @@ fun RowChart(
         mutableStateListOf<Pair<Double, Rect>>()
     }
 
-    val selectedValue = remember {
+    val selectedBar = remember {
         mutableStateOf<SelectedBar?>(null)
     }
 
@@ -143,11 +143,11 @@ fun RowChart(
         }
     }
 
-    LaunchedEffect(selectedValue.value) {
-        if (selectedValue.value != null) {
+    LaunchedEffect(selectedBar.value) {
+        if (selectedBar.value != null) {
             delay(popupProperties.duration)
             popupAnimation.animateTo(0f, animationSpec = popupProperties.animationSpec)
-            selectedValue.value = null
+            selectedBar.value = null
         }
     }
 
@@ -187,11 +187,11 @@ fun RowChart(
                     if (!popupProperties.enabled) return@pointerInput
                     detectDragGestures { change, dragAmount ->
                         rectWithValue
-                            .lastOrNull { (value,rect)->
-                                change.position.y in rect.top .. rect.bottom
+                            .lastOrNull { (value, rect) ->
+                                change.position.y in rect.top..rect.bottom
                             }
-                            ?.let { (value,rect)->
-                                selectedValue.value = SelectedBar(
+                            ?.let { (value, rect) ->
+                                selectedBar.value = SelectedBar(
                                     value = value,
                                     rect = rect,
                                     offset = Offset(
@@ -215,8 +215,8 @@ fun RowChart(
                         val position = Offset(event.x, event.y)
                         rectWithValue
                             .lastOrNull { it.second.contains(position) }
-                            ?.let {(value,rect)->
-                                selectedValue.value = SelectedBar(
+                            ?.let { (value, rect) ->
+                                selectedBar.value = SelectedBar(
                                     value = value,
                                     rect = rect,
                                     offset = Offset(
@@ -257,15 +257,20 @@ fun RowChart(
 
                         val stroke = (bar.properties?.thickness ?: barProperties.thickness).toPx()
                         val spacing = (bar.properties?.spacing ?: barProperties.spacing).toPx()
-                        var width = ((barAreaWidth * bar.value) / (maxValue-minValue)) * bar.animator.value
+                        val width =
+                            ((barAreaWidth * bar.value) / (maxValue - minValue)) * bar.animator.value
 
                         val everyBarHeight = (stroke + spacing)
 
-                        val barY = (everyBarHeight * barIndex) + (barAreaHeight - everyDataHeight).spaceBetween(
-                            itemCount = data.count(),
-                            index = dataIndex
-                        )
-                        val barX = if (bar.value > 0) size.width-zeroX else (size.width-zeroX-width.absoluteValue.toFloat()).coerceAtLeast(0f)
+                        val barY =
+                            (everyBarHeight * barIndex) + (barAreaHeight - everyDataHeight).spaceBetween(
+                                itemCount = data.count(),
+                                index = dataIndex
+                            )
+                        val barX =
+                            if (bar.value > 0) size.width - zeroX else (size.width - zeroX - width.absoluteValue.toFloat()).coerceAtLeast(
+                                0f
+                            )
                         val rect = Rect(
                             offset = Offset(x = barX, y = barY),
                             size = Size(height = stroke, width = width.absoluteValue.toFloat())
@@ -276,13 +281,13 @@ fun RowChart(
                         if (rectWithValue.none { it.second == rect }) rectWithValue.add(bar.value to rect)
 
                         var radius = (bar.properties?.cornerRadius ?: barProperties.cornerRadius)
-                        if (bar.value < 0){
+                        if (bar.value < 0) {
                             radius = radius.reverse(horizontal = true)
                         }
 
                         path.addRoundRect(rect = rect, radius = radius)
 
-                        val alpha = if (rect == selectedValue.value?.rect) {
+                        val alpha = if (rect == selectedBar.value?.rect) {
                             1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
                         } else {
                             1f
@@ -315,68 +320,81 @@ fun RowChart(
                     }
                 }
 
-
-                if (selectedValue.value != null) {
-                    val measure = textMeasurer.measure(
-                        popupProperties.contentBuilder(selectedValue.value!!.value),
-                        style = popupProperties.textStyle.copy(
-                            color = popupProperties.textStyle.color.copy(
-                                alpha = popupAnimation.value * 1f
-                            )
-                        )
-                    )
-                    val textSize = measure.size.toSize()
-                    val popupSize = Size(
-                        width = (textSize.width + (popupProperties.contentHorizontalPadding.toPx() * 2)),
-                        height = textSize.height + popupProperties.contentVerticalPadding.toPx() * 2
-                    )
-                    val value = selectedValue.value!!.value
-                    val barRect = selectedValue.value!!.rect
-                    val barHeight = barRect.bottom-barRect.top
-                    val barWidth = barRect.right-barRect.left
-                    var popupPosition = selectedValue.value!!.offset.copy(
-                        y = selectedValue.value!!.offset.y-popupSize.height+(barHeight/2),
-                        x = selectedValue.value!!.offset.x - (barWidth/10)
-                    )
-                    if (value < 0){
-                        popupPosition = popupPosition.copy(
-                            x = selectedValue.value!!.offset.x - popupSize.width + barWidth/10
-                        )
-                    }
-                    val outOfCanvas = popupPosition.x+popupSize.width > size.width
-                    if (outOfCanvas){
-                        popupPosition = popupPosition.copy(
-                            x = (selectedValue.value!!.offset.x - popupSize.width)-20f
-                        )
-                    }
-                    val cornerRadius = CornerRadius(popupProperties.cornerRadius.toPx(), popupProperties.cornerRadius.toPx())
-                    drawPath(
-                        path = Path().apply {
-                            addRoundRect(
-                                RoundRect(
-                                    rect = Rect(
-                                        offset = popupPosition,
-                                        size = popupSize.copy(width = popupSize.width*popupAnimation.value,),
-                                    ),
-                                    topRight = cornerRadius,
-                                    topLeft = cornerRadius,
-                                    bottomRight = if (outOfCanvas || value < 0) CornerRadius.Zero else cornerRadius,
-                                    bottomLeft = if (!outOfCanvas && value > 0) CornerRadius.Zero else cornerRadius,
-                                )
-                            )
-                        },
-                        color = popupProperties.containerColor
-                    )
-                    drawText(
-                        textLayoutResult = measure,
-                        topLeft = popupPosition.copy(
-                            x = popupPosition.x + popupProperties.contentHorizontalPadding.toPx(),
-                            y = popupPosition.y + popupProperties.contentVerticalPadding.toPx()
-                        ),
+                selectedBar.value?.let { selectedValue ->
+                    drawPopUp(
+                        selectedBar = selectedValue,
+                        properties = popupProperties,
+                        textMeasurer = textMeasurer,
+                        progress = popupAnimation.value
                     )
                 }
             }
         }
     }
+}
+
+private fun DrawScope.drawPopUp(
+    selectedBar: SelectedBar,
+    properties: PopupProperties,
+    textMeasurer: TextMeasurer,
+    progress: Float,
+) {
+    val measure = textMeasurer.measure(
+        properties.contentBuilder(selectedBar.value),
+        style = properties.textStyle.copy(
+            color = properties.textStyle.color.copy(
+                alpha = 1f * progress
+            )
+        )
+    )
+    val textSize = measure.size.toSize()
+    val popupSize = Size(
+        width = (textSize.width + (properties.contentHorizontalPadding.toPx() * 2)),
+        height = textSize.height + properties.contentVerticalPadding.toPx() * 2
+    )
+    val value = selectedBar.value
+    val barRect = selectedBar.rect
+    val barHeight = barRect.bottom - barRect.top
+    val barWidth = barRect.right - barRect.left
+    var popupPosition = selectedBar.offset.copy(
+        y = selectedBar.offset.y - popupSize.height + (barHeight / 2),
+        x = selectedBar.offset.x - (barWidth / 10)
+    )
+    if (value < 0) {
+        popupPosition = popupPosition.copy(
+            x = selectedBar.offset.x - popupSize.width + barWidth / 10
+        )
+    }
+    val outOfCanvas = popupPosition.x + popupSize.width > size.width
+    if (outOfCanvas) {
+        popupPosition = popupPosition.copy(
+            x = (selectedBar.offset.x - popupSize.width) - 20f
+        )
+    }
+    val cornerRadius = CornerRadius(properties.cornerRadius.toPx(), properties.cornerRadius.toPx())
+    drawPath(
+        path = Path().apply {
+            addRoundRect(
+                RoundRect(
+                    rect = Rect(
+                        offset = popupPosition,
+                        size = popupSize.copy(width = popupSize.width * progress),
+                    ),
+                    topRight = cornerRadius,
+                    topLeft = cornerRadius,
+                    bottomRight = if (outOfCanvas || value < 0) CornerRadius.Zero else cornerRadius,
+                    bottomLeft = if (!outOfCanvas && value > 0) CornerRadius.Zero else cornerRadius,
+                )
+            )
+        },
+        color = properties.containerColor
+    )
+    drawText(
+        textLayoutResult = measure,
+        topLeft = popupPosition.copy(
+            x = popupPosition.x + properties.contentHorizontalPadding.toPx(),
+            y = popupPosition.y + properties.contentVerticalPadding.toPx()
+        ),
+    )
 }
 
