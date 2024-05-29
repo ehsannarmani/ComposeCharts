@@ -107,10 +107,10 @@ fun LineChart(
     require(data.isNotEmpty()) {
         "Chart data is empty"
     }
-    require(minValue <= data.minOf { it.values.minOf { it } }){
+    require(minValue <= data.minOf { it.values.minOf { it } }) {
         "Chart data must be at least $minValue (Specified Min Value)"
     }
-    require(maxValue >= data.maxOf { it.values.maxOf { it } }){
+    require(maxValue >= data.maxOf { it.values.maxOf { it } }) {
         "Chart data must be at most $maxValue (Specified Max Value)"
     }
 
@@ -138,12 +138,16 @@ fun LineChart(
     }
     val labelAreaHeight = remember {
         if (labelProperties.enabled) {
-            labelProperties.labels.maxOf {
-                textMeasurer.measure(
-                    it,
-                    style = labelProperties.textStyle
-                ).size.height
-            } + (labelProperties.padding.value * density.density).toInt()
+            if (labelProperties.labels.isNotEmpty()) {
+                labelProperties.labels.maxOf {
+                    textMeasurer.measure(
+                        it,
+                        style = labelProperties.textStyle
+                    ).size.height
+                } + (labelProperties.padding.value * density.density).toInt()
+            } else {
+                error("Labels enabled, but there is no label provided to show, disable labels or fill 'labels' parameter in LabelProperties")
+            }
         } else {
             0
         }
@@ -592,22 +596,18 @@ fun DrawScope.getLinePath(
 
     path.moveTo(0f, _size.height - calculateHeight(dataPoints[0]))
 
-    if (rounded) {
-        for (i in 0 until dataPoints.size - 1) {
-            val x1 = (i * (_size.width / (dataPoints.size - 1)))
-            val y1 = _size.height - calculateHeight(dataPoints[i])
-            val x2 = ((i + 1) * (_size.width / (dataPoints.size - 1)))
-            val y2 = _size.height - calculateHeight(dataPoints[i + 1])
+    for (i in 0 until dataPoints.size - 1) {
+        val x1 = (i * (_size.width / (dataPoints.size - 1)))
+        val y1 = _size.height - calculateHeight(dataPoints[i])
+        val x2 = ((i + 1) * (_size.width / (dataPoints.size - 1)))
+        val y2 = _size.height - calculateHeight(dataPoints[i + 1])
 
+        if (rounded) {
             val cx = (x1 + x2) / 2
             path.cubicTo(cx, y1, cx, y2, x2, y2)
-        }
-    } else {
-        dataPoints.forEachIndexed { index, value ->
-            path.lineTo(
-                _size.width.spaceBetween(itemCount = dataPoints.count(), index = index),
-                y = _size.height - calculateHeight(value)
-            )
+        } else {
+            path.cubicTo(x1, y1, x1, y1, (x1 + x2) / 2, (y1 + y2) / 2)
+            path.cubicTo((x1 + x2) / 2, (y1 + y2) / 2, x2, y2, x2, y2)
         }
     }
     return path
