@@ -270,20 +270,20 @@ fun LineChart(
                             popupPositions.clear()
                             pathsOffsets
                                 .map {
-                                    it.offset.find {
-                                        it.second.x in change.position.x - 5..change.position.x + 5
+                                    it.offset.firstOrNull {(length,offset)->
+                                        offset.x >= change.position.x
+                                    } ?: it.offset.lastOrNull {(length,offset)->
+                                        offset.x <= change.position.x
                                     }
                                 }
                                 .also {
-                                    if (rectOffsets.count() < it.count()) {
-                                        repeat(it.count()) {
+                                    val popups = it.filterNotNull()
+                                    if (rectOffsets.count() < popups.count()) {
+                                        repeat(popups.count()) {
                                             rectOffsets.add(Animatable(0f) to Animatable(0f))
                                         }
                                     }
-                                    popupPositions.addAll(
-                                        it
-                                            .filter { it?.second != null }
-                                            .map { it!!.second })
+                                    popupPositions.addAll(popups.map { it.second })
                                 }
 
                             scope.launch {
