@@ -5,6 +5,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,6 +70,8 @@ fun RowChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
+    onBarClick:((Bars.Data)->Unit)? = null,
+    onBarLongClick:((Bars.Data)->Unit)? = null,
     labelProperties: LabelProperties = LabelProperties(
         enabled = true,
         textStyle = TextStyle.Default
@@ -117,8 +120,8 @@ fun RowChart(
         }.average().toFloat()
     }
 
-    val rectWithValue = remember {
-        mutableStateListOf<Pair<Double, Rect>>()
+    val barWithRect = remember {
+        mutableStateListOf<Pair<Bars.Data, Rect>>()
     }
 
     val selectedBar = remember {
@@ -186,16 +189,16 @@ fun RowChart(
                 .pointerInput(Unit) {
                     if (!popupProperties.enabled) return@pointerInput
                     detectDragGestures { change, dragAmount ->
-                        rectWithValue
-                            .lastOrNull { (value, rect) ->
+                        barWithRect
+                            .lastOrNull { (bar, rect) ->
                                 change.position.y in rect.top..rect.bottom
                             }
-                            ?.let { (value, rect) ->
+                            ?.let { (bar, rect) ->
                                 selectedBar.value = SelectedBar(
-                                    value = value,
+                                    bar = bar,
                                     rect = rect,
                                     offset = Offset(
-                                        x = if (value > 0) rect.right else rect.left,
+                                        x = if (bar.value > 0) rect.right else rect.left,
                                         y = rect.top
                                     )
                                 )
@@ -210,28 +213,50 @@ fun RowChart(
                             }
                     }
                 }
+                .pointerInput(Unit){
+                    detectTapGestures(
+                        onTap = {
+                            val position = Offset(it.x, it.y)
+                            barWithRect
+                                .lastOrNull { (bar,rect)->
+                                    rect.contains(position)
+                                }
+                                ?.let { (bar, rect) ->
+                                    if (popupProperties.enabled){
+                                        selectedBar.value = SelectedBar(
+                                            bar = bar,
+                                            rect = rect,
+                                            offset = Offset(
+                                                x = if (bar.value > 0) rect.right else rect.left,
+                                                y = rect.top
+                                            )
+                                        )
+                                        scope.launch {
+                                            popupAnimation.snapTo(0f)
+                                            popupAnimation.animateTo(
+                                                1f,
+                                                animationSpec = popupProperties.animationSpec
+                                            )
+                                        }
+                                    }
+                                    onBarClick?.invoke(bar)
+                                }
+                        },
+                        onLongPress = {
+                            val position = Offset(it.x, it.y)
+                            barWithRect
+                                .lastOrNull { (bar,rect)->
+                                    rect.contains(position)
+                                }
+                                ?.let { (bar, rect) ->
+                                    onBarLongClick?.invoke(bar)
+                                }
+                        }
+                    )
+                }
                 .pointerInteropFilter { event ->
                     if (event.action == MotionEvent.ACTION_DOWN && popupProperties.enabled) {
-                        val position = Offset(event.x, event.y)
-                        rectWithValue
-                            .lastOrNull { it.second.contains(position) }
-                            ?.let { (value, rect) ->
-                                selectedBar.value = SelectedBar(
-                                    value = value,
-                                    rect = rect,
-                                    offset = Offset(
-                                        x = if (value > 0) rect.right else rect.left,
-                                        y = rect.top
-                                    )
-                                )
-                                scope.launch {
-                                    popupAnimation.snapTo(0f)
-                                    popupAnimation.animateTo(
-                                        1f,
-                                        animationSpec = popupProperties.animationSpec
-                                    )
-                                }
-                            }
+
                     }
                     false
                 }) {
@@ -278,7 +303,7 @@ fun RowChart(
 
                         val path = Path()
 
-                        if (rectWithValue.none { it.second == rect }) rectWithValue.add(bar.value to rect)
+                        if (barWithRect.none { it.second == rect }) barWithRect.add(bar to rect)
 
                         var radius = (bar.properties?.cornerRadius ?: barProperties.cornerRadius)
                         if (bar.value < 0) {
@@ -340,7 +365,7 @@ private fun DrawScope.drawPopUp(
     progress: Float,
 ) {
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.value),
+        properties.contentBuilder(selectedBar.bar.value),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress
@@ -352,7 +377,7 @@ private fun DrawScope.drawPopUp(
         width = (textSize.width + (properties.contentHorizontalPadding.toPx() * 2)),
         height = textSize.height + properties.contentVerticalPadding.toPx() * 2
     )
-    val value = selectedBar.value
+    val value = selectedBar.bar.value
     val barRect = selectedBar.rect
     val barHeight = barRect.bottom - barRect.top
     val barWidth = barRect.right - barRect.left

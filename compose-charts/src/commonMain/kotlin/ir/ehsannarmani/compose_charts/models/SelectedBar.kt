@@ -4,7 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 
 data class SelectedBar(
-    val value: Double,
+    val bar: Bars.Data,
     val offset: Offset,
     val rect: Rect
 )

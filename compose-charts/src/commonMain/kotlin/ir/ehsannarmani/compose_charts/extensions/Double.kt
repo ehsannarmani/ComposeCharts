@@ -1,7 +1,6 @@
 package ir.ehsannarmani.compose_charts.extensions
 
 import kotlin.math.PI
-import kotlin.math.min
 
 fun Double.split(
     step:Double,
@@ -17,12 +16,7 @@ fun Double.split(
             break
         }
     }
-    println("Min value: $minValue,step: $step, result: $result")
     return result
-}
-
-fun Double.toRadians(): Double {
-    return this * PI / 180.0
 }
 
 fun Double.toDegrees(): Double {

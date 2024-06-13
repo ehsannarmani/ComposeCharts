@@ -173,6 +173,12 @@ fun RowScope.RowSample() {
                     },
                     containerColor = Color(0xff414141),
                 ),
+                onBarClick = {
+                    println("bar click: $it")
+                },
+                onBarLongClick = {
+                    println("long click: $it")
+                }
             )
         }
     }

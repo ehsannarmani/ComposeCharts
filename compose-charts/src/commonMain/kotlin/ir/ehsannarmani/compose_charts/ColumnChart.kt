@@ -5,6 +5,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,6 +69,8 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
+    onBarClick: ((Bars.Data) -> Unit)? = null,
+    onBarLongClick: ((Bars.Data) -> Unit)? = null,
     labelProperties: LabelProperties = LabelProperties(
         textStyle = TextStyle.Default,
         enabled = true
@@ -115,8 +118,8 @@ fun ColumnChart(
         }.average().toFloat()
     }
 
-    val rectWithValue = remember {
-        mutableStateListOf<Pair<Double, Rect>>()
+    val barWithRect = remember {
+        mutableStateListOf<Pair<Bars.Data, Rect>>()
     }
 
     val selectedValue = remember {
@@ -155,7 +158,7 @@ fun ColumnChart(
         spec = { it.animationSpec ?: animationSpec },
         delay = animationDelay,
         before = {
-            rectWithValue.clear()
+            barWithRect.clear()
         }
     )
     Column(modifier = modifier) {
@@ -172,59 +175,75 @@ fun ColumnChart(
             Canvas(modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
-                    if (!popupProperties.enabled) return@pointerInput
-                    detectDragGestures { change, dragAmount ->
-                        rectWithValue
-                            .lastOrNull { (value, rect) ->
-                                change.position.x in rect.left..rect.right
-                            }
-                            ?.let { (value, rect) ->
-                                selectedValue.value = SelectedBar(
-                                    value = value,
-                                    rect = rect,
-                                    offset = Offset(
-                                        rect.left,
-                                        if (value < 0) rect.bottom else rect.top
-                                    )
-                                )
-                                scope.launch {
-                                    if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                        popupAnimation.animateTo(
-                                            1f,
-                                            animationSpec = popupProperties.animationSpec
+                    if (popupProperties.enabled) {
+                        detectDragGestures { change, dragAmount ->
+                            barWithRect
+                                .lastOrNull { (value, rect) ->
+                                    change.position.x in rect.left..rect.right
+                                }
+                                ?.let { (bar, rect) ->
+                                    selectedValue.value = SelectedBar(
+                                        bar = bar,
+                                        rect = rect,
+                                        offset = Offset(
+                                            rect.left,
+                                            if (bar.value < 0) rect.bottom else rect.top
                                         )
+                                    )
+                                    scope.launch {
+                                        if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                            popupAnimation.animateTo(
+                                                1f,
+                                                animationSpec = popupProperties.animationSpec
+                                            )
+                                        }
                                     }
                                 }
-                            }
+                        }
                     }
                 }
-                .pointerInteropFilter { event ->
-                    if (event.action == MotionEvent.ACTION_DOWN && popupProperties.enabled) {
-                        val position = Offset(event.x, event.y)
-                        rectWithValue
-                            .lastOrNull {
-                                it.second.contains(position)
-                            }
-                            ?.let { (value, rect) ->
-                                selectedValue.value = SelectedBar(
-                                    value = value,
-                                    rect = rect,
-                                    offset = Offset(
-                                        rect.left,
-                                        if (value < 0) rect.bottom else rect.top
-                                    )
-                                )
-                                scope.launch {
-                                    popupAnimation.snapTo(0f)
-                                    popupAnimation.animateTo(
-                                        1f,
-                                        animationSpec = popupProperties.animationSpec
-                                    )
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            val position = Offset(it.x, it.y)
+                            barWithRect
+                                .lastOrNull { (_, rect) ->
+                                    rect.contains(position)
                                 }
-                            }
-                    }
-                    false
-                }) {
+                                ?.let { (bar, rect) ->
+                                    if (popupProperties.enabled) {
+                                        selectedValue.value = SelectedBar(
+                                            bar = bar,
+                                            rect = rect,
+                                            offset = Offset(
+                                                rect.left,
+                                                if (bar.value < 0) rect.bottom else rect.top
+                                            )
+                                        )
+                                        scope.launch {
+                                            popupAnimation.snapTo(0f)
+                                            popupAnimation.animateTo(
+                                                1f,
+                                                animationSpec = popupProperties.animationSpec
+                                            )
+                                        }
+                                    }
+                                    onBarClick?.invoke(bar)
+                                }
+                        },
+                        onLongPress = {
+                            val position = Offset(it.x, it.y)
+                            barWithRect
+                                .lastOrNull { (_, rect) ->
+                                    rect.contains(position)
+                                }
+                                ?.let { (bar, _) ->
+                                    onBarLongClick?.invoke(bar)
+                                }
+                        }
+                    )
+                }
+            ) {
 
                 val barsAreaWidth = size.width - (indicatorAreaWidth)
                 val zeroY = size.height - calculateOffset(
@@ -286,7 +305,7 @@ fun ColumnChart(
                             ),
                             size = Size(width = stroke, height = barHeight.absoluteValue.toFloat()),
                         )
-                        if (rectWithValue.none { it.second == rect }) rectWithValue.add(col.value to rect)
+                        if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
                         val path = Path()
 
                         var radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius)
@@ -348,7 +367,7 @@ private fun DrawScope.drawPopup(
     progress: Float,
 ) {
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.value),
+        properties.contentBuilder(selectedBar.bar.value),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress
@@ -361,7 +380,7 @@ private fun DrawScope.drawPopup(
         width = (textSize.width + (properties.contentHorizontalPadding.toPx() * 2)),
         height = textSize.height + properties.contentVerticalPadding.toPx() * 2
     )
-    val value = selectedBar.value
+    val value = selectedBar.bar.value
     val barRect = selectedBar.rect
     val barWidth = barRect.right - barRect.left
     val barHeight = barRect.bottom - barRect.top
@@ -395,10 +414,10 @@ private fun DrawScope.drawPopup(
                             width = popupSize.width * progress
                         ),
                     ),
-                    topRight = if (selectedBar.value < 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
-                    topLeft = if (selectedBar.value < 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius,
-                    bottomRight = if (selectedBar.value > 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
-                    bottomLeft = if (selectedBar.value > 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius
+                    topRight = if (value < 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    topLeft = if (value < 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    bottomRight = if (value > 0 && outOfCanvas) CornerRadius.Zero else cornerRadius,
+                    bottomLeft = if (value > 0 && !outOfCanvas) CornerRadius.Zero else cornerRadius
                 )
             )
         },

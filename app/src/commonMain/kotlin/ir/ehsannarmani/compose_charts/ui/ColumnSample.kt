@@ -167,6 +167,12 @@ fun RowScope.ColumnSample() {
                     containerColor = Color(0xff414141),
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                onBarClick = {
+                    println(it)
+                },
+                onBarLongClick = {
+                    println("long: $it")
+                }
             )
         }
     }

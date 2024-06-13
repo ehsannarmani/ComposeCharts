@@ -7,12 +7,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
 data class Bars(
     val label: String,
     val values: List<Data>
 ) {
     data class Data(
+        val id:Int = Random.nextInt(0, 999999),
         val label: String? = null,
         val value: Double,
         val color: Brush,

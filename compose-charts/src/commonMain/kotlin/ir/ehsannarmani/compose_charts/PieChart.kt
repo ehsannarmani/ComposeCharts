@@ -131,17 +131,10 @@ fun PieChart(
     Canvas(modifier = modifier
         .pointerInput(Unit) {
             detectTapGestures { offset ->
-                val centerX = size.width / 2
-                val centerY = size.height / 2
-                val dx = offset.x - centerX
-                val dy = offset.y - centerY
-               atan2(dy.toDouble(), dx.toDouble()).toDegrees().toFloat().also {
-                   println("degree: $it")
-               }
                 pieces
                     .firstOrNull { it.second.contains(offset) }
                     ?.let {
-                        val (id, rect) = it
+                        val (id, _) = it
                         details.find { it.id == id }
                             ?.let {
                                 onPieClick(it.pie)
