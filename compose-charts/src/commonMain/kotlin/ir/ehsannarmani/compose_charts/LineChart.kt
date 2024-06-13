@@ -582,17 +582,17 @@ fun DrawScope.drawDots(
             val radius: Float
             val strokeRadius: Float
             if (properties.animationEnabled) {
-                radius = (properties.radius + properties.strokeWidth / 2) * value.first.value
-                strokeRadius = properties.radius * value.first.value
+                radius = (properties.radius.toPx() + properties.strokeWidth.toPx() / 2) * value.first.value
+                strokeRadius = properties.radius.toPx() * value.first.value
             } else {
-                radius = properties.radius + properties.strokeWidth / 2
-                strokeRadius = properties.radius
+                radius = properties.radius.toPx() + properties.strokeWidth.toPx() / 2
+                strokeRadius = properties.radius.toPx()
             }
             drawCircle(
                 brush = properties.strokeColor,
                 radius = radius,
                 center = dotOffset,
-                style = Stroke(width = properties.strokeWidth, pathEffect = pathEffect),
+                style = Stroke(width = properties.strokeWidth.toPx(), pathEffect = pathEffect),
             )
             drawCircle(
                 brush = properties.color,

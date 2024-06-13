@@ -157,7 +157,7 @@ fun PieChart(
             }
 
             is Pie.Style.Stroke->{
-                (minOf(size.width,size.height)/2) - (style.width/2)
+                (minOf(size.width,size.height)/2) - (style.width.toPx()/2)
             }
         }
         val total = details.sumOf { it.pie.data } // 360 degree for total
@@ -182,7 +182,7 @@ fun PieChart(
 
             val drawStyle: DrawStyle
             if ((detail.pie.style ?: style) is Pie.Style.Stroke) {
-                drawStyle = Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width,)
+                drawStyle = Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width.toPx(),)
             } else {
                 pathMeasure.setPath(piecePath, false)
                 piecePath.reset()

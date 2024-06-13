@@ -268,8 +268,8 @@ fun RowScope.LineSample3() {
                 dotProperties = DotProperties(
                     enabled = true,
                     color = SolidColor(Color(0xffE1E2EC)),
-                    strokeWidth = 4f,
-                    radius = 7f,
+                    strokeWidth = 1.dp,
+                    radius = 2.dp,
                     strokeColor = SolidColor(Color(0xffF7B731)),
                 )
             ),
@@ -290,8 +290,8 @@ fun RowScope.LineSample3() {
                 dotProperties = DotProperties(
                     enabled = true,
                     color = SolidColor(Color(0xffE1E2EC)),
-                    strokeWidth = 4f,
-                    radius = 7f,
+                    strokeWidth = 2.dp,
+                    radius = 4.dp,
                     strokeColor = SolidColor(Color(0xff0FB9B1)),
                 )
             ),
@@ -520,8 +520,8 @@ fun RowScope.LineSample6() {
                 dotProperties = DotProperties(
                     enabled = true,
                     color = SolidColor(Color(0xFFFB8231)),
-                    strokeWidth = 5f,
-                    radius = 9f,
+                    strokeWidth = 2.dp,
+                    radius = 3.dp,
                     strokeColor = SolidColor(Color(0xffffffff)),
                 )
             ),
@@ -544,8 +544,8 @@ fun RowScope.LineSample6() {
                 dotProperties = DotProperties(
                     enabled = true,
                     color = SolidColor(Color(0xff23AF92)),
-                    strokeWidth = 5f,
-                    radius = 9f,
+                    strokeWidth = 2.dp,
+                    radius = 3.dp,
                     strokeColor = SolidColor(Color(0xffffffff)),
                 )
             ),

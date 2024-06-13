@@ -1,8 +1,9 @@
 package ir.ehsannarmani.compose_charts.models
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 data class Pie(
     val label: String? = null,
@@ -22,6 +23,6 @@ data class Pie(
 ) {
     sealed class Style {
         data object Fill : Style()
-        data class Stroke(val width: Float = 120f) : Style()
+        data class Stroke(val width: Dp = 24.dp) : Style()
     }
 }
