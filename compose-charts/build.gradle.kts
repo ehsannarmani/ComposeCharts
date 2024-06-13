@@ -19,7 +19,7 @@ afterEvaluate {
                 from(components["kotlin"])
                 groupId = "com.github.ehsannarmani"
                 artifactId = "compose-charts"
-                version = "0.0.4"
+                version = "0.0.5"
             }
         }
     }
