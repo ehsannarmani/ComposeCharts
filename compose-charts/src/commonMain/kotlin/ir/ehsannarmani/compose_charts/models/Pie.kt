@@ -23,6 +23,6 @@ data class Pie(
 ) {
     sealed class Style {
         data object Fill : Style()
-        data class Stroke(val width: Dp = 24.dp) : Style()
+        data class Stroke(val width: Dp = 42.dp) : Style()
     }
 }
