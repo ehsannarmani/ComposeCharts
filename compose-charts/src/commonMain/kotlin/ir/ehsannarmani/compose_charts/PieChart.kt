@@ -138,7 +138,6 @@ fun PieChart(
                atan2(dy.toDouble(), dx.toDouble()).toDegrees().toFloat().also {
                    println("degree: $it")
                }
-
                 pieces
                     .firstOrNull { it.second.contains(offset) }
                     ?.let {
@@ -216,7 +215,7 @@ fun PieChart(
 
 
 private data class PieDetails(
-    val id: String = Random(999999999).nextInt().toString(),
+    val id: String = Random.nextInt(0, 999999).toString(),
     val pie: Pie,
     val color: Animatable<Color, AnimationVector4D> = Animatable(pie.color),
     val scale: Animatable<Float, AnimationVector1D> = Animatable(1f),
