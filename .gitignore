@@ -8,7 +8,9 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/artifacts
 .DS_Store
+.idea/misc.xml
 /build
 /captures
 .externalNativeBuild
