@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="compose-charts-wasm-js">
+    <output-path>$PROJECT_DIR$/compose-charts/build/libs</output-path>
+    <root id="archive" name="compose-charts-wasm-js.jar">
+      <element id="module-output" name="ComposeCharts.compose-charts.wasmJsMain" />
+    </root>
+  </artifact>
+</component>
