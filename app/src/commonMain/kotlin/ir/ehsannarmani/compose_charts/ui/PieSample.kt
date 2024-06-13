@@ -147,7 +147,7 @@ fun RowScope.PieSample2() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
-                style = Pie.Style.Stroke(24.dp)
+                style = Pie.Style.Stroke(width = 32.dp)
             )
         }
     }
@@ -193,7 +193,7 @@ fun RowScope.PieSample3() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
-                style = Pie.Style.Stroke(32.dp),
+                style = Pie.Style.Stroke(),
                 spaceDegree = 7f
             )
         }
