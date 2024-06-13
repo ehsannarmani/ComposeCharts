@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
@@ -8,23 +9,44 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    `maven-publish`
+    alias(libs.plugins.maven.publish)
 }
+mavenPublishing{
+    coordinates(
+        groupId = "io.github.ehsannarmani",
+        artifactId = "compose-charts",
+        version = "0.0.5"
+    )
+    pom{
+        name.set("Compose Charts")
+        description.set("https://github.com/ehsannarmani/ComposeCharts")
+        inceptionYear.set("2024")
+        url.set("https://github.com/ehsannarmani/ComposeCharts")
 
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["kotlin"])
-                groupId = "com.github.ehsannarmani"
-                artifactId = "compose-charts"
-                version = "0.0.5"
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
             }
         }
-    }
-}
 
+        // Specify developers information
+        developers {
+            developer {
+                id.set("ehsannarmani")
+                name.set("Ehsan Narmani")
+                email.set("ehsan.enk.narmani@gmail.com")
+            }
+        }
+
+        // Specify SCM information
+        scm {
+            url.set("https://github.com/ehsannarmani/ComposeCharts")
+        }
+    }
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+}
 kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
@@ -53,6 +75,7 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
+        publishLibraryVariants("release","debug")
     }
 
     jvm("desktop")
