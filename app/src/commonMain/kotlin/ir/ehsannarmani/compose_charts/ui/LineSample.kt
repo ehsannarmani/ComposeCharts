@@ -269,7 +269,6 @@ fun RowScope.LineSample3() {
                     enabled = true,
                     color = SolidColor(Color(0xffE1E2EC)),
                     strokeWidth = 1.dp,
-                    radius = 2.dp,
                     strokeColor = SolidColor(Color(0xffF7B731)),
                 )
             ),
@@ -291,7 +290,6 @@ fun RowScope.LineSample3() {
                     enabled = true,
                     color = SolidColor(Color(0xffE1E2EC)),
                     strokeWidth = 2.dp,
-                    radius = 4.dp,
                     strokeColor = SolidColor(Color(0xff0FB9B1)),
                 )
             ),
