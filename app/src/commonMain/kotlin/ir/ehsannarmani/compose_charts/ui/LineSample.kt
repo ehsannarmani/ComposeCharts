@@ -142,7 +142,7 @@ fun RowScope.LineSample() {
                         fontFamily = ubuntu
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -152,7 +152,7 @@ fun RowScope.LineSample() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -221,7 +221,7 @@ fun RowScope.LineSample2() {
                         fontFamily = ubuntu
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " °C"
+                        it.format(1) + " °C"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -236,7 +236,7 @@ fun RowScope.LineSample2() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " °C"
+                        it.format(1) + " °C"
                     },
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -322,7 +322,7 @@ fun RowScope.LineSample3() {
                         fontFamily = ubuntu
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -332,7 +332,7 @@ fun RowScope.LineSample3() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -405,7 +405,7 @@ fun RowScope.LineSample4() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -415,7 +415,7 @@ fun RowScope.LineSample4() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -470,7 +470,7 @@ fun RowScope.LineSample5() {
                         fontFamily = ubuntu, color = Color.White,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -480,7 +480,7 @@ fun RowScope.LineSample5() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -575,7 +575,7 @@ fun RowScope.LineSample6() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -585,7 +585,7 @@ fun RowScope.LineSample6() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelProperties = LabelProperties(
@@ -651,7 +651,7 @@ fun RowScope.LineSample7() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -661,7 +661,7 @@ fun RowScope.LineSample7() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
@@ -717,7 +717,7 @@ fun RowScope.LineSample8() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -772,7 +772,7 @@ fun RowScope.LineSample9() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -782,7 +782,7 @@ fun RowScope.LineSample9() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " M"
+                        it.format(1) + " M"
                     }
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),

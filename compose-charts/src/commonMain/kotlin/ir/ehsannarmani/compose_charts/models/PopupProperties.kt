@@ -19,6 +19,6 @@ data class PopupProperties(
     val contentHorizontalPadding: Dp = 4.dp,
     val contentVerticalPadding: Dp = 2.dp,
     val contentBuilder: (value: Double) -> String = {
-        "%.1f".format(it)
+        it.format(1)
     }
 )

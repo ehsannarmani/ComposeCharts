@@ -169,7 +169,7 @@ fun RowScope.RowSample() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -373,7 +373,7 @@ fun RowScope.RowSample2() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -445,7 +445,7 @@ fun RowScope.RowSample3() {
                         fontFamily = ubuntu,
                     ),
                     contentBuilder = {
-                        "%.1f".format(it) + " Million"
+                        it.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141),
                 ),

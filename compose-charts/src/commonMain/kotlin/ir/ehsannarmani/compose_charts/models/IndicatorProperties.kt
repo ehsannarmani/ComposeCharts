@@ -9,6 +9,6 @@ data class IndicatorProperties(
     val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
     val count: Int = 4,
     val contentBuilder: (Double) -> String = {
-        "%.1f".format(it)
+        it.format(1)
     },
 )

@@ -1,44 +1,15 @@
 package ir.ehsannarmani.compose_charts.extensions
 
-import kotlin.text.StringBuilder
+import kotlin.math.pow
 
-fun String.format(vararg args: Any): String {
-    val formatted = StringBuilder(this)
-    var argIndex = 0
-    var currentIndex = 0
+fun Double.format(decimalPlaces: Int): String {
+    require(decimalPlaces >= 0) { "Decimal places must be non-negative." }
 
-    while (currentIndex < formatted.length) {
-        if (formatted[currentIndex] == '%' && currentIndex + 1 < formatted.length) {
-            when (val nextChar = formatted[currentIndex + 1]) {
-                's' -> {
-                    if (argIndex < args.size) {
-                        formatted.replaceRange(currentIndex, currentIndex + 2, args[argIndex].toString())
-                        argIndex++
-                        currentIndex += args[argIndex - 1].toString().length // Adjust index
-                    } else {
-                        // Handle missing argument
-                        formatted.replaceRange(currentIndex, currentIndex + 2, "??")
-                    }
-                }
-                'd' -> {
-                    if (argIndex < args.size) {
-                        formatted.replaceRange(currentIndex, currentIndex + 2, args[argIndex].toString())
-                        argIndex++
-                        currentIndex += args[argIndex - 1].toString().length // Adjust index
-                    } else {
-                        // Handle missing argument
-                        formatted.replaceRange(currentIndex, currentIndex + 2, "??")
-                    }
-                }
-                else -> { // Other format specifiers
-                    formatted.replaceRange(currentIndex, currentIndex + 2, "%${nextChar}")
-                }
-            }
-            currentIndex++ // Skip the next character
-        } else {
-            currentIndex++ // Move to the next character
-        }
+    if (decimalPlaces == 0) {
+        return this.toInt().toString() // Handle whole numbers efficiently
     }
 
-    return formatted.toString()
+    val factor = 10.0.pow(decimalPlaces.toDouble())
+    val roundedValue = kotlin.math.round(this * factor) / factor
+    return roundedValue.toString()
 }
