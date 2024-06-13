@@ -666,7 +666,7 @@ private fun DrawScope.drawGradient(
             ),
             tileMode = TileMode.Mirror
         )
-        it.drawPath(path, paint)
+        it.drawPath(p, paint)
     }
 }
 
