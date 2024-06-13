@@ -10,9 +10,9 @@ import androidx.compose.ui.unit.dp
 
 data class DotProperties(
     val enabled: Boolean = false,
-    val radius: Dp = 2.dp,
+    val radius: Dp = 3.dp,
     val color: Brush = SolidColor(Color.Unspecified),
-    val strokeWidth: Dp = 1.dp,
+    val strokeWidth: Dp = 2.dp,
     val strokeColor: Brush = SolidColor(Color.Unspecified),
     val strokeStyle: StrokeStyle = StrokeStyle.Normal,
     val animationEnabled:Boolean = true,
