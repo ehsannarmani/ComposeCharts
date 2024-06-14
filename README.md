@@ -38,9 +38,12 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
 ```gradle
 dependencies {
-    implementation ("io.github.ehsannarmani:latest_version")
+    implementation ("io.github.ehsannarmani:compose-charts:latest_version")
 }
 ```
+> [!NOTE]
+> We migrated to maven central repository in 0.0.5v, so if you want to access previous versions of library, see [this](https://github.com/ehsannarmani/ComposeCharts/tree/0.0.4).
+
 ### All Charts:
 ![mockup](https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/full_chart.png?raw=true)
 
