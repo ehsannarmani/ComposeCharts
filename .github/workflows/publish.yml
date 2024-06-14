@@ -1,4 +1,4 @@
-name: Publish Artifacts
+name: Publish On Maven Central
 on:
   workflow_dispatch:
 jobs:
