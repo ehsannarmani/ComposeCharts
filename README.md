@@ -3,37 +3,42 @@
 ![banner](https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/banner.png?raw=true)
 ![mockup](https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/mokup.png?raw=true)
 
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0.0-orange)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin-Multiplatform-blue)](https://kotlinlang.org/docs/reference/multiplatform.html)
+
+![Platform](https://img.shields.io/badge/Android-3aab58)
+![Platform](https://img.shields.io/badge/Windows-097cd5)
+![Platform](https://img.shields.io/badge/IOS-d32408)
+![Platform](https://img.shields.io/badge/WasmJS-f7e025)
+
 ## Table of Contents
 
 - [Gradle Setup](#gradle-setup)
 - [All Charts](#all-charts)
 - [Examples](#examples)
-   - [Pie Chart](#pie-chart)
-   - [Row Chart](#row-chart)
-   - [Column Chart](#column-chart)
-   - [Line Chart](#line-chart)
+  - [Pie Chart](#pie-chart)
+  - [Row Chart](#row-chart)
+  - [Column Chart](#column-chart)
+  - [Line Chart](#line-chart)
 - [Animation Mode](#animation-mode)
 - [Chart Properties](#chart-properties)
-   - [Bars](#bars-barproperties)
-   - [Dots](#dots-dotproperties)
-   - [Indicators](#indicators-indicatorproperties)
-   - [Grid Lines](#grid-lines-gridproperties)
-   - [Axis](#axis-axisproperties)
-   - [Dividers](#dividers-dividerproperties)
-   - [Lines](#line-lineproperties)
-   - [Labels](#labels-labelproperties)
-   - [Label Helpers](#label-helpers-labelhelperproperties)
-   - [Popups](#popups-popupproperties)
+  - [Bars](#bars-barproperties)
+  - [Dots](#dots-dotproperties)
+  - [Indicators](#indicators-indicatorproperties)
+  - [Grid Lines](#grid-lines-gridproperties)
+  - [Axis](#axis-axisproperties)
+  - [Dividers](#dividers-dividerproperties)
+  - [Lines](#line-lineproperties)
+  - [Labels](#labels-labelproperties)
+  - [Label Helpers](#label-helpers-labelhelperproperties)
+  - [Popups](#popups-popupproperties)
 
-### Gradle Setup 
-[![](https://jitpack.io/v/ehsannarmani/ComposeCharts.svg)](https://jitpack.io/#ehsannarmani/ComposeCharts)
+### Gradle Setup
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
 ```gradle
-repositories {
-    maven("https://jitpack.io")
-}
-
 dependencies {
-    implementation ("com.github.ehsannarmani:ComposeCharts:latest_version")
+    implementation ("io.github.ehsannarmani:latest_version")
 }
 ```
 ### All Charts:
@@ -722,7 +727,9 @@ val popupProperties = PopupProperties(
 ## Todos:
 1. [ ] Add Candle Stick Chart
 2. [ ] Add Circle Progress Chart
-3. [ ] MultiPlatform Support 
+3. [x] MultiPlatform Support
+
+
 
 
 
