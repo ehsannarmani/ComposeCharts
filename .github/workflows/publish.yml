@@ -5,7 +5,6 @@ jobs:
   build:
     name: Build
     runs-on: macos-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -16,8 +15,28 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Install GPG
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          brew install gpg
+          echo "$SIGNING_KEY" | gpg --dearmor > ${HOME}/secring.gpg
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Add Gradle Properties
+        env:
+          MAVEN_CENTRAL_USER_NAME: ${{ secrets.MAVEN_CENTRAL_USER_NAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          echo "mavenCentralUsername=${MAVEN_CENTRAL_USER_NAME}" >> gradle.properties
+          echo "mavenCentralPassword=${MAVEN_CENTRAL_PASSWORD}" >> gradle.properties
+          echo "signing.keyId=${SIGNING_KEY_ID}" >> gradle.properties
+          echo "signing.password=${SIGNING_KEY_PASSWORD}" >> gradle.properties
+          echo "signing.secretKeyRingFile=${HOME}/secring.gpg" >> gradle.properties
 
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -25,11 +44,5 @@ jobs:
           xcode-version: latest-stable
 
       - name: Publish To Maven Central
-        env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralUsername }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.ORG_GRADLE_PROJECT_mavenCentralPassword }}
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKey }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyId }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.ORG_GRADLE_PROJECT_signingInMemoryKeyPassword }}
         run: |
           ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
