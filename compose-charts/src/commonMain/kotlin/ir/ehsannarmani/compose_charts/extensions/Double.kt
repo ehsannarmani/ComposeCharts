@@ -2,23 +2,12 @@ package ir.ehsannarmani.compose_charts.extensions
 
 import kotlin.math.PI
 
-fun Double.split(
-    step:Double,
-    minValue:Double
+fun split(
+    count: Int,
+    minValue: Double,
+    maxValue: Double,
 ):List<Double>{
-    var current = this
-    val result = mutableListOf<Double>()
-    while (true){
-        result.add(current)
-        current = (current-step)
-        if (current <= minValue) {
-            result.add(current.coerceAtLeast(minValue))
-            break
-        }
-    }
+    val step = (maxValue - minValue) / (count - 1)
+    val result = (0 until count).map { (maxValue - it * step) }
     return result
-}
-
-fun Double.toDegrees(): Double {
-    return this * 180.0 / PI
 }

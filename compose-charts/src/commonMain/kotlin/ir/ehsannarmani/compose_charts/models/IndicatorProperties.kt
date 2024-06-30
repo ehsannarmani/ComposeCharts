@@ -7,7 +7,7 @@ import ir.ehsannarmani.compose_charts.extensions.format
 data class IndicatorProperties(
     val enabled:Boolean = true,
     val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
-    val count: Int = 4,
+    val count: Int = 5,
     val contentBuilder: (Double) -> String = {
         it.format(1)
     },

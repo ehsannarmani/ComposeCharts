@@ -253,9 +253,10 @@ fun LineChart(
                         .padding(bottom = (labelAreaHeight / density.density).dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    (maxValue).split(
-                        step = (maxValue - minValue) / indicatorProperties.count,
-                        minValue = minValue
+                    split(
+                        count = indicatorProperties.count,
+                        minValue = minValue,
+                        maxValue = maxValue
                     ).forEach {
                         BasicText(
                             text = indicatorProperties.contentBuilder(it),

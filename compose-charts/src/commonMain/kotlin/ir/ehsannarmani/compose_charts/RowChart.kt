@@ -133,9 +133,10 @@ fun RowChart(
     }
 
     val indicators = remember {
-        maxValue.split(
-            step = (maxValue - minValue) / indicatorProperties.count,
-            minValue = minValue
+        split(
+            count = indicatorProperties.count,
+            minValue = minValue,
+            maxValue = maxValue
         )
     }
     val indicatorAreaHeight = remember {

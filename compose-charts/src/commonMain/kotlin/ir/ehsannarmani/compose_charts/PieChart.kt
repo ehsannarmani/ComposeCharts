@@ -22,11 +22,9 @@ import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import ir.ehsannarmani.compose_charts.extensions.toDegrees
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
 import kotlin.math.atan2
