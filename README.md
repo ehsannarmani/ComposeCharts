@@ -36,7 +36,7 @@
 
 ### Gradle Setup
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=5)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=6)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
 ```gradle
 dependencies {
     implementation ("io.github.ehsannarmani:compose-charts:latest_version")
@@ -697,17 +697,21 @@ val labelHelperProperties = LabelHelperProperties(
 ### Popups: `PopupProperties`
 > Usage: In every chart you can set properties of popup which shown when user click or drag on chart
 
-| Property                   | Type                 | Default                 | Description                 |
-|----------------------------|----------------------|-------------------------|-----------------------------|
-| `enabled`                  | Boolean              | `true`                  | specifies popup visibility 
-| `animationSpec`            | AnimationSpec<Float> | `tween(400)`            | specifies popup visibility animation spec   
-| `duration`                 | Long                 | `1500`                  | in column/row charts, specifies how long the popup will be visible  
-| `textStyle`                | TextStyle            | `TextStyle.Default`     | specifies popup text style  
-| `containerColor`           | Color                | `Color(0xff313131)`     | specifies popup background color  
-| `cornerRadius`             | Dp                   | `6.dp`                  | specifies popup corner radius  
-| `contentHorizontalPadding` | Dp                   | `4.dp`                  | specifies popup horizontal padding  
-| `contentVerticalPadding`   | Dp                   | `2.dp`                  | specifies popup vertical padding  
-| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | specifies popup content creation template
+> [!NOTE]
+> In line charts your can set specific popup properties for each line, for example you can disable one of lines popup
+> and e.g.
+
+| Property                   | Type                 | Default                 | Description                                                        |
+|----------------------------|----------------------|-------------------------|--------------------------------------------------------------------|
+| `enabled`                  | Boolean              | `true`                  | specifies popup visibility                                         
+| `animationSpec`            | AnimationSpec<Float> | `tween(400)`            | specifies popup visibility animation spec                          
+| `duration`                 | Long                 | `1500`                  | in column/row charts, specifies how long the popup will be visible 
+| `textStyle`                | TextStyle            | `TextStyle.Default`     | specifies popup text style                                         
+| `containerColor`           | Color                | `Color(0xff313131)`     | specifies popup background color                                   
+| `cornerRadius`             | Dp                   | `6.dp`                  | specifies popup corner radius                                      
+| `contentHorizontalPadding` | Dp                   | `4.dp`                  | specifies popup horizontal padding                                 
+| `contentVerticalPadding`   | Dp                   | `2.dp`                  | specifies popup vertical padding                                   
+| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | specifies popup content creation template                          
 
 #### Example:
 ```kotlin
