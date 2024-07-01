@@ -265,8 +265,8 @@ fun RowChart(
                 val barAreaWidth = size.width
 
                 val zeroX = size.width - calculateOffset(
-                    maxValue = maxValue.toFloat(),
-                    minValue = minValue.toFloat(),
+                    maxValue = maxValue,
+                    minValue = minValue,
                     total = size.width,
                     value = 0.0f
                 )
@@ -294,9 +294,9 @@ fun RowChart(
                                 index = dataIndex
                             )
                         val barX =
-                            if (bar.value > 0) size.width - zeroX else (size.width - zeroX - width.absoluteValue.toFloat()).coerceAtLeast(
-                                0f
-                            )
+                            (if (bar.value > 0) size.width - zeroX else (size.width - zeroX - width.absoluteValue.toFloat()).coerceAtLeast(
+                                0.0
+                            )).toFloat()
                         val rect = Rect(
                             offset = Offset(x = barX, y = barY),
                             size = Size(height = stroke, width = width.absoluteValue.toFloat())

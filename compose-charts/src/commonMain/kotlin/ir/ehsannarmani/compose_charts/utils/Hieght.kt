@@ -4,11 +4,11 @@ package ir.ehsannarmani.compose_charts.utils
  * This function calculates offset from total for a specific value
  */
 fun calculateOffset(
-    maxValue: Float,
-    minValue: Float,
+    maxValue: Double,
+    minValue: Double,
     total: Float,
     value:Float
-): Float {
+): Double {
     val range = maxValue - minValue
     val percentage = (value - minValue) / range
     val offset = total * percentage

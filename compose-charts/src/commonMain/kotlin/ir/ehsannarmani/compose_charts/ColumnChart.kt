@@ -248,11 +248,11 @@ fun ColumnChart(
 
                 val barsAreaWidth = size.width - (indicatorAreaWidth)
                 val zeroY = size.height - calculateOffset(
-                    maxValue = maxValue.toFloat(),
-                    minValue = minValue.toFloat(),
+                    maxValue = maxValue,
+                    minValue = minValue,
                     total = size.height,
                     value = 0.0f
-                )
+                ).toFloat()
 
 
                 if (indicatorProperties.enabled) {

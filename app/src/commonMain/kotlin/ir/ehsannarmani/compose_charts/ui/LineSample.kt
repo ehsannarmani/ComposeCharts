@@ -545,7 +545,8 @@ fun RowScope.LineSample6() {
                     strokeWidth = 2.dp,
                     radius = 3.dp,
                     strokeColor = SolidColor(Color(0xffffffff)),
-                )
+                ),
+                popupProperties = PopupProperties(enabled = false)
             ),
         )
     }

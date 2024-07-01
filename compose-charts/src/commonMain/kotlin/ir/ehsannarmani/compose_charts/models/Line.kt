@@ -20,6 +20,7 @@ data class Line(
     val gradientAnimationSpec: AnimationSpec<Float> = tween(2000),
     val gradientAnimationDelay: Long = 1000,
     val dotProperties: DotProperties? = null,
+    val popupProperties: PopupProperties? = null,
     val curvedEdges:Boolean? = null,
     val strokeProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),
     val gradientProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),

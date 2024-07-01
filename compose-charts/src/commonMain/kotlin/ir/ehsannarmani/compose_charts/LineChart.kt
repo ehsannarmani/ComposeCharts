@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -28,18 +27,13 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -51,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
-import ir.ehsannarmani.compose_charts.extensions.flatten
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -66,23 +59,18 @@ import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
-import ir.ehsannarmani.compose_charts.utils.calculateValue
+import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.floor
-import kotlin.math.pow
-
-private data class PathOffset(
-    val offset: List<Pair<Int, Offset>>,
-    val line: Line,
-)
 
 private data class Popup(
+    val properties: PopupProperties,
     val position: Offset,
     val value: Double
 )
-
 
 @Composable
 fun LineChart(
@@ -111,18 +99,16 @@ fun LineChart(
         it.values.minOfOrNull { it } ?: 0.0
     } ?: 0.0 else 0.0,
 ) {
-
-    require(data.isNotEmpty()) {
-        "Chart data is empty"
-    }
-    require(minValue <= data.minOf { it.values.minOf { it } }) {
-        "Chart data must be at least $minValue (Specified Min Value)"
-    }
-    require(maxValue >= data.maxOf { it.values.maxOf { it } }) {
-        "Chart data must be at most $maxValue (Specified Max Value)"
-    }
-    require(data.none { it.values.isEmpty() }) {
-        "Chart data should not contain empty values"
+    if (data.isNotEmpty()) {
+        require(minValue <= data.minOf { it.values.minOf { it } }) {
+            "Chart data must be at least $minValue (Specified Min Value)"
+        }
+        require(maxValue >= data.maxOf { it.values.maxOf { it } }) {
+            "Chart data must be at most $maxValue (Specified Max Value)"
+        }
+        require(data.none { it.values.isEmpty() }) {
+            "Chart data should not contain empty values"
+        }
     }
 
     val density = LocalDensity.current
@@ -130,10 +116,6 @@ fun LineChart(
 
     val pathMeasure = remember {
         PathMeasure()
-    }
-
-    val pathsOffsets = remember {
-        mutableStateListOf<PathOffset>()
     }
 
     val popupAnimation = remember {
@@ -150,7 +132,6 @@ fun LineChart(
     val popups = remember {
         mutableStateListOf<Popup>()
     }
-
     val popupsOffsetAnimators = remember {
         mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
     }
@@ -173,12 +154,15 @@ fun LineChart(
 
 
 
-    LaunchedEffect(data) {
-        pathsOffsets.clear()
-        dotAnimators.clear()
+    LaunchedEffect(Unit) {
         if (zeroLineProperties.enabled) {
             zeroLineAnimation.snapTo(0f)
+            zeroLineAnimation.animateTo(1f, animationSpec = zeroLineProperties.animationSpec)
         }
+    }
+
+    LaunchedEffect(data) {
+        dotAnimators.clear()
         launch {
             data.forEach {
                 val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
@@ -187,9 +171,6 @@ fun LineChart(
                 }
                 dotAnimators.add(animators)
             }
-        }
-        if (zeroLineProperties.enabled) {
-            zeroLineAnimation.animateTo(1f, animationSpec = zeroLineProperties.animationSpec)
         }
     }
 
@@ -268,9 +249,7 @@ fun LineChart(
             }
             Canvas(modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(Unit) {
-                    if (!popupProperties.enabled) return@pointerInput
-
+                .pointerInput(data) {
                     detectDragGestures(
                         onDragEnd = {
                             scope.launch {
@@ -280,45 +259,30 @@ fun LineChart(
                             }
                         },
                         onDrag = { change, amount ->
+                            val _size = size.toSize().copy(height = (size.height - labelAreaHeight).toFloat())
                             popups.clear()
-                            val popupValues = mutableListOf<Double>()
                             data.forEach {
-                                val fraction = (change.position.x / size.width).coerceIn(0f, 1f)
-                                popupValues.add(
-                                    calculateFractionOfValues(
+                                val properties = it.popupProperties ?: popupProperties
+
+                                if (properties.enabled) {
+                                    val positionX = (change.position.x).coerceIn(0f, size.width.toFloat())
+                                    val fraction = (positionX / size.width)
+                                    val popupValue = getPopupValue(
                                         points = it.values,
-                                        fraction = fraction.toDouble()
+                                        fraction = fraction.toDouble(),
+                                        rounded = it.curvedEdges ?: curvedEdges,
+                                        size = _size,
+                                        minValue = minValue,
+                                        maxValue = maxValue
                                     )
-                                )
-                            }
-                            pathsOffsets
-                                .map {
-                                    it.offset.firstOrNull { (_, offset) ->
-                                        offset.x >= change.position.x
-                                    } ?: it.offset.lastOrNull { (_, offset) ->
-                                        offset.x <= change.position.x
-                                    }
-                                }
-                                .also {
-                                    val popupPositions = it.filterNotNull()
-                                    popupPositions.map { it.second }
-                                        .forEachIndexed { index, offset ->
-                                            popups.add(
-                                                Popup(
-                                                    position = offset,
-//                                                    position = Offset(
-//                                                        x = change.position.x,
-//                                                        y = (size.height-labelAreaHeight)-calculateOffset(
-//                                                            maxValue = maxValue.toFloat(),
-//                                                            minValue = minValue.toFloat(),
-//                                                            total = (size.height-labelAreaHeight).toFloat(),
-//                                                            value = popupValues[index].toFloat()
-//                                                        )
-//                                                    ),
-                                                    value = popupValues[index]
-                                                )
-                                            )
-                                        }
+                                    popups.add(
+                                        Popup(
+                                            position = popupValue.offset,
+                                            value = popupValue.calculatedValue,
+                                            properties = properties
+                                        )
+                                    )
+                                    // add popup offset animators
                                     if (popupsOffsetAnimators.count() < popups.count()) {
                                         repeat(popups.count() - popupsOffsetAnimators.count()) {
                                             popupsOffsetAnimators.add(
@@ -328,11 +292,10 @@ fun LineChart(
                                             )
                                         }
                                     }
-
-
                                 }
-
+                            }
                             scope.launch {
+                                // animate popup (alpha)
                                 if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
                                     popupAnimation.animateTo(1f, animationSpec = tween(500))
                                 }
@@ -340,19 +303,15 @@ fun LineChart(
                         }
                     )
                 }
-                .onSizeChanged {
-                    pathsOffsets.clear()
-                }
             ) {
                 val chartAreaHeight = size.height - labelAreaHeight
-
                 val drawZeroLine = {
                     val zeroY = chartAreaHeight - calculateOffset(
-                        minValue = minValue.toFloat(),
-                        maxValue = maxValue.toFloat(),
+                        minValue = minValue,
+                        maxValue = maxValue,
                         total = chartAreaHeight,
-                        value = 0.0f
-                    )
+                        value = 0f
+                    ).toFloat()
                     drawLine(
                         brush = zeroLineProperties.color,
                         start = Offset(x = 0f, y = zeroY),
@@ -397,11 +356,6 @@ fun LineChart(
                         rounded = line.curvedEdges ?: curvedEdges,
                         size = size.copy(height = chartAreaHeight)
                     )
-                    if (pathsOffsets.none { it.line == line }) {
-                        pathsOffsets.add(
-                            PathOffset(offset = path.flatten(), line = line)
-                        )
-                    }
                     val segmentedPath = Path()
                     pathMeasure.setPath(path, false)
                     pathMeasure.getSegment(
@@ -409,7 +363,6 @@ fun LineChart(
                         pathMeasure.length * line.strokeProgress.value,
                         segmentedPath
                     )
-
                     var pathEffect: PathEffect? = null
                     val stroke: Float = when (val drawStyle = line.drawStyle) {
                         is DrawStyle.Fill -> {
@@ -427,7 +380,7 @@ fun LineChart(
                         style = Stroke(width = stroke, pathEffect = pathEffect)
                     )
                     if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
-                        drawGradient(
+                        drawLineGradient(
                             path = path,
                             color1 = line.firstGradientFillColor,
                             color2 = line.secondGradientFillColor,
@@ -439,7 +392,7 @@ fun LineChart(
                         if (line.color is SolidColor) {
                             fillColor = line.color.value
                         }
-                        drawGradient(
+                        drawLineGradient(
                             path = path,
                             color1 = fillColor,
                             color2 = fillColor,
@@ -472,7 +425,6 @@ fun LineChart(
                     drawPopup(
                         popup = popup,
                         nextPopup = popups.getOrNull(index + 1),
-                        popupProperties = popupProperties,
                         textMeasurer = textMeasurer,
                         scope = scope,
                         progress = popupAnimation.value,
@@ -488,13 +440,13 @@ fun LineChart(
 private fun DrawScope.drawPopup(
     popup: Popup,
     nextPopup: Popup?,
-    popupProperties: PopupProperties,
     textMeasurer: TextMeasurer,
     scope: CoroutineScope,
     progress: Float,
     offsetAnimator: Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>? = null,
 ) {
     val offset = popup.position
+    val popupProperties = popup.properties
     val measureResult = textMeasurer.measure(
         popupProperties.contentBuilder(popup.value),
         style = popupProperties.textStyle.copy(
@@ -606,12 +558,12 @@ fun DrawScope.drawDots(
                 itemCount = dataPoints.count(),
                 index = valueIndex
             ),
-            y = _size.height - calculateOffset(
-                maxValue = maxValue,
-                minValue = minValue,
+            y = (_size.height - calculateOffset(
+                maxValue = maxValue.toDouble(),
+                minValue = minValue.toDouble(),
                 total = _size.height,
                 value = value.second
-            )
+            )).toFloat()
 
         )
         if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
@@ -646,85 +598,10 @@ fun DrawScope.drawDots(
     }
 }
 
-private fun DrawScope.getLinePath(
-    dataPoints: List<Float>,
-    maxValue: Float,
-    minValue: Float,
-    rounded: Boolean = true,
-    size: Size? = null
-): Path {
 
-    val _size = size ?: this.size
-    val path = Path()
 
-    val calculateHeight = { value: Float ->
-        calculateOffset(
-            maxValue = maxValue,
-            minValue = minValue,
-            total = _size.height,
-            value = value
-        )
-    }
 
-    path.moveTo(0f, _size.height - calculateHeight(dataPoints[0]))
 
-    for (i in 0 until dataPoints.size - 1) {
-        val x1 = (i * (_size.width / (dataPoints.size - 1)))
-        val y1 = _size.height - calculateHeight(dataPoints[i])
-        val x2 = ((i + 1) * (_size.width / (dataPoints.size - 1)))
-        val y2 = _size.height - calculateHeight(dataPoints[i + 1])
 
-        if (rounded) {
-            val cx = (x1 + x2) / 2
-            path.cubicTo(x1 = cx, y1 = y1, x2 = cx, y2 = y2, x3 = x2, y3 = y2)
-        } else {
-            path.cubicTo(x1, y1, x1, y1, (x1 + x2) / 2, (y1 + y2) / 2)
-            path.cubicTo((x1 + x2) / 2, (y1 + y2) / 2, x2, y2, x2, y2)
-        }
-    }
-    return path
-}
 
-private fun DrawScope.drawGradient(
-    path: Path,
-    color1: Color,
-    color2: Color,
-    progress: Float,
-    size: Size? = null
-) {
-    val _size = size ?: this.size
-    drawIntoCanvas {
-        val p = Path()
-        p.addPath(path)
-        p.lineTo(_size.width, _size.height)
-        p.lineTo(0f, _size.height)
-        p.close()
-        val paint = Paint()
-        paint.shader = LinearGradientShader(
-            Offset(0f, 0f),
-            Offset(0f, _size.height),
-            listOf(
-                color1.copy(alpha = color1.alpha * progress),
-                color2,
-            ),
-            tileMode = TileMode.Mirror
-        )
-        it.drawPath(p, paint)
-    }
-}
-
-private fun calculateFractionOfValues(
-    points: List<Double>,
-    fraction: Double,
-): Double {
-    return if (fraction == 1.0) {
-        points.last()
-    } else {
-        val index = fraction * (points.count() - 1)
-        val roundedIndex = floor(index).toInt()
-        val p1 = points[roundedIndex]
-        val p2 = points[roundedIndex + 1]
-        (p2 - p1) * (index - roundedIndex) + p1
-    }
-}
 
