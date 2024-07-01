@@ -567,7 +567,7 @@ fun DrawScope.drawDots(
 
         )
         if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
-            if (!value.first.isRunning && properties.animationEnabled) {
+            if (!value.first.isRunning && properties.animationEnabled && value.first.value != 1f) {
                 scope.launch {
                     value.first.animateTo(1f, animationSpec = properties.animationSpec)
                 }
