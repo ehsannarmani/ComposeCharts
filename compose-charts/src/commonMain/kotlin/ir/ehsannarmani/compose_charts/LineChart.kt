@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -227,27 +228,20 @@ fun LineChart(
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
         Row(modifier = Modifier.fillMaxSize()) {
+            val paddingBottom = (labelAreaHeight / density.density).dp
             if (indicatorProperties.enabled) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(bottom = (labelAreaHeight / density.density).dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    split(
-                        count = indicatorProperties.count,
+                if (indicatorProperties.position == IndicatorProperties.Position.Start) {
+                    Indicator(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
                         minValue = minValue,
                         maxValue = maxValue
-                    ).forEach {
-                        BasicText(
-                            text = indicatorProperties.contentBuilder(it),
-                            style = indicatorProperties.textStyle
-                        )
-                    }
+                    )
+                    Spacer(modifier = Modifier.width(18.dp))
                 }
-                Spacer(modifier = Modifier.width(18.dp))
             }
             Canvas(modifier = Modifier
+                .weight(1f)
                 .fillMaxSize()
                 .pointerInput(data) {
                     detectDragGestures(
@@ -340,6 +334,7 @@ fun LineChart(
 
                 drawGridLines(
                     dividersProperties = dividerProperties,
+                    indicatorProperties = indicatorProperties,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     size = size.copy(height = chartAreaHeight),
@@ -432,10 +427,50 @@ fun LineChart(
                     )
                 }
             }
+            if (indicatorProperties.enabled) {
+                if (indicatorProperties.position == IndicatorProperties.Position.End) {
+                    Spacer(modifier = Modifier.width(18.dp))
+                    Indicator(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
+                        minValue = minValue,
+                        maxValue = maxValue
+                    )
+                }
+            }
         }
     }
 }
 
+@Composable
+private fun Indicator(
+    modifier: Modifier = Modifier,
+    indicatorProperties: IndicatorProperties,
+    minValue: Double,
+    maxValue: Double
+) {
+    val alignment = when (indicatorProperties.position) {
+        IndicatorProperties.Position.Start -> Alignment.Start
+        IndicatorProperties.Position.End -> Alignment.End
+    }
+    Column(
+        modifier = modifier
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = alignment
+    ) {
+        split(
+            count = indicatorProperties.count,
+            minValue = minValue,
+            maxValue = maxValue
+        ).forEach {
+            BasicText(
+                text = indicatorProperties.contentBuilder(it),
+                style = indicatorProperties.textStyle
+            )
+        }
+    }
+}
 
 private fun DrawScope.drawPopup(
     popup: Popup,

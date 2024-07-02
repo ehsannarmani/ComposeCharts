@@ -8,7 +8,13 @@ data class IndicatorProperties(
     val enabled:Boolean = true,
     val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
     val count: Int = 5,
+    val position: Position = Position.Start,
     val contentBuilder: (Double) -> String = {
         it.format(1)
-    },
-)
+    }
+) {
+    enum class Position {
+        Start,
+        End
+    }
+}

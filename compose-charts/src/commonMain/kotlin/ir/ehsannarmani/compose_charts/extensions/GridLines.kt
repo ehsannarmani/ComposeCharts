@@ -5,9 +5,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 
 fun DrawScope.drawGridLines(
     dividersProperties: DividerProperties,
+    indicatorProperties: IndicatorProperties = IndicatorProperties(position = IndicatorProperties.Position.Start),
     gridEnabled: Boolean,
     xAxisProperties: GridProperties.AxisProperties,
     yAxisProperties: GridProperties.AxisProperties,
@@ -46,10 +48,14 @@ fun DrawScope.drawGridLines(
         }
     }
     if (yAxisProperties.enabled && gridEnabled) {
+        val x = when (indicatorProperties.position) {
+            IndicatorProperties.Position.Start -> this.size.width
+            IndicatorProperties.Position.End -> 0f
+        }
         drawLine(
             brush = yAxisProperties.color,
-            start = Offset(this.size.width, 0f),
-            end = Offset(this.size.width, _size.height),
+            start = Offset(x, 0f),
+            end = Offset(x, _size.height),
             strokeWidth = yAxisProperties.thickness.toPx(),
             pathEffect = yAxisPathEffect
         )
@@ -64,10 +70,14 @@ fun DrawScope.drawGridLines(
         )
     }
     if (dividersProperties.yAxisProperties.enabled && dividersProperties.enabled) {
+        val x = when (indicatorProperties.position) {
+            IndicatorProperties.Position.Start -> 0f
+            IndicatorProperties.Position.End -> _size.width
+        }
         drawLine(
             brush = dividersProperties.yAxisProperties.color,
-            start = Offset(0f + xPadding, 0f),
-            end = Offset(0f + xPadding, _size.height),
+            start = Offset(x + xPadding, 0f),
+            end = Offset(x + xPadding, _size.height),
             strokeWidth = dividersProperties.yAxisProperties.thickness.toPx(),
             pathEffect = dividersProperties.yAxisProperties.style.pathEffect
         )
