@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -46,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
+import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -60,9 +62,6 @@ import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
-import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
-import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
-import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -449,15 +448,10 @@ private fun Indicator(
     minValue: Double,
     maxValue: Double
 ) {
-    val alignment = when (indicatorProperties.position) {
-        IndicatorProperties.Position.Start -> Alignment.Start
-        IndicatorProperties.Position.End -> Alignment.End
-    }
     Column(
         modifier = modifier
             .fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = alignment
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         split(
             count = indicatorProperties.count,
