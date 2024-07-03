@@ -55,7 +55,8 @@ import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
@@ -82,7 +83,9 @@ fun LineChart(
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
+        textStyle = TextStyle.Default
+    ),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
@@ -229,7 +232,7 @@ fun LineChart(
         Row(modifier = Modifier.fillMaxSize()) {
             val paddingBottom = (labelAreaHeight / density.density).dp
             if (indicatorProperties.enabled) {
-                if (indicatorProperties.position == IndicatorProperties.Position.Start) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
                     Indicator(
                         modifier = Modifier.padding(bottom = paddingBottom),
                         indicatorProperties = indicatorProperties,
@@ -252,13 +255,15 @@ fun LineChart(
                             }
                         },
                         onDrag = { change, amount ->
-                            val _size = size.toSize().copy(height = (size.height - labelAreaHeight).toFloat())
+                            val _size = size.toSize()
+                                .copy(height = (size.height - labelAreaHeight).toFloat())
                             popups.clear()
                             data.forEach {
                                 val properties = it.popupProperties ?: popupProperties
 
                                 if (properties.enabled) {
-                                    val positionX = (change.position.x).coerceIn(0f, size.width.toFloat())
+                                    val positionX =
+                                        (change.position.x).coerceIn(0f, size.width.toFloat())
                                     val fraction = (positionX / size.width)
                                     val popupValue = getPopupValue(
                                         points = it.values,
@@ -333,7 +338,7 @@ fun LineChart(
 
                 drawGridLines(
                     dividersProperties = dividerProperties,
-                    indicatorProperties = indicatorProperties,
+                    indicatorPosition = indicatorProperties.position,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     size = size.copy(height = chartAreaHeight),
@@ -427,7 +432,7 @@ fun LineChart(
                 }
             }
             if (indicatorProperties.enabled) {
-                if (indicatorProperties.position == IndicatorProperties.Position.End) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
                     Spacer(modifier = Modifier.width(18.dp))
                     Indicator(
                         modifier = Modifier.padding(bottom = paddingBottom),
@@ -444,7 +449,7 @@ fun LineChart(
 @Composable
 private fun Indicator(
     modifier: Modifier = Modifier,
-    indicatorProperties: IndicatorProperties,
+    indicatorProperties: HorizontalIndicatorProperties,
     minValue: Double,
     maxValue: Double
 ) {

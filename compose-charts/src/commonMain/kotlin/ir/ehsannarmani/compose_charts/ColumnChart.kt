@@ -52,7 +52,8 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
@@ -75,7 +76,9 @@ fun ColumnChart(
         textStyle = TextStyle.Default,
         enabled = true
     ),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
+        textStyle = TextStyle.Default
+    ),
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
@@ -146,7 +149,7 @@ fun ColumnChart(
     }
 
     val xPadding = remember {
-        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorProperties.Position.Start) {
+        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
             indicatorAreaWidth
         } else {
             0f
@@ -276,8 +279,8 @@ fun ColumnChart(
                                 style = indicatorProperties.textStyle
                             )
                         val x = when (indicatorProperties.position) {
-                            IndicatorProperties.Position.Start -> 0f
-                            IndicatorProperties.Position.End -> barsAreaWidth + 16 * density.density
+                            IndicatorPosition.Horizontal.Start -> 0f
+                            IndicatorPosition.Horizontal.End -> barsAreaWidth + 16 * density.density
                         }
                         drawText(
                             textLayoutResult = measureResult,
@@ -296,7 +299,7 @@ fun ColumnChart(
                     xPadding = xPadding,
                     size = size.copy(width = barsAreaWidth),
                     dividersProperties = dividerProperties,
-                    indicatorProperties = indicatorProperties,
+                    indicatorPosition = indicatorProperties.position,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     gridEnabled = gridProperties.enabled
@@ -361,7 +364,7 @@ fun ColumnChart(
             Spacer(modifier = Modifier.height(labelProperties.padding))
 
             val widthModifier =
-                if (indicatorProperties.position == IndicatorProperties.Position.End) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
                     Modifier.width((chartWidth.value / density.density).dp)
                 } else {
                     Modifier.fillMaxWidth()

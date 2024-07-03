@@ -53,11 +53,12 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
+import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.delay
@@ -70,13 +71,13 @@ fun RowChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
-    onBarClick:((Bars.Data)->Unit)? = null,
-    onBarLongClick:((Bars.Data)->Unit)? = null,
+    onBarClick: ((Bars.Data) -> Unit)? = null,
+    onBarLongClick: ((Bars.Data) -> Unit)? = null,
     labelProperties: LabelProperties = LabelProperties(
         enabled = true,
         textStyle = TextStyle.Default
     ),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    indicatorProperties: VerticalIndicatorProperties = VerticalIndicatorProperties(textStyle = TextStyle.Default),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
@@ -172,10 +173,14 @@ fun RowChart(
         }
         Row(modifier = Modifier.fillMaxSize()) {
             if (labelProperties.enabled) {
+                val paddingY = (indicatorAreaHeight / density.density).dp
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(bottom = (indicatorAreaHeight / density.density).dp)
+                        .padding(
+                            top = if (indicatorProperties.position == IndicatorPosition.Vertical.Top) paddingY else 0.dp,
+                            bottom = if (indicatorProperties.position == IndicatorPosition.Vertical.Bottom) paddingY else 0.dp
+                        )
                         .padding(vertical = (((everyDataHeight) / data.count()) / density.density).dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -214,16 +219,16 @@ fun RowChart(
                             }
                     }
                 }
-                .pointerInput(Unit){
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
                             val position = Offset(it.x, it.y)
                             barWithRect
-                                .lastOrNull { (bar,rect)->
+                                .lastOrNull { (bar, rect) ->
                                     rect.contains(position)
                                 }
                                 ?.let { (bar, rect) ->
-                                    if (popupProperties.enabled){
+                                    if (popupProperties.enabled) {
                                         selectedBar.value = SelectedBar(
                                             bar = bar,
                                             rect = rect,
@@ -246,7 +251,7 @@ fun RowChart(
                         onLongPress = {
                             val position = Offset(it.x, it.y)
                             barWithRect
-                                .lastOrNull { (bar,rect)->
+                                .lastOrNull { (bar, rect) ->
                                     rect.contains(position)
                                 }
                                 ?.let { (bar, rect) ->
@@ -271,12 +276,17 @@ fun RowChart(
                     value = 0.0f
                 )
 
+                val yPadding =
+                    if (indicatorProperties.position == IndicatorPosition.Vertical.Top) indicatorAreaHeight.toFloat() else 0f
+
                 drawGridLines(
                     size = size.copy(height = barAreaHeight, width = barAreaWidth),
+                    indicatorPosition = indicatorProperties.position,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     dividersProperties = dividerProperties,
-                    gridEnabled = gridProperties.enabled
+                    gridEnabled = gridProperties.enabled,
+                    yPadding = yPadding
                 )
                 data.forEachIndexed { dataIndex, bars ->
                     bars.values.forEachIndexed { barIndex, bar ->
@@ -297,8 +307,10 @@ fun RowChart(
                             (if (bar.value > 0) size.width - zeroX else (size.width - zeroX - width.absoluteValue.toFloat()).coerceAtLeast(
                                 0.0
                             )).toFloat()
+                        val y =
+                            if (indicatorProperties.position == IndicatorPosition.Vertical.Top) barY + indicatorAreaHeight else barY
                         val rect = Rect(
-                            offset = Offset(x = barX, y = barY),
+                            offset = Offset(x = barX, y = y),
                             size = Size(height = stroke, width = width.absoluteValue.toFloat())
                         )
 
@@ -334,13 +346,18 @@ fun RowChart(
                                 indicatorProperties.contentBuilder(indicator),
                                 style = indicatorProperties.textStyle
                             )
+                        val textHeight = measureResult.size.height
+                        val y = when (indicatorProperties.position) {
+                            IndicatorPosition.Vertical.Top -> 0f - textHeight / 2
+                            IndicatorPosition.Vertical.Bottom -> size.height - indicatorAreaHeight / 2
+                        }
                         drawText(
                             textLayoutResult = measureResult,
                             topLeft = Offset(
                                 x = (barAreaWidth - measureResult.size.width).spaceBetween(
                                     itemCount = indicators.count(),
                                     index = index
-                                ), y = size.height - indicatorAreaHeight / 2
+                                ), y = y
                             )
                         )
                     }
