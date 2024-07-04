@@ -36,7 +36,7 @@
 
 ### Gradle Setup
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=6)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=7)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
 ```gradle
 dependencies {
     implementation ("io.github.ehsannarmani:compose-charts:latest_version")
@@ -547,22 +547,41 @@ val dotProperties = DotProperties(
 ### Indicators: `IndicatorProperties`
 > Usage: In every chart you can set properties of counters next to the chart
 
-| Property         | Type               | Default                | Description         |
-|------------------|--------------------|------------------------|---------------------|
-| `enabled`        | Boolean            | `true`                 | specifies indicator visiblity 
-| `textStyle`      | TextStyle          | `TextStyle.Default`    | specifies counter style 
-| `count`          | Int                | `4`                    | specifies counters count 
-| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`| specifies counter content creation template 
+| Property         | Type               | Default                 | Description                                                                                                      |
+|------------------|--------------------|-------------------------|------------------------------------------------------------------------------------------------------------------|
+| `enabled`        | Boolean            | `true`                  | specifies indicator visiblity                                                                                    
+| `textStyle`      | TextStyle          | `TextStyle.Default`     | specifies counter style                                                                                          
+| `count`          | Int                | `4`                     | specifies counters count                                                                                         
+| `position`       | IndicatorPosition  | `Depends on chart`      | specifies indicator position, in line & column charts can be: start or end, in line charts can be: top or bottom 
+| `padding`        | Dp                 | `12`                    | specifies indicator area padding with chart area                                                                 
+| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }` | specifies counter content creation template                                                                      
 
-#### Example:
+#### Example For Column/Line Charts:
 ```kotlin
-val indicatorProperties = IndicatorProperties(
+val indicatorProperties = HorizontalIndicatorProperties(
    enabled = true,
    textStyle = MaterialTheme.typography.labelSmall,
    count = 5,
+  position = IndicatorPosition.Horizontal.End,
+  padding = 32.dp,
    contentBuilder = { indicator->
         "%.2f".format(indicator)+" Million"
    }
+)
+```
+
+#### Example For Row Charts:
+
+```kotlin
+val indicatorProperties = VerticalIndicatorProperties(
+  enabled = true,
+  textStyle = MaterialTheme.typography.labelSmall,
+  count = 5,
+  position = IndicatorPosition.Vertical.Top,
+  padding = 32.dp,
+  contentBuilder = { indicator ->
+    "%.2f".format(indicator) + " Million"
+  }
 )
 ```
 
