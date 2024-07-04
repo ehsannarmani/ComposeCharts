@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,10 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.RCChartLabelHelper
-import ir.ehsannarmani.compose_charts.extensions.MotionEvent
 import ir.ehsannarmani.compose_charts.extensions.addRoundRect
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
-import ir.ehsannarmani.compose_charts.extensions.pointerInteropFilter
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -52,7 +52,8 @@ import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
@@ -75,7 +76,9 @@ fun ColumnChart(
         textStyle = TextStyle.Default,
         enabled = true
     ),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
+        textStyle = TextStyle.Default
+    ),
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
@@ -143,6 +146,18 @@ fun ColumnChart(
         } else {
             0f
         }
+    }
+
+    val xPadding = remember {
+        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+            indicatorAreaWidth
+        } else {
+            0f
+        }
+    }
+
+    val chartWidth = remember {
+        mutableFloatStateOf(0f)
     }
 
     LaunchedEffect(selectedValue.value) {
@@ -247,6 +262,7 @@ fun ColumnChart(
             ) {
 
                 val barsAreaWidth = size.width - (indicatorAreaWidth)
+                chartWidth.value = barsAreaWidth
                 val zeroY = size.height - calculateOffset(
                     maxValue = maxValue,
                     minValue = minValue,
@@ -262,10 +278,14 @@ fun ColumnChart(
                                 indicatorProperties.contentBuilder(indicator),
                                 style = indicatorProperties.textStyle
                             )
+                        val x = when (indicatorProperties.position) {
+                            IndicatorPosition.Horizontal.Start -> 0f
+                            IndicatorPosition.Horizontal.End -> barsAreaWidth + 16 * density.density
+                        }
                         drawText(
                             textLayoutResult = measureResult,
                             topLeft = Offset(
-                                x = 0f,
+                                x = x,
                                 y = (size.height - measureResult.size.height).spaceBetween(
                                     itemCount = indicators.count(),
                                     index
@@ -276,9 +296,10 @@ fun ColumnChart(
                 }
 
                 drawGridLines(
-                    xPadding = indicatorAreaWidth,
+                    xPadding = xPadding,
                     size = size.copy(width = barsAreaWidth),
                     dividersProperties = dividerProperties,
+                    indicatorPosition = indicatorProperties.position,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     gridEnabled = gridProperties.enabled
@@ -293,12 +314,11 @@ fun ColumnChart(
                             ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
                         val everyBarWidth = (stroke + spacing)
 
-
                         val barX =
                             (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
                                 itemCount = data.count(),
                                 index = dataIndex
-                            ) + indicatorAreaWidth
+                            ) + xPadding
                         val rect = Rect(
                             offset = Offset(
                                 x = barX,
@@ -342,11 +362,18 @@ fun ColumnChart(
         }
         if (labelProperties.enabled) {
             Spacer(modifier = Modifier.height(labelProperties.padding))
+
+            val widthModifier =
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                    Modifier.width((chartWidth.value / density.density).dp)
+                } else {
+                    Modifier.fillMaxWidth()
+                }
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = widthModifier
                     .padding(
-                        start = (indicatorAreaWidth / density.density).dp,
+                        start = (xPadding / density.density).dp,
                     ), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 data.forEach {

@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
+import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
+import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
 import ir.ehsannarmani.compose_charts.extensions.spaceBetween
 import ir.ehsannarmani.compose_charts.extensions.split
 import ir.ehsannarmani.compose_charts.models.AnimationMode
@@ -52,16 +55,14 @@ import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.DrawStyle
 import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
-import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
-import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
-import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -82,7 +83,9 @@ fun LineChart(
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
-    indicatorProperties: IndicatorProperties = IndicatorProperties(textStyle = TextStyle.Default),
+    indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
+        textStyle = TextStyle.Default
+    ),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     labelHelperPadding: Dp = 26.dp,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
@@ -227,27 +230,20 @@ fun LineChart(
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
         Row(modifier = Modifier.fillMaxSize()) {
+            val paddingBottom = (labelAreaHeight / density.density).dp
             if (indicatorProperties.enabled) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(bottom = (labelAreaHeight / density.density).dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    split(
-                        count = indicatorProperties.count,
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                    Indicator(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
                         minValue = minValue,
                         maxValue = maxValue
-                    ).forEach {
-                        BasicText(
-                            text = indicatorProperties.contentBuilder(it),
-                            style = indicatorProperties.textStyle
-                        )
-                    }
+                    )
+                    Spacer(modifier = Modifier.width(18.dp))
                 }
-                Spacer(modifier = Modifier.width(18.dp))
             }
             Canvas(modifier = Modifier
+                .weight(1f)
                 .fillMaxSize()
                 .pointerInput(data) {
                     detectDragGestures(
@@ -259,13 +255,15 @@ fun LineChart(
                             }
                         },
                         onDrag = { change, amount ->
-                            val _size = size.toSize().copy(height = (size.height - labelAreaHeight).toFloat())
+                            val _size = size.toSize()
+                                .copy(height = (size.height - labelAreaHeight).toFloat())
                             popups.clear()
                             data.forEach {
                                 val properties = it.popupProperties ?: popupProperties
 
                                 if (properties.enabled) {
-                                    val positionX = (change.position.x).coerceIn(0f, size.width.toFloat())
+                                    val positionX =
+                                        (change.position.x).coerceIn(0f, size.width.toFloat())
                                     val fraction = (positionX / size.width)
                                     val popupValue = getPopupValue(
                                         points = it.values,
@@ -340,6 +338,7 @@ fun LineChart(
 
                 drawGridLines(
                     dividersProperties = dividerProperties,
+                    indicatorPosition = indicatorProperties.position,
                     xAxisProperties = gridProperties.xAxisProperties,
                     yAxisProperties = gridProperties.yAxisProperties,
                     size = size.copy(height = chartAreaHeight),
@@ -432,10 +431,45 @@ fun LineChart(
                     )
                 }
             }
+            if (indicatorProperties.enabled) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                    Spacer(modifier = Modifier.width(18.dp))
+                    Indicator(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
+                        minValue = minValue,
+                        maxValue = maxValue
+                    )
+                }
+            }
         }
     }
 }
 
+@Composable
+private fun Indicator(
+    modifier: Modifier = Modifier,
+    indicatorProperties: HorizontalIndicatorProperties,
+    minValue: Double,
+    maxValue: Double
+) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        split(
+            count = indicatorProperties.count,
+            minValue = minValue,
+            maxValue = maxValue
+        ).forEach {
+            BasicText(
+                text = indicatorProperties.contentBuilder(it),
+                style = indicatorProperties.textStyle
+            )
+        }
+    }
+}
 
 private fun DrawScope.drawPopup(
     popup: Popup,
