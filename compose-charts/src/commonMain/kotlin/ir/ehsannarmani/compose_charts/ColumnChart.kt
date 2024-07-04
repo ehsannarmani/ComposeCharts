@@ -3,6 +3,7 @@ package ir.ehsannarmani.compose_charts
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -16,13 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -35,10 +30,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -81,9 +78,9 @@ fun ColumnChart(
     dividerProperties: DividerProperties = DividerProperties(),
     gridProperties: GridProperties = GridProperties(),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
-    animationMode: AnimationMode = AnimationMode.Together(),
-    animationSpec: AnimationSpec<Float> = snap(),
-    animationDelay: Long = 200,
+    animationMode: AnimationMode = AnimationMode.Together { it * 200L },
+    animationSpec: AnimationSpec<Float> = tween(500),
+    animationDelay: Long = 100,
     textMeasurer: TextMeasurer = rememberTextMeasurer(),
     popupProperties: PopupProperties = PopupProperties(
         textStyle = TextStyle.Default.copy(
@@ -176,57 +173,28 @@ fun ColumnChart(
             barWithRect.clear()
         }
     )
-    Column(modifier = modifier) {
-        if (labelHelperProperties.enabled) {
-            RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-        ) {
-            val scope = rememberCoroutineScope()
-            Canvas(modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(Unit) {
-                    if (popupProperties.enabled) {
-                        detectDragGestures { change, dragAmount ->
-                            barWithRect
-                                .lastOrNull { (_, rect) ->
-                                    change.position.x in rect.left..rect.right
-                                }
-                                ?.let { (bar, rect) ->
-                                    selectedValue.value = SelectedBar(
-                                        bar = bar,
-                                        rect = rect,
-                                        offset = Offset(
-                                            rect.left,
-                                            if (bar.value < 0) rect.bottom else rect.top
-                                        )
-                                    )
-                                    scope.launch {
-                                        if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                            popupAnimation.animateTo(
-                                                1f,
-                                                animationSpec = popupProperties.animationSpec
-                                            )
-                                        }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Column(modifier = modifier) {
+            if (labelHelperProperties.enabled) {
+                RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                val scope = rememberCoroutineScope()
+                Canvas(modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        if (popupProperties.enabled) {
+                            detectDragGestures { change, dragAmount ->
+                                barWithRect
+                                    .lastOrNull { (_, rect) ->
+                                        change.position.x in rect.left..rect.right
                                     }
-                                }
-                        }
-                    }
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = {
-                            val position = Offset(it.x, it.y)
-                            barWithRect
-                                .lastOrNull { (_, rect) ->
-                                    rect.contains(position)
-                                }
-                                ?.let { (bar, rect) ->
-                                    if (popupProperties.enabled) {
+                                    ?.let { (bar, rect) ->
                                         selectedValue.value = SelectedBar(
                                             bar = bar,
                                             rect = rect,
@@ -236,154 +204,185 @@ fun ColumnChart(
                                             )
                                         )
                                         scope.launch {
-                                            popupAnimation.snapTo(0f)
-                                            popupAnimation.animateTo(
-                                                1f,
-                                                animationSpec = popupProperties.animationSpec
-                                            )
+                                            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                                popupAnimation.animateTo(
+                                                    1f,
+                                                    animationSpec = popupProperties.animationSpec
+                                                )
+                                            }
                                         }
                                     }
-                                    onBarClick?.invoke(bar)
-                                }
-                        },
-                        onLongPress = {
-                            val position = Offset(it.x, it.y)
-                            barWithRect
-                                .lastOrNull { (_, rect) ->
-                                    rect.contains(position)
-                                }
-                                ?.let { (bar, _) ->
-                                    onBarLongClick?.invoke(bar)
-                                }
+                            }
                         }
-                    )
-                }
-            ) {
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                val position = Offset(it.x, it.y)
+                                barWithRect
+                                    .lastOrNull { (_, rect) ->
+                                        rect.contains(position)
+                                    }
+                                    ?.let { (bar, rect) ->
+                                        if (popupProperties.enabled) {
+                                            selectedValue.value = SelectedBar(
+                                                bar = bar,
+                                                rect = rect,
+                                                offset = Offset(
+                                                    rect.left,
+                                                    if (bar.value < 0) rect.bottom else rect.top
+                                                )
+                                            )
+                                            scope.launch {
+                                                popupAnimation.snapTo(0f)
+                                                popupAnimation.animateTo(
+                                                    1f,
+                                                    animationSpec = popupProperties.animationSpec
+                                                )
+                                            }
+                                        }
+                                        onBarClick?.invoke(bar)
+                                    }
+                            },
+                            onLongPress = {
+                                val position = Offset(it.x, it.y)
+                                barWithRect
+                                    .lastOrNull { (_, rect) ->
+                                        rect.contains(position)
+                                    }
+                                    ?.let { (bar, _) ->
+                                        onBarLongClick?.invoke(bar)
+                                    }
+                            }
+                        )
+                    }
+                ) {
 
-                val barsAreaWidth = size.width - (indicatorAreaWidth)
-                chartWidth.value = barsAreaWidth
-                val zeroY = size.height - calculateOffset(
-                    maxValue = maxValue,
-                    minValue = minValue,
-                    total = size.height,
-                    value = 0.0f
-                ).toFloat()
+                    val barsAreaWidth = size.width - (indicatorAreaWidth)
+                    chartWidth.value = barsAreaWidth
+                    val zeroY = size.height - calculateOffset(
+                        maxValue = maxValue,
+                        minValue = minValue,
+                        total = size.height,
+                        value = 0.0f
+                    ).toFloat()
 
 
-                if (indicatorProperties.enabled) {
-                    indicators.forEachIndexed { index, indicator ->
-                        val measureResult =
-                            textMeasurer.measure(
-                                indicatorProperties.contentBuilder(indicator),
-                                style = indicatorProperties.textStyle
-                            )
-                        val x = when (indicatorProperties.position) {
-                            IndicatorPosition.Horizontal.Start -> 0f
-                            IndicatorPosition.Horizontal.End -> barsAreaWidth + indicatorProperties.padding.value * density.density
-                        }
-                        drawText(
-                            textLayoutResult = measureResult,
-                            topLeft = Offset(
-                                x = x,
-                                y = (size.height - measureResult.size.height).spaceBetween(
-                                    itemCount = indicators.count(),
-                                    index
+                    if (indicatorProperties.enabled) {
+                        indicators.forEachIndexed { index, indicator ->
+                            val measureResult =
+                                textMeasurer.measure(
+                                    indicatorProperties.contentBuilder(indicator),
+                                    style = indicatorProperties.textStyle
+                                )
+                            val x = when (indicatorProperties.position) {
+                                IndicatorPosition.Horizontal.Start -> 0f
+                                IndicatorPosition.Horizontal.End -> barsAreaWidth + indicatorProperties.padding.value * density.density
+                            }
+                            drawText(
+                                textLayoutResult = measureResult,
+                                topLeft = Offset(
+                                    x = x,
+                                    y = (size.height - measureResult.size.height).spaceBetween(
+                                        itemCount = indicators.count(),
+                                        index
+                                    )
                                 )
                             )
+                        }
+                    }
+
+                    drawGridLines(
+                        xPadding = xPadding,
+                        size = size.copy(width = barsAreaWidth),
+                        dividersProperties = dividerProperties,
+                        indicatorPosition = indicatorProperties.position,
+                        xAxisProperties = gridProperties.xAxisProperties,
+                        yAxisProperties = gridProperties.yAxisProperties,
+                        gridEnabled = gridProperties.enabled
+                    )
+
+                    data.forEachIndexed { dataIndex, columnChart ->
+                        columnChart.values.forEachIndexed { valueIndex, col ->
+                            val stroke = (col.properties?.thickness ?: barProperties.thickness).toPx()
+                            val spacing = (col.properties?.spacing ?: barProperties.spacing).toPx()
+
+                            val barHeight =
+                                ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
+                            val everyBarWidth = (stroke + spacing)
+
+                            val barX =
+                                (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
+                                    itemCount = data.count(),
+                                    index = dataIndex
+                                ) + xPadding
+                            val rect = Rect(
+                                offset = Offset(
+                                    x = barX,
+                                    y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
+                                ),
+                                size = Size(width = stroke, height = barHeight.absoluteValue.toFloat()),
+                            )
+                            if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
+                            val path = Path()
+
+                            var radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius)
+                            if (col.value < 0) {
+                                radius = radius.reverse()
+                            }
+
+                            path.addRoundRect(rect = rect, radius = radius)
+                            val alpha = if (rect == selectedValue.value?.rect) {
+                                1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
+                            } else {
+                                1f
+                            }
+                            drawPath(
+                                path = path,
+                                brush = col.color,
+                                alpha = alpha,
+                                style = (col.properties?.style
+                                    ?: barProperties.style).getStyle(density.density)
+                            )
+                        }
+                    }
+                    selectedValue.value?.let { selectedValue ->
+                        drawPopup(
+                            selectedBar = selectedValue,
+                            properties = popupProperties,
+                            textMeasurer = textMeasurer,
+                            progress = popupAnimation.value
+                        )
+                    }
+
+                }
+            }
+            if (labelProperties.enabled) {
+                Spacer(modifier = Modifier.height(labelProperties.padding))
+
+                val widthModifier =
+                    if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                        Modifier.width((chartWidth.value / density.density).dp)
+                    } else {
+                        Modifier.fillMaxWidth()
+                    }
+
+                Row(
+                    modifier = widthModifier
+                        .padding(
+                            start = (xPadding / density.density).dp,
+                        ), horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    data.forEach {
+                        BasicText(
+                            text = it.label,
+                            style = labelProperties.textStyle,
                         )
                     }
                 }
-
-                drawGridLines(
-                    xPadding = xPadding,
-                    size = size.copy(width = barsAreaWidth),
-                    dividersProperties = dividerProperties,
-                    indicatorPosition = indicatorProperties.position,
-                    xAxisProperties = gridProperties.xAxisProperties,
-                    yAxisProperties = gridProperties.yAxisProperties,
-                    gridEnabled = gridProperties.enabled
-                )
-
-                data.forEachIndexed { dataIndex, columnChart ->
-                    columnChart.values.forEachIndexed { valueIndex, col ->
-                        val stroke = (col.properties?.thickness ?: barProperties.thickness).toPx()
-                        val spacing = (col.properties?.spacing ?: barProperties.spacing).toPx()
-
-                        val barHeight =
-                            ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
-                        val everyBarWidth = (stroke + spacing)
-
-                        val barX =
-                            (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
-                                itemCount = data.count(),
-                                index = dataIndex
-                            ) + xPadding
-                        val rect = Rect(
-                            offset = Offset(
-                                x = barX,
-                                y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
-                            ),
-                            size = Size(width = stroke, height = barHeight.absoluteValue.toFloat()),
-                        )
-                        if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
-                        val path = Path()
-
-                        var radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius)
-                        if (col.value < 0) {
-                            radius = radius.reverse()
-                        }
-
-                        path.addRoundRect(rect = rect, radius = radius)
-                        val alpha = if (rect == selectedValue.value?.rect) {
-                            1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
-                        } else {
-                            1f
-                        }
-                        drawPath(
-                            path = path,
-                            brush = col.color,
-                            alpha = alpha,
-                            style = (col.properties?.style
-                                ?: barProperties.style).getStyle(density.density)
-                        )
-                    }
-                }
-                selectedValue.value?.let { selectedValue ->
-                    drawPopup(
-                        selectedBar = selectedValue,
-                        properties = popupProperties,
-                        textMeasurer = textMeasurer,
-                        progress = popupAnimation.value
-                    )
-                }
-
             }
+
         }
-        if (labelProperties.enabled) {
-            Spacer(modifier = Modifier.height(labelProperties.padding))
-
-            val widthModifier =
-                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                    Modifier.width((chartWidth.value / density.density).dp)
-                } else {
-                    Modifier.fillMaxWidth()
-                }
-
-            Row(
-                modifier = widthModifier
-                    .padding(
-                        start = (xPadding / density.density).dp,
-                    ), horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                data.forEach {
-                    BasicText(
-                        text = it.label,
-                        style = labelProperties.textStyle,
-                    )
-                }
-            }
-        }
-
     }
 }
 

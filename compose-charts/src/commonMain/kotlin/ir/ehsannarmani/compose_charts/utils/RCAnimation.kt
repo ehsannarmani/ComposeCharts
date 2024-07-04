@@ -24,8 +24,9 @@ fun ImplementRCAnimation(
     LaunchedEffect(data) {
         before()
         delay(delay)
-        data.forEachIndexed { colIndex, columnChart ->
-            columnChart.values.forEachIndexed { dataIndex, data ->
+        data.filter { it.values.any { it.value != 0.0 } }.forEachIndexed { colIndex, columnChart ->
+            // animate just values which greater than zero
+            columnChart.values.filter { it.value != 0.0 }.forEachIndexed { dataIndex, data ->
                 val animate: suspend () -> Unit = {
                     data.animator.animateTo(
                         1f,

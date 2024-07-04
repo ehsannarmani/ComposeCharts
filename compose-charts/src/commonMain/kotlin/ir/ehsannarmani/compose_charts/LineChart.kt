@@ -15,11 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -35,14 +31,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.unit.*
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
@@ -222,225 +216,227 @@ fun LineChart(
         }
     }
 
-    Column(modifier = modifier) {
-        if (labelHelperProperties.enabled) {
-            LabelHelper(
-                data = data.map { it.label to it.color },
-                textStyle = labelHelperProperties.textStyle
-            )
-            Spacer(modifier = Modifier.height(labelHelperPadding))
-        }
-        Row(modifier = Modifier.fillMaxSize()) {
-            val paddingBottom = (labelAreaHeight / density.density).dp
-            if (indicatorProperties.enabled) {
-                if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                    Indicators(
-                        modifier = Modifier.padding(bottom = paddingBottom),
-                        indicatorProperties = indicatorProperties,
-                        minValue = minValue,
-                        maxValue = maxValue
-                    )
-                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
-                }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Column(modifier = modifier) {
+            if (labelHelperProperties.enabled) {
+                LabelHelper(
+                    data = data.map { it.label to it.color },
+                    textStyle = labelHelperProperties.textStyle
+                )
+                Spacer(modifier = Modifier.height(labelHelperPadding))
             }
-            Canvas(modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .pointerInput(data) {
-                    detectDragGestures(
-                        onDragEnd = {
-                            scope.launch {
-                                popupAnimation.animateTo(0f, animationSpec = tween(500))
+            Row(modifier = Modifier.fillMaxSize()) {
+                val paddingBottom = (labelAreaHeight / density.density).dp
+                if (indicatorProperties.enabled) {
+                    if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                        Indicators(
+                            modifier = Modifier.padding(bottom = paddingBottom),
+                            indicatorProperties = indicatorProperties,
+                            minValue = minValue,
+                            maxValue = maxValue
+                        )
+                        Spacer(modifier = Modifier.width(indicatorProperties.padding))
+                    }
+                }
+                Canvas(modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .pointerInput(data) {
+                        detectDragGestures(
+                            onDragEnd = {
+                                scope.launch {
+                                    popupAnimation.animateTo(0f, animationSpec = tween(500))
+                                    popups.clear()
+                                    popupsOffsetAnimators.clear()
+                                }
+                            },
+                            onDrag = { change, amount ->
+                                val _size = size.toSize()
+                                    .copy(height = (size.height - labelAreaHeight).toFloat())
                                 popups.clear()
-                                popupsOffsetAnimators.clear()
-                            }
-                        },
-                        onDrag = { change, amount ->
-                            val _size = size.toSize()
-                                .copy(height = (size.height - labelAreaHeight).toFloat())
-                            popups.clear()
-                            data.forEach {
-                                val properties = it.popupProperties ?: popupProperties
+                                data.forEach {
+                                    val properties = it.popupProperties ?: popupProperties
 
-                                if (properties.enabled) {
-                                    val positionX =
-                                        (change.position.x).coerceIn(0f, size.width.toFloat())
-                                    val fraction = (positionX / size.width)
-                                    val popupValue = getPopupValue(
-                                        points = it.values,
-                                        fraction = fraction.toDouble(),
-                                        rounded = it.curvedEdges ?: curvedEdges,
-                                        size = _size,
-                                        minValue = minValue,
-                                        maxValue = maxValue
-                                    )
-                                    popups.add(
-                                        Popup(
-                                            position = popupValue.offset,
-                                            value = popupValue.calculatedValue,
-                                            properties = properties
+                                    if (properties.enabled) {
+                                        val positionX =
+                                            (change.position.x).coerceIn(0f, size.width.toFloat())
+                                        val fraction = (positionX / size.width)
+                                        val popupValue = getPopupValue(
+                                            points = it.values,
+                                            fraction = fraction.toDouble(),
+                                            rounded = it.curvedEdges ?: curvedEdges,
+                                            size = _size,
+                                            minValue = minValue,
+                                            maxValue = maxValue
                                         )
-                                    )
-                                    // add popup offset animators
-                                    if (popupsOffsetAnimators.count() < popups.count()) {
-                                        repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                            popupsOffsetAnimators.add(
-                                                Animatable(0f) to Animatable(
-                                                    0f
-                                                )
+                                        popups.add(
+                                            Popup(
+                                                position = popupValue.offset,
+                                                value = popupValue.calculatedValue,
+                                                properties = properties
                                             )
+                                        )
+                                        // add popup offset animators
+                                        if (popupsOffsetAnimators.count() < popups.count()) {
+                                            repeat(popups.count() - popupsOffsetAnimators.count()) {
+                                                popupsOffsetAnimators.add(
+                                                    Animatable(0f) to Animatable(
+                                                        0f
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            scope.launch {
-                                // animate popup (alpha)
-                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                    popupAnimation.animateTo(1f, animationSpec = tween(500))
+                                scope.launch {
+                                    // animate popup (alpha)
+                                    if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                        popupAnimation.animateTo(1f, animationSpec = tween(500))
+                                    }
                                 }
                             }
-                        }
-                    )
-                }
-            ) {
-                val chartAreaHeight = size.height - labelAreaHeight
-                val drawZeroLine = {
-                    val zeroY = chartAreaHeight - calculateOffset(
-                        minValue = minValue,
-                        maxValue = maxValue,
-                        total = chartAreaHeight,
-                        value = 0f
-                    ).toFloat()
-                    drawLine(
-                        brush = zeroLineProperties.color,
-                        start = Offset(x = 0f, y = zeroY),
-                        end = Offset(x = size.width * zeroLineAnimation.value, y = zeroY),
-                        pathEffect = zeroLineProperties.style.pathEffect,
-                        strokeWidth = zeroLineProperties.thickness.toPx()
-                    )
-                }
+                        )
+                    }
+                ) {
+                    val chartAreaHeight = size.height - labelAreaHeight
+                    val drawZeroLine = {
+                        val zeroY = chartAreaHeight - calculateOffset(
+                            minValue = minValue,
+                            maxValue = maxValue,
+                            total = chartAreaHeight,
+                            value = 0f
+                        ).toFloat()
+                        drawLine(
+                            brush = zeroLineProperties.color,
+                            start = Offset(x = 0f, y = zeroY),
+                            end = Offset(x = size.width * zeroLineAnimation.value, y = zeroY),
+                            pathEffect = zeroLineProperties.style.pathEffect,
+                            strokeWidth = zeroLineProperties.thickness.toPx()
+                        )
+                    }
 
-                if (labelProperties.enabled) {
-                    labelProperties.labels.forEachIndexed { index, label ->
-                        val measureResult =
-                            textMeasurer.measure(label, style = labelProperties.textStyle)
-                        drawText(
-                            textLayoutResult = measureResult,
-                            topLeft = Offset(
-                                (size.width - measureResult.size.width).spaceBetween(
-                                    itemCount = labelProperties.labels.count(),
-                                    index = index
-                                ),
-                                size.height - labelAreaHeight + labelProperties.padding.toPx()
+                    if (labelProperties.enabled) {
+                        labelProperties.labels.forEachIndexed { index, label ->
+                            val measureResult =
+                                textMeasurer.measure(label, style = labelProperties.textStyle)
+                            drawText(
+                                textLayoutResult = measureResult,
+                                topLeft = Offset(
+                                    (size.width - measureResult.size.width).spaceBetween(
+                                        itemCount = labelProperties.labels.count(),
+                                        index = index
+                                    ),
+                                    size.height - labelAreaHeight + labelProperties.padding.toPx()
+                                )
                             )
-                        )
-                    }
-                }
-
-                drawGridLines(
-                    dividersProperties = dividerProperties,
-                    indicatorPosition = indicatorProperties.position,
-                    xAxisProperties = gridProperties.xAxisProperties,
-                    yAxisProperties = gridProperties.yAxisProperties,
-                    size = size.copy(height = chartAreaHeight),
-                    gridEnabled = gridProperties.enabled
-                )
-                if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
-                    drawZeroLine()
-                }
-                data.forEachIndexed { index, line ->
-                    val path = getLinePath(
-                        dataPoints = line.values.map { it.toFloat() },
-                        maxValue = maxValue.toFloat(),
-                        minValue = minValue.toFloat(),
-                        rounded = line.curvedEdges ?: curvedEdges,
-                        size = size.copy(height = chartAreaHeight)
-                    )
-                    val segmentedPath = Path()
-                    pathMeasure.setPath(path, false)
-                    pathMeasure.getSegment(
-                        0f,
-                        pathMeasure.length * line.strokeProgress.value,
-                        segmentedPath
-                    )
-                    var pathEffect: PathEffect? = null
-                    val stroke: Float = when (val drawStyle = line.drawStyle) {
-                        is DrawStyle.Fill -> {
-                            0f
-                        }
-
-                        is DrawStyle.Stroke -> {
-                            pathEffect = drawStyle.strokeStyle.pathEffect
-                            drawStyle.width.toPx()
                         }
                     }
-                    drawPath(
-                        path = segmentedPath,
-                        brush = line.color,
-                        style = Stroke(width = stroke, pathEffect = pathEffect)
-                    )
-                    if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
-                        drawLineGradient(
-                            path = path,
-                            color1 = line.firstGradientFillColor,
-                            color2 = line.secondGradientFillColor,
-                            progress = line.gradientProgress.value,
-                            size = size.copy(height = chartAreaHeight)
-                        )
-                    } else if (line.drawStyle is DrawStyle.Fill) {
-                        var fillColor = Color.Unspecified
-                        if (line.color is SolidColor) {
-                            fillColor = line.color.value
-                        }
-                        drawLineGradient(
-                            path = path,
-                            color1 = fillColor,
-                            color2 = fillColor,
-                            progress = 1f,
-                            size = size.copy(height = chartAreaHeight)
-                        )
-                    }
 
-                    if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
-                        drawDots(
-                            dataPoints = line.values.mapIndexed { mapIndex, value ->
-                                (dotAnimators.getOrNull(
-                                    index
-                                )?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat()
-                            },
-                            properties = line.dotProperties ?: dotsProperties,
-                            linePath = segmentedPath,
+                    drawGridLines(
+                        dividersProperties = dividerProperties,
+                        indicatorPosition = indicatorProperties.position,
+                        xAxisProperties = gridProperties.xAxisProperties,
+                        yAxisProperties = gridProperties.yAxisProperties,
+                        size = size.copy(height = chartAreaHeight),
+                        gridEnabled = gridProperties.enabled
+                    )
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+                        drawZeroLine()
+                    }
+                    data.forEachIndexed { index, line ->
+                        val path = getLinePath(
+                            dataPoints = line.values.map { it.toFloat() },
                             maxValue = maxValue.toFloat(),
                             minValue = minValue.toFloat(),
-                            pathMeasure = pathMeasure,
-                            scope = scope,
+                            rounded = line.curvedEdges ?: curvedEdges,
                             size = size.copy(height = chartAreaHeight)
+                        )
+                        val segmentedPath = Path()
+                        pathMeasure.setPath(path, false)
+                        pathMeasure.getSegment(
+                            0f,
+                            pathMeasure.length * line.strokeProgress.value,
+                            segmentedPath
+                        )
+                        var pathEffect: PathEffect? = null
+                        val stroke: Float = when (val drawStyle = line.drawStyle) {
+                            is DrawStyle.Fill -> {
+                                0f
+                            }
+
+                            is DrawStyle.Stroke -> {
+                                pathEffect = drawStyle.strokeStyle.pathEffect
+                                drawStyle.width.toPx()
+                            }
+                        }
+                        drawPath(
+                            path = segmentedPath,
+                            brush = line.color,
+                            style = Stroke(width = stroke, pathEffect = pathEffect)
+                        )
+                        if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
+                            drawLineGradient(
+                                path = path,
+                                color1 = line.firstGradientFillColor,
+                                color2 = line.secondGradientFillColor,
+                                progress = line.gradientProgress.value,
+                                size = size.copy(height = chartAreaHeight)
+                            )
+                        } else if (line.drawStyle is DrawStyle.Fill) {
+                            var fillColor = Color.Unspecified
+                            if (line.color is SolidColor) {
+                                fillColor = line.color.value
+                            }
+                            drawLineGradient(
+                                path = path,
+                                color1 = fillColor,
+                                color2 = fillColor,
+                                progress = 1f,
+                                size = size.copy(height = chartAreaHeight)
+                            )
+                        }
+
+                        if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
+                            drawDots(
+                                dataPoints = line.values.mapIndexed { mapIndex, value ->
+                                    (dotAnimators.getOrNull(
+                                        index
+                                    )?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat()
+                                },
+                                properties = line.dotProperties ?: dotsProperties,
+                                linePath = segmentedPath,
+                                maxValue = maxValue.toFloat(),
+                                minValue = minValue.toFloat(),
+                                pathMeasure = pathMeasure,
+                                scope = scope,
+                                size = size.copy(height = chartAreaHeight)
+                            )
+                        }
+                    }
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+                        drawZeroLine()
+                    }
+                    popups.forEachIndexed { index, popup ->
+                        drawPopup(
+                            popup = popup,
+                            nextPopup = popups.getOrNull(index + 1),
+                            textMeasurer = textMeasurer,
+                            scope = scope,
+                            progress = popupAnimation.value,
+                            offsetAnimator = popupsOffsetAnimators.getOrNull(index)
                         )
                     }
                 }
-                if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
-                    drawZeroLine()
-                }
-                popups.forEachIndexed { index, popup ->
-                    drawPopup(
-                        popup = popup,
-                        nextPopup = popups.getOrNull(index + 1),
-                        textMeasurer = textMeasurer,
-                        scope = scope,
-                        progress = popupAnimation.value,
-                        offsetAnimator = popupsOffsetAnimators.getOrNull(index)
-                    )
-                }
-            }
-            if (indicatorProperties.enabled) {
-                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
-                    Indicators(
-                        modifier = Modifier.padding(bottom = paddingBottom),
-                        indicatorProperties = indicatorProperties,
-                        minValue = minValue,
-                        maxValue = maxValue
-                    )
+                if (indicatorProperties.enabled) {
+                    if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                        Spacer(modifier = Modifier.width(indicatorProperties.padding))
+                        Indicators(
+                            modifier = Modifier.padding(bottom = paddingBottom),
+                            indicatorProperties = indicatorProperties,
+                            minValue = minValue,
+                            maxValue = maxValue
+                        )
+                    }
                 }
             }
         }
