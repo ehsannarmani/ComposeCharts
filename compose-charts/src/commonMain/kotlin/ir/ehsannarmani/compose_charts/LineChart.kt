@@ -84,7 +84,8 @@ fun LineChart(
     gridProperties: GridProperties = GridProperties(),
     zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
     indicatorProperties: HorizontalIndicatorProperties = HorizontalIndicatorProperties(
-        textStyle = TextStyle.Default
+        textStyle = TextStyle.Default,
+        padding = 16.dp
     ),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     labelHelperPadding: Dp = 26.dp,
@@ -233,13 +234,13 @@ fun LineChart(
             val paddingBottom = (labelAreaHeight / density.density).dp
             if (indicatorProperties.enabled) {
                 if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                    Indicator(
+                    Indicators(
                         modifier = Modifier.padding(bottom = paddingBottom),
                         indicatorProperties = indicatorProperties,
                         minValue = minValue,
                         maxValue = maxValue
                     )
-                    Spacer(modifier = Modifier.width(18.dp))
+                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
                 }
             }
             Canvas(modifier = Modifier
@@ -433,8 +434,8 @@ fun LineChart(
             }
             if (indicatorProperties.enabled) {
                 if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                    Spacer(modifier = Modifier.width(18.dp))
-                    Indicator(
+                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
+                    Indicators(
                         modifier = Modifier.padding(bottom = paddingBottom),
                         indicatorProperties = indicatorProperties,
                         minValue = minValue,
@@ -447,7 +448,7 @@ fun LineChart(
 }
 
 @Composable
-private fun Indicator(
+private fun Indicators(
     modifier: Modifier = Modifier,
     indicatorProperties: HorizontalIndicatorProperties,
     minValue: Double,

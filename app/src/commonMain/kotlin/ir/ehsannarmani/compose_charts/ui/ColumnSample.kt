@@ -23,14 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.BarProperties
-import ir.ehsannarmani.compose_charts.models.Bars
-import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
-import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
-import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.*
 
 
 val columnGridProperties = GridProperties(
@@ -132,7 +125,7 @@ fun RowScope.ColumnSample() {
             ColumnChart(
                 modifier= Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 22.dp)
+                    .padding(start = 22.dp, end = 12.dp)
                 ,
                 data = data,
                 barProperties = BarProperties(
@@ -140,9 +133,10 @@ fun RowScope.ColumnSample() {
                     spacing = 3.dp,
                     thickness = 20.dp
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = 4
+                    count = 4,
+                    position = IndicatorPosition.Horizontal.Start,
                 ),
                 gridProperties = columnGridProperties,
                 labelProperties = LabelProperties(
@@ -343,7 +337,7 @@ fun RowScope.ColumnSample2() {
                     spacing = 1.dp,
                     thickness = 5.dp
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
@@ -380,7 +374,7 @@ fun RowScope.ColumnSample3() {
     val positiveBarColor = SolidColor(Color(0xFF42A5F5))
     val negativeBarColor = SolidColor(Color(0x9742A5F5))
     val data = remember {
-        MutableList(20){
+        MutableList(15) {
             val value = (-50..40).random().toDouble()
             Bars(
                 label = (it+1).toString(),
@@ -410,7 +404,7 @@ fun RowScope.ColumnSample3() {
                     spacing = 1.dp,
                     thickness = 10.dp,
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4,
                 ),

@@ -142,9 +142,9 @@ fun RowChart(
     }
     val indicatorAreaHeight = remember {
         if (indicatorProperties.enabled) {
-            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.height }
+            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.height } + indicatorProperties.padding.value * density.density
         } else {
-            0
+            0f
         }
     }
 
@@ -346,10 +346,9 @@ fun RowChart(
                                 indicatorProperties.contentBuilder(indicator),
                                 style = indicatorProperties.textStyle
                             )
-                        val textHeight = measureResult.size.height
                         val y = when (indicatorProperties.position) {
-                            IndicatorPosition.Vertical.Top -> 0f - textHeight / 2
-                            IndicatorPosition.Vertical.Bottom -> size.height - indicatorAreaHeight / 2
+                            IndicatorPosition.Vertical.Top -> 0f
+                            IndicatorPosition.Vertical.Bottom -> size.height - indicatorAreaHeight + indicatorProperties.padding.value * density.density
                         }
                         drawText(
                             textLayoutResult = measureResult,

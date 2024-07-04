@@ -23,19 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.DividerProperties
-import ir.ehsannarmani.compose_charts.models.DotProperties
-import ir.ehsannarmani.compose_charts.models.DrawStyle
-import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
-import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
-import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.Line
-import ir.ehsannarmani.compose_charts.models.LineProperties
-import ir.ehsannarmani.compose_charts.models.PopupProperties
-import ir.ehsannarmani.compose_charts.models.StrokeStyle
-import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
+import ir.ehsannarmani.compose_charts.models.*
 
 val gridProperties = GridProperties(
     xAxisProperties = GridProperties.AxisProperties(
@@ -146,14 +134,14 @@ fun RowScope.LineSample() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
-                        fontFamily = ubuntu, color = Color.White
+                        fontFamily = ubuntu, color = Color.White,
                     ),
                     contentBuilder = {
                         it.format(1) + " M"
-                    }
+                    },
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
                 curvedEdges = false
@@ -230,7 +218,7 @@ fun RowScope.LineSample2() {
                     color = SolidColor(Color(0xFFAD1457)),
                     thickness = 1.dp,
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -324,7 +312,7 @@ fun RowScope.LineSample3() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -407,7 +395,7 @@ fun RowScope.LineSample4() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -472,7 +460,7 @@ fun RowScope.LineSample5() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -578,7 +566,7 @@ fun RowScope.LineSample6() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -654,7 +642,7 @@ fun RowScope.LineSample7() {
                     },
                     containerColor = Color(0xff414141),
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
@@ -720,7 +708,7 @@ fun RowScope.LineSample8() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     enabled = false
                 ),
                 labelProperties = LabelProperties(enabled = false),
@@ -775,7 +763,7 @@ fun RowScope.LineSample9() {
                     },
                     containerColor = Color(0xff414141)
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White

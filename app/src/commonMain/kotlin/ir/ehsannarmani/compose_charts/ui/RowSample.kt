@@ -24,14 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.RowChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.BarProperties
-import ir.ehsannarmani.compose_charts.models.Bars
-import ir.ehsannarmani.compose_charts.models.GridProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
-import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
-import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.*
 
 val rowGridProperties = GridProperties(
     enabled = true,
@@ -130,7 +123,7 @@ fun RowScope.RowSample() {
         )
 
     ) {
-        Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
+        Box(modifier = Modifier.fillMaxSize().padding(top = 12.dp, bottom = 12.dp)) {
             RowChart(
                 modifier= Modifier
                     .fillMaxSize()
@@ -142,9 +135,9 @@ fun RowScope.RowSample() {
                     spacing = 4.dp,
                     thickness = 20.dp,
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = VerticalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = 4
+                    count = 4,
                 ),
                 gridProperties = rowGridProperties,
                 labelProperties = LabelProperties(
@@ -342,21 +335,20 @@ fun RowScope.RowSample2() {
     ) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             RowChart(
-                modifier= Modifier
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 22.dp)
-                ,
+                    .padding(horizontal = 22.dp),
                 data = data,
                 barProperties = BarProperties(
                     cornerRadius = Bars.Data.Radius.Rectangle(topRight = 6.dp, bottomRight = 6.dp),
                     spacing = 1.dp,
                     thickness = 5.dp
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = VerticalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4
                 ),
-                gridProperties =  rowGridProperties,
+                gridProperties = rowGridProperties,
                 labelProperties = LabelProperties(
                     enabled = true,
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
@@ -365,13 +357,15 @@ fun RowScope.RowSample2() {
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
                 ),
-                animationMode = AnimationMode.Together(delayBuilder = {it*100L}),
+                animationMode = AnimationMode.Together(delayBuilder = { it * 100L }),
                 animationDelay = 300,
-                labelHelperProperties = LabelHelperProperties(textStyle = LocalTextStyle.current.copy(
-                    fontSize = 12.sp,
-                    fontFamily = ubuntu,
-                    color = Color.White
-                )),
+                labelHelperProperties = LabelHelperProperties(
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 12.sp,
+                        fontFamily = ubuntu,
+                        color = Color.White
+                    )
+                ),
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -424,7 +418,7 @@ fun RowScope.RowSample3() {
                     spacing = 1.dp,
                     thickness = 10.dp,
                 ),
-                indicatorProperties = IndicatorProperties(
+                indicatorProperties = VerticalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 11.sp, fontFamily = ubuntu, color = Color.White),
                     count = 4,
                 ),

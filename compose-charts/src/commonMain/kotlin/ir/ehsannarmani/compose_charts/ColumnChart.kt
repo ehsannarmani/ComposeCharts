@@ -64,7 +64,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ColumnChart(
     modifier: Modifier = Modifier,
@@ -142,7 +141,7 @@ fun ColumnChart(
     }
     val indicatorAreaWidth = remember {
         if (indicatorProperties.enabled) {
-            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (16 * density.density)
+            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (indicatorProperties.padding.value * density.density)
         } else {
             0f
         }
@@ -194,7 +193,7 @@ fun ColumnChart(
                     if (popupProperties.enabled) {
                         detectDragGestures { change, dragAmount ->
                             barWithRect
-                                .lastOrNull { (value, rect) ->
+                                .lastOrNull { (_, rect) ->
                                     change.position.x in rect.left..rect.right
                                 }
                                 ?.let { (bar, rect) ->
@@ -280,7 +279,7 @@ fun ColumnChart(
                             )
                         val x = when (indicatorProperties.position) {
                             IndicatorPosition.Horizontal.Start -> 0f
-                            IndicatorPosition.Horizontal.End -> barsAreaWidth + 16 * density.density
+                            IndicatorPosition.Horizontal.End -> barsAreaWidth + indicatorProperties.padding.value * density.density
                         }
                         drawText(
                             textLayoutResult = measureResult,
