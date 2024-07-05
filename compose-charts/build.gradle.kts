@@ -15,7 +15,7 @@ mavenPublishing{
     coordinates(
         groupId = "io.github.ehsannarmani",
         artifactId = "compose-charts",
-        version = "0.0.12"
+        version = "0.0.13"
     )
     pom{
         name.set("Compose Charts")
@@ -93,7 +93,6 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)

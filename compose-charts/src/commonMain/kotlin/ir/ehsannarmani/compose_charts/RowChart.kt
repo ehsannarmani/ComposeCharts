@@ -7,15 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -91,7 +83,7 @@ fun RowChart(
     ),
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
-    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0
+    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
 ) {
     require(data.isNotEmpty()) {
         "Chart data is empty"
@@ -100,7 +92,7 @@ fun RowChart(
         "Chart data must be at most $maxValue (Specified Max Value)"
     }
     require(minValue <= 0) {
-        "Min value in column chart must be 0 or lower."
+        "Min value in row chart must be 0 or lower."
     }
     require(minValue <= data.minOf { it.values.minOf { it.value } }) {
         "Chart data must be at least $minValue (Specified Min Value)"
@@ -110,13 +102,16 @@ fun RowChart(
     val density = LocalDensity.current
 
     val everyDataHeight = with(density) {
-        data.map { rowData ->
+        data.maxOfOrNull { rowData ->
             rowData.values.map {
                 (it.properties?.thickness
                     ?: barProperties.thickness).toPx() + (it.properties?.spacing
                     ?: barProperties.spacing).toPx()
             }.sum()
-        }.average().toFloat()
+        } ?: 0f
+    }
+    val averageSpacingBetweenBars = with(density) {
+        data.map { it.values }.flatten().map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
     }
 
     val barWithRect = remember {
@@ -176,6 +171,7 @@ fun RowChart(
                     Column(
                         modifier = Modifier
                             .fillMaxHeight()
+                            .width(IntrinsicSize.Max)
                             .padding(
                                 top = if (indicatorProperties.position == IndicatorPosition.Vertical.Top) paddingY else 0.dp,
                                 bottom = if (indicatorProperties.position == IndicatorPosition.Vertical.Bottom) paddingY else 0.dp
@@ -184,7 +180,11 @@ fun RowChart(
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         data.forEach {
-                            BasicText(text = it.label, style = labelProperties.textStyle)
+                            BasicText(
+                                text = it.label,
+                                style = labelProperties.textStyle,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.width(labelProperties.padding))
@@ -301,7 +301,7 @@ fun RowChart(
                                 (everyBarHeight * barIndex) + (barAreaHeight - everyDataHeight).spaceBetween(
                                     itemCount = data.count(),
                                     index = dataIndex
-                                )
+                                ) + (averageSpacingBetweenBars / 2).toFloat()
                             val barX =
                                 (if (bar.value > 0) size.width - zeroX else (size.width - zeroX - width.absoluteValue.toFloat()).coerceAtLeast(
                                     0.0
@@ -343,7 +343,7 @@ fun RowChart(
                             val measureResult =
                                 textMeasurer.measure(
                                     indicatorProperties.contentBuilder(indicator),
-                                    style = indicatorProperties.textStyle
+                                    style = indicatorProperties.textStyle,
                                 )
                             val y = when (indicatorProperties.position) {
                                 IndicatorPosition.Vertical.Top -> 0f

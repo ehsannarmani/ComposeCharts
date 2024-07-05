@@ -24,25 +24,22 @@ fun ImplementRCAnimation(
     LaunchedEffect(data) {
         before()
         delay(delay)
-        data.filter { it.values.any { it.value != 0.0 } }.forEachIndexed { colIndex, columnChart ->
-            // animate just values which greater than zero
-            columnChart.values.filter { it.value != 0.0 }.forEachIndexed { dataIndex, data ->
-                val animate: suspend () -> Unit = {
-                    data.animator.animateTo(
-                        1f,
-                        animationSpec = spec(data)
-                    )
+        data.map { it.values }.flatten().filter { it.value != 0.0 }.forEachIndexed { index, data ->
+            val animate: suspend () -> Unit = {
+                data.animator.animateTo(
+                    1f,
+                    animationSpec = spec(data)
+                )
+            }
+            when (animationMode) {
+                is AnimationMode.OneByOne -> {
+                    animate()
                 }
-                when (animationMode) {
-                    is AnimationMode.OneByOne -> {
-                        animate()
-                    }
 
-                    is AnimationMode.Together -> {
-                        launch {
-                            delay(animationMode.delayBuilder((colIndex * columnChart.values.count()) + dataIndex))
-                            animate()
-                        }
+                is AnimationMode.Together -> {
+                    launch {
+                        delay(animationMode.delayBuilder(index))
+                        animate()
                     }
                 }
             }

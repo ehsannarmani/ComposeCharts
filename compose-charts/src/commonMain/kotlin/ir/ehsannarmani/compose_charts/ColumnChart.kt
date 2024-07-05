@@ -2,23 +2,13 @@ package ir.ehsannarmani.compose_charts
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -27,7 +17,9 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -35,6 +27,7 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,7 +83,7 @@ fun ColumnChart(
     ),
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
-    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0
+    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
 ) {
     require(data.isNotEmpty()) {
         "Chart data is empty"
@@ -108,13 +101,16 @@ fun ColumnChart(
     val density = LocalDensity.current
 
     val everyDataWidth = with(density) {
-        data.map { rowData ->
+        data.maxOfOrNull { rowData ->
             rowData.values.map {
                 (it.properties?.thickness
                     ?: barProperties.thickness).toPx() + (it.properties?.spacing
                     ?: barProperties.spacing).toPx()
             }.sum()
-        }.average().toFloat()
+        } ?: 0f
+    }
+    val averageSpacingBetweenBars = with(density) {
+        data.map { it.values }.flatten().map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
     }
 
     val barWithRect = remember {
@@ -315,7 +311,7 @@ fun ColumnChart(
                                 (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
                                     itemCount = data.count(),
                                     index = dataIndex
-                                ) + xPadding
+                                ) + xPadding + (averageSpacingBetweenBars / 2).toFloat()
                             val rect = Rect(
                                 offset = Offset(
                                     x = barX,
@@ -367,16 +363,37 @@ fun ColumnChart(
                         Modifier.fillMaxWidth()
                     }
 
+                val labelMeasures =
+                    data.map { textMeasurer.measure(it.label, style = labelProperties.textStyle, maxLines = 1) }
+                val labelWidths = labelMeasures.map { it.size.width }
+                val maxLabelWidth = labelWidths.max()
+                val minLabelWidth = labelWidths.min()
+
+                var textModifier: Modifier = Modifier
+                var shouldRotate = false
+                if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5) {
+                    textModifier = textModifier.width((minLabelWidth / density.density).dp)
+                    shouldRotate = true
+                }
                 Row(
                     modifier = widthModifier
                         .padding(
                             start = (xPadding / density.density).dp,
                         ), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    data.forEach {
+                    data.forEachIndexed { index, bar ->
                         BasicText(
-                            text = it.label,
-                            style = labelProperties.textStyle,
+                            modifier = if (shouldRotate) textModifier.graphicsLayer {
+                                rotationZ = labelProperties.rotationDegreeOnSizeConflict
+                                transformOrigin =
+                                    TransformOrigin((labelMeasures[index].size.width / minLabelWidth.toFloat()), .5f)
+                                translationX =
+                                    -(labelMeasures[index].size.width - minLabelWidth.toFloat()) - minLabelWidth / 2
+                            } else textModifier,
+                            text = bar.label,
+                            style = labelProperties.textStyle.copy(),
+                            overflow = TextOverflow.Visible,
+                            softWrap = false,
                         )
                     }
                 }
