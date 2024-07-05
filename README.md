@@ -36,7 +36,7 @@
 
 ### Gradle Setup
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=8)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.ehsannarmani/compose-charts?color=4caf50&label=Latest%20Release&v=9)](https://central.sonatype.com/artifact/io.github.ehsannarmani/compose-charts/overview)
 ```gradle
 dependencies {
     implementation ("io.github.ehsannarmani:compose-charts:latest_version")
@@ -676,12 +676,17 @@ val lineProperties = LineProperties(
 ### Labels: `LabelProperties`
 > Usage: In every chart you can set properties of the labels (Apr, Jan, ...)
 
-| Property          | Type         | Default             | Description                 |
-|-------------------|--------------|---------------------|-----------------------------|
-| `enabled`         | Boolean      | `true`              | specifies labels visibility 
-| `textStyle`       | TextStyle    | `TextStyle.Default` | specifies label textStyle   
-| `verticalPadding` | Dp           | `12.dp`             | specifies vertical padding of labels area  
-| `labels`          | List<String> | `emptyList()`       | In line charts specifies chart labels  
+| Property                       | Type         | Default             | Description                                                        |
+|--------------------------------|--------------|---------------------|--------------------------------------------------------------------|
+| `enabled`                      | Boolean      | `true`              | specifies labels visibility                                        
+| `textStyle`                    | TextStyle    | `TextStyle.Default` | specifies label textStyle                                          
+| `verticalPadding`              | Dp           | `12.dp`             | specifies vertical padding of labels area                          
+| `labels`                       | List<String> | `emptyList()`       | In line charts, specifies chart labels                             
+| `rotationDegreeOnSizeConflict` | Float        | `-45`               | rotation degree of label on size confilict with other labels (See) 
+
+> [!NOTE]
+> Example of label rotation degree
+> <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/rotation_degree_sample.png?raw=true" width="300">
 
 #### Example:
 ```kotlin
