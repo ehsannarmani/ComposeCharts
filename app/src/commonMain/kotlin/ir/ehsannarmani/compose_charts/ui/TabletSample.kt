@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.BarProperties
 import ir.ehsannarmani.compose_charts.models.Bars
 
 @Composable
@@ -25,47 +26,8 @@ fun TabletSample() {
             .verticalScroll(rememberScrollState())
             .statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(28.dp)
     ) {
-        Box(Modifier.fillMaxSize().background(Color.White), contentAlignment = Alignment.Center) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                ColumnChart(
-                    modifier = Modifier.width(400.dp).height(350.dp), data = listOf(
-                        Bars(
-                            label = "شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 20.0))
-                        ),
-                        Bars(
-                            label = "یک شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 0.0))
-                        ),
-                        Bars(
-                            label = "دو شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 0.0))
-                        ),
-                        Bars(
-                            label = "سه شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 0.0))
-                        ),
-                        Bars(
-                            label = "چهار شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 0.0))
-                        ),
-                        Bars(
-                            label = "پنج شنبه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 20.0))
-                        ),
-                        Bars(
-                            label = "جمعه",
-                            values = listOf(Bars.Data(label = "", color = SolidColor(Color.Red), value = 20.0))
-                        ),
-                    ),
-                    animationSpec = tween(500),
-                    animationMode = AnimationMode.Together { it * 200L },
-                    animationDelay = 100
-                )
-            }
-        }
-        return
-        Row(
+
+    Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 48.dp),
