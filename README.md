@@ -686,7 +686,8 @@ val lineProperties = LineProperties(
 
 > [!NOTE]
 > Example of label rotation degree
-> <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/rotation_degree_sample.png?raw=true" width="300">
+
+<img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/rotation_degree_sample.png?raw=true" width="300">
 
 #### Example:
 ```kotlin
