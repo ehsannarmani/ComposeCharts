@@ -1,19 +1,16 @@
-*.iml
+# Ignore Gradle project-specific cache directory
 .gradle
 .kotlin
+
+# Ignore Gradle build output directory
+build
+# Ignore intellij Idea / Android Studio directory
+.idea
+*.iml
+
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-/.idea/artifacts
 .DS_Store
-.idea/misc.xml
-/build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
-/.kotlin/
