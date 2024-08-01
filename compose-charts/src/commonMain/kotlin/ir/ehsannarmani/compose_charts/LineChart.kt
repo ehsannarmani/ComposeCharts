@@ -216,28 +216,28 @@ fun LineChart(
         }
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Column(modifier = modifier) {
-            if (labelHelperProperties.enabled) {
-                LabelHelper(
-                    data = data.map { it.label to it.color },
-                    textStyle = labelHelperProperties.textStyle
-                )
-                Spacer(modifier = Modifier.height(labelHelperPadding))
-            }
-            Row(modifier = Modifier.fillMaxSize()) {
-                val paddingBottom = (labelAreaHeight / density.density).dp
-                if (indicatorProperties.enabled) {
-                    if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                        Indicators(
-                            modifier = Modifier.padding(bottom = paddingBottom),
-                            indicatorProperties = indicatorProperties,
-                            minValue = minValue,
-                            maxValue = maxValue
-                        )
-                        Spacer(modifier = Modifier.width(indicatorProperties.padding))
-                    }
+    Column(modifier = modifier) {
+        if (labelHelperProperties.enabled) {
+            LabelHelper(
+                data = data.map { it.label to it.color },
+                textStyle = labelHelperProperties.textStyle
+            )
+            Spacer(modifier = Modifier.height(labelHelperPadding))
+        }
+        Row(modifier = Modifier.fillMaxSize()) {
+            val paddingBottom = (labelAreaHeight / density.density).dp
+            if (indicatorProperties.enabled) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                    Indicators(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
+                        minValue = minValue,
+                        maxValue = maxValue
+                    )
+                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
                 }
+            }
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Canvas(modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
@@ -259,7 +259,10 @@ fun LineChart(
 
                                     if (properties.enabled) {
                                         val positionX =
-                                            (change.position.x).coerceIn(0f, size.width.toFloat())
+                                            (change.position.x).coerceIn(
+                                                0f,
+                                                size.width.toFloat()
+                                            )
                                         val fraction = (positionX / size.width)
                                         val popupValue = getPopupValue(
                                             points = it.values,
@@ -427,16 +430,16 @@ fun LineChart(
                         )
                     }
                 }
-                if (indicatorProperties.enabled) {
-                    if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                        Spacer(modifier = Modifier.width(indicatorProperties.padding))
-                        Indicators(
-                            modifier = Modifier.padding(bottom = paddingBottom),
-                            indicatorProperties = indicatorProperties,
-                            minValue = minValue,
-                            maxValue = maxValue
-                        )
-                    }
+            }
+            if (indicatorProperties.enabled) {
+                if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                    Spacer(modifier = Modifier.width(indicatorProperties.padding))
+                    Indicators(
+                        modifier = Modifier.padding(bottom = paddingBottom),
+                        indicatorProperties = indicatorProperties,
+                        minValue = minValue,
+                        maxValue = maxValue
+                    )
                 }
             }
         }
