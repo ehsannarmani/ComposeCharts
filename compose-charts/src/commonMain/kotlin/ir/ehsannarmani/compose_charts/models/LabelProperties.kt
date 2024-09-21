@@ -12,4 +12,5 @@ data class LabelProperties(
     val padding:Dp = 12.dp,
     val labels: List<String> = listOf(),
     val rotationDegreeOnSizeConflict: Float = -45f,
+    val forceRotation: Boolean = false,
 )

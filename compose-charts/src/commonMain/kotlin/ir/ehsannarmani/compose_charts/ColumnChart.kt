@@ -370,7 +370,7 @@ fun ColumnChart(
                 val minLabelWidth = labelWidths.min()
 
                 var textModifier: Modifier = Modifier
-                var shouldRotate = false
+                var shouldRotate = labelProperties.forceRotation
                 if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5) {
                     textModifier = textModifier.width((minLabelWidth / density.density).dp)
                     shouldRotate = true
@@ -391,7 +391,7 @@ fun ColumnChart(
                                     -(labelMeasures[index].size.width - minLabelWidth.toFloat()) - minLabelWidth / 2
                             } else textModifier,
                             text = bar.label,
-                            style = labelProperties.textStyle.copy(),
+                            style = labelProperties.textStyle,
                             overflow = TextOverflow.Visible,
                             softWrap = false,
                         )
