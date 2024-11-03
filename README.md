@@ -50,17 +50,21 @@ dependencies {
 
 ## Examples:
 
+> [!WARNING]  
+> Put chart data in remember and do not use directly to avoid additional recompositions.
 ### Pie Chart:
 <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie1.gif?raw=true" width="300">
 
 ```kotlin
 PieChart(
    modifier = Modifier.size(200.dp),
-   data = listOf(
-      Pie(label = "Android",data = 20.0, color = Color.Red, selectedColor = Color.Green),
-      Pie(label = "Windows",data = 45.0, color = Color.Cyan, selectedColor = Color.Blue),
-      Pie(label = "Linux",data = 35.0, color = Color.Gray, selectedColor = Color.Yellow),
-   ),
+  data = remember {
+    listOf(
+      Pie(label = "Android", data = 20.0, color = Color.Red, selectedColor = Color.Green),
+      Pie(label = "Windows", data = 45.0, color = Color.Cyan, selectedColor = Color.Blue),
+      Pie(label = "Linux", data = 35.0, color = Color.Gray, selectedColor = Color.Yellow),
+    )
+  },
    onPieClick = {
        println("${it.label} Clicked")
        val pieIndex = data.indexOf(it)
@@ -109,23 +113,31 @@ PieChart(
 ```kotlin
 ColumnChart(
     modifier= Modifier.fillMaxSize().padding(horizontal = 22.dp),
-    data = listOf(
+  data = remember {
+    listOf(
         Bars(
-            label = "Jan",
-            values = listOf(
-               Bars.Data(label = "Linux", value = 50.0, color = Brush.verticalGradient(...)),
-               Bars.Data(label = "Windows", value = 70.0, color = SolidColor(Color.Red)),
-            )
-        ),
-        Bars(
-            label = "Feb",
-            values = listOf(
-               Bars.Data(label = "Linux", value = 80.0, color = Brush.verticalGradient(...)),
-               Bars.Data(label = "Windows", value = 60.0, color = SolidColor(Color.Red)),
-            )
-        ),
-        ...
+          label = "Jan",
+          values = listOf(
+            Bars.Data(label = "Linux", value = 50.0, color = Brush.verticalGradient(...)
+          ),
+          Bars.Data(
+            label = "Windows", value = 70.0, color = SolidColor(Color.Red)
+          ),
+        )
     ),
+        Bars(
+          label = "Feb",
+          values = listOf(
+            Bars.Data(label = "Linux", value = 80.0, color = Brush.verticalGradient(...)
+          ),
+          Bars.Data(
+            label = "Windows", value = 60.0, color = SolidColor(Color.Red)
+          ),
+        )
+        ),
+    ...
+    )
+  },
     barProperties = BarProperties(
         radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, topLeft = 6.dp),
         spacing = 3.dp,
@@ -145,19 +157,21 @@ ColumnChart(
 
 ```kotlin
 ColumnChart(
-    data = listOf(
+  data = remember {
+    listOf(
         Bars(
-            label = "1", values = listOf(
-               Bars.Data(value = 10.0, color = Color.Blue)
-            )
+          label = "1", values = listOf(
+            Bars.Data(value = 10.0, color = Color.Blue)
+          )
         ),
         Bars(
-            label = "2", values = listOf(
-               Bars.Data(value = 20.0, color = Color.Blue)
-            )
+          label = "2", values = listOf(
+            Bars.Data(value = 20.0, color = Color.Blue)
+          )
         ),
         ...
-    ),
+    )
+  },
     barProperties = BarProperties(
         spacing = 1.dp,
         strokeWidth = 10.dp,
@@ -175,19 +189,21 @@ ColumnChart(
 
 ```kotlin
 ColumnChart(
-    data = listOf(
+  data = remember {
+    listOf(
         Bars(
-            label = "1", values = listOf(
-               Bars.Data(value = -40.0, color = Color.Blue)
-            )
+          label = "1", values = listOf(
+            Bars.Data(value = -40.0, color = Color.Blue)
+          )
         ),
         Bars(
-            label = "2", values = listOf(
-               Bars.Data(value = 50.0, color = Color.Blue)
-            )
+          label = "2", values = listOf(
+            Bars.Data(value = 50.0, color = Color.Blue)
+          )
         ),
         ...
-    ),
+    )
+  },
     maxValue = 75.0,
     minValue = -75.0
     ...
@@ -212,23 +228,31 @@ ColumnChart(
 ```kotlin
 RowChart(
     modifier= Modifier.fillMaxSize().padding(horizontal = 22.dp),
-    data = listOf(
+  data = remember {
+    listOf(
         Bars(
-            label = "Jan",
-            values = listOf(
-               Bars.Data(label = "Linux", value = 50.0, color = Brush.verticalGradient(...)),
-               Bars.Data(label = "Windows", value = 70.0, color = SolidColor(Color.Red)),
-            )
-        ),
-        Bars(
-            label = "Feb",
-            values = listOf(
-               Bars.Data(label = "Linux", value = 80.0, color = Brush.verticalGradient(...)),
-               Bars.Data(label = "Windows", value = 60.0, color = SolidColor(Color.Red)),
-            )
-        ),
-        ...
+          label = "Jan",
+          values = listOf(
+            Bars.Data(label = "Linux", value = 50.0, color = Brush.verticalGradient(...)
+          ),
+          Bars.Data(
+            label = "Windows", value = 70.0, color = SolidColor(Color.Red)
+          ),
+        )
     ),
+        Bars(
+          label = "Feb",
+          values = listOf(
+            Bars.Data(label = "Linux", value = 80.0, color = Brush.verticalGradient(...)
+          ),
+          Bars.Data(
+            label = "Windows", value = 60.0, color = SolidColor(Color.Red)
+          ),
+        )
+        ),
+    ...
+    )
+  },
     barProperties = BarProperties(
         radius = Bars.Data.Radius.Rectangle(topRight = 6.dp, topLeft = 6.dp),
         spacing = 3.dp,
@@ -250,19 +274,21 @@ RowChart(
 
 ```kotlin
 RowChart(
-    data = listOf(
+  data = remember {
+    listOf(
         Bars(
-            label = "1", values = listOf(
-               Bars.Data(value = -40.0, color = Color.Blue)
-            )
+          label = "1", values = listOf(
+            Bars.Data(value = -40.0, color = Color.Blue)
+          )
         ),
         Bars(
-            label = "2", values = listOf(
-               Bars.Data(value = 50.0, color = Color.Blue)
-            )
+          label = "2", values = listOf(
+            Bars.Data(value = 50.0, color = Color.Blue)
+          )
         ),
         ...
-    ),
+    )
+  },
     maxValue = 75.0,
     minValue = -75.0
     ...
@@ -285,18 +311,20 @@ RowChart(
 ```kotlin
 LineChart(
     modifier = Modifier.fillMaxSize().padding(horizontal = 22.dp),
-    data = listOf(
-         Line(
-            label = "Windows",
-            values = listOf(28.0,41.0,5.0,10.0,35.0),
-            color = SolidColor(Color(0xFF23af92)),
-            firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
-            secondGradientFillColor = Color.Transparent,
-            strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
-            gradientAnimationDelay = 1000,
-            drawStyle = DrawStyle.Stroke(width = 2.dp),
-         )
-    ),
+  data = remember {
+    listOf(
+      Line(
+        label = "Windows",
+        values = listOf(28.0, 41.0, 5.0, 10.0, 35.0),
+        color = SolidColor(Color(0xFF23af92)),
+        firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
+        secondGradientFillColor = Color.Transparent,
+        strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
+        gradientAnimationDelay = 1000,
+        drawStyle = DrawStyle.Stroke(width = 2.dp),
+      )
+    )
+  },
     animationMode = AnimationMode.Together(delayBuilder = {
         it * 500L
     }),
@@ -313,15 +341,16 @@ LineChart(
 
 ```kotlin
 LineChart(
-    data = listOf(
-         Line(
+  data = remember {
+    listOf(
+      Line(
             label = "Temperature",
             values = listOf(28.0,41.0,-5.0,10.0,35.0),
             color = Brush.radialGradient(...),
             ...
-         )
-    ),
-    ...,
+    )
+    )
+  },
     zeroLineProperties = LineProperties(
         enabled = true,
         color = SolidColor(Color.Red),
@@ -341,14 +370,16 @@ LineChart(
 
 ```kotlin
 LineChart(
-    data = listOf(
-         Line(
+  data = remember {
+    listOf(
+      Line(
             label = "Linux",
             values = listOf(28.0,41.0,5.0,10.0,35.0),
             color = Brush.radialGradient(...),
             ...
-         )
-    ),
+    )
+    )
+  },
     ...
 )
 ```
@@ -361,26 +392,30 @@ LineChart(
 
 ```kotlin
 LineChart(
-    data = listOf(
-         Line(
+  data = remember {
+    listOf(
+      Line(
             label = "Windows",
             values = listOf(...),
             color = Color.Green,
             curvedEdges = true
-         ),
-         Line(
-            label = "Linux",
-            values = listOf(...),
-            color = Color.Orange,
-            curvedEdges = false
-         ),
-         Line(
-            label = "Linux",
-            values = listOf(...),
-            color = Color.Blue,
-            curvedEdges = true
-         ),
     ),
+    Line(
+      label = "Linux",
+      values = listOf(...
+    ),
+    color = Color.Orange,
+    curvedEdges = false
+    ),
+    Line(
+      label = "Linux",
+      values = listOf(...
+    ),
+    color = Color.Blue,
+    curvedEdges = true
+    ),
+    )
+  },
     ...
 )
 ```
@@ -392,30 +427,32 @@ LineChart(
 
 ```kotlin
 LineChart(
-    data = listOf(
-         Line(
+  data = remember {
+    listOf(
+      Line(
             label = "Windows",
             values = listOf(...),
             color = Color.Orange,
             curvedEdges = true,
             dotProperties = DotProperties(
-                enabled = true,
-                color = SolidColor(Color.White),
-                strokeWidth = 4f,
-                radius = 7f,
-                strokeColor = SolidColor(Color.Orange),
+              enabled = true,
+              color = SolidColor(Color.White),
+              strokeWidth = 4f,
+              radius = 7f,
+              strokeColor = SolidColor(Color.Orange),
             )
-         ),
-         Line(
+    ),
+    Line(
             label = "Linux",
             values = listOf(...),
             color = Color.Cyan,
             curvedEdges = false,
             dotProperties = DotProperties(
-               ...
+              ...
             )
-         ),
     ),
+    )
+  },
     curvedEdges = false
 )
 ```
@@ -428,22 +465,26 @@ LineChart(
 
 ```kotlin
 LineChart(
-    data = listOf(
-         Line(
-            label = "Windows",
-            values = listOf(...),
-            drawStyle = DrawStyle.Stroke(
-                width = 3.dp,
-                strokeStyle = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f), phase = 15f)
-            )
-            ...
-         ),
-         Line(
-            label = "Linux",
-            values = listOf(...),
-            ...
-         ),
+  data = remember {
+    listOf(
+      Line(
+        label = "Windows",
+        values = listOf(...
+      ),
+      drawStyle = DrawStyle.Stroke(
+        width = 3.dp,
+        strokeStyle = StrokeStyle.Dashed(intervals = floatArrayOf(10f, 10f), phase = 15f)
+      )
+      ...
     ),
+    Line(
+      label = "Linux",
+      values = listOf(...
+    ),
+    ...
+    ),
+    )
+  },
 )
 ```
 <hr/>
@@ -547,21 +588,21 @@ val dotProperties = DotProperties(
 ### Indicators: `IndicatorProperties`
 > Usage: In every chart you can set properties of counters next to the chart
 
-| Property         | Type               | Default                 | Description                                                                                                      |
-|------------------|--------------------|-------------------------|------------------------------------------------------------------------------------------------------------------|
-| `enabled`        | Boolean            | `true`                  | specifies indicator visiblity                                                                                    
-| `textStyle`      | TextStyle          | `TextStyle.Default`     | specifies counter style                                                                                          
-| `count`          | Int                | `4`                     | specifies counters count                                                                                         
-| `position`       | IndicatorPosition  | `Depends on chart`      | specifies indicator position, in line & column charts can be: start or end, in line charts can be: top or bottom 
-| `padding`        | Dp                 | `12`                    | specifies indicator area padding with chart area                                                                 
-| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }` | specifies counter content creation template                                                                      
+| Property         | Type               | Default                        | Description                                                                                                      |
+|------------------|--------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `enabled`        | Boolean            | `true`                         | specifies indicator visiblity                                                                                    
+| `textStyle`      | TextStyle          | `TextStyle.Default`            | specifies counter style                                                                                          
+| `count`          | IndicatorCount     | `IndicatorCount.CountBased(5)` | specifies counters type and count                                                                                
+| `position`       | IndicatorPosition  | `Depends on chart`             | specifies indicator position, in line & column charts can be: start or end, in line charts can be: top or bottom 
+| `padding`        | Dp                 | `12`                           | specifies indicator area padding with chart area                                                                 
+| `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`        | specifies counter content creation template                                                                      
 
 #### Example For Column/Line Charts:
 ```kotlin
 val indicatorProperties = HorizontalIndicatorProperties(
    enabled = true,
    textStyle = MaterialTheme.typography.labelSmall,
-   count = 5,
+  count = IndicatorCount.CountBased(count = 5),
   position = IndicatorPosition.Horizontal.End,
   padding = 32.dp,
    contentBuilder = { indicator->
@@ -576,7 +617,7 @@ val indicatorProperties = HorizontalIndicatorProperties(
 val indicatorProperties = VerticalIndicatorProperties(
   enabled = true,
   textStyle = MaterialTheme.typography.labelSmall,
-  count = 5,
+  count = IndicatorCount.CountBased(count = 5),
   position = IndicatorPosition.Vertical.Top,
   padding = 32.dp,
   contentBuilder = { indicator ->
@@ -584,6 +625,14 @@ val indicatorProperties = VerticalIndicatorProperties(
   }
 )
 ```
+
+> Tip: You can specify type of indicator counts, we have two type: CountBased, StepBased
+
+> CountBased: it will receive a count number and will divide & calculate and in the end it will show the requested count
+> of indicators.
+
+> StepBased: it will receive a stepBy value and will split step by given value until it reach min value, for example
+> if (max value = 20, min value = -10) and stepBy value is 5, the indicators will be: 20,15,10,5,0,-5,-10
 
 <hr/>
 
