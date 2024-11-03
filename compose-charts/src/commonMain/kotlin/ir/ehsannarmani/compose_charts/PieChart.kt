@@ -47,9 +47,6 @@ fun PieChart(
     style: Pie.Style = Pie.Style.Fill
 ) {
 
-    require(data.isNotEmpty()){
-        "Chart data is empty"
-    }
     require(data.none { it.data < 0 }){
         "Data must be at least 0"
     }

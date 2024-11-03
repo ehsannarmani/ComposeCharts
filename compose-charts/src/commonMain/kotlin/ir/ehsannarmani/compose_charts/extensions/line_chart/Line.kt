@@ -15,7 +15,7 @@ internal fun DrawScope.getLinePath(
 
     val _size = size ?: this.size
     val path = Path()
-
+    if (dataPoints.isEmpty()) return path
     val calculateHeight = { value: Float ->
         calculateOffset(
             maxValue = maxValue.toDouble(),

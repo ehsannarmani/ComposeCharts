@@ -10,9 +10,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-/*
-* RC: Row/Column Animation
-* */
+/**
+ * RC means Row & Column
+ */
 @Composable
 fun ImplementRCAnimation(
     data:List<Bars>,

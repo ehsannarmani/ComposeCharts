@@ -48,6 +48,9 @@ fun LabelHelper(
     }
 }
 
+/**
+ * RC means Row & Column
+ */
 @Composable
 fun RCChartLabelHelper(
     data:List<Bars>,

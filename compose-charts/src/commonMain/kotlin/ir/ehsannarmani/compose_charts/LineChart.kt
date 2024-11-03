@@ -98,14 +98,11 @@ fun LineChart(
     } ?: 0.0 else 0.0,
 ) {
     if (data.isNotEmpty()) {
-        require(minValue <= data.minOf { it.values.minOf { it } }) {
+        require(minValue <= (data.minOfOrNull { it.values.minOfOrNull { it } ?: 0.0 } ?: 0.0)) {
             "Chart data must be at least $minValue (Specified Min Value)"
         }
-        require(maxValue >= data.maxOf { it.values.maxOf { it } }) {
+        require(maxValue >= (data.maxOfOrNull { it.values.maxOfOrNull { it } ?: 0.0 } ?: 0.0)) {
             "Chart data must be at most $maxValue (Specified Max Value)"
-        }
-        require(data.none { it.values.isEmpty() }) {
-            "Chart data should not contain empty values"
         }
     }
 
@@ -159,6 +156,7 @@ fun LineChart(
         }
     }
 
+    // make animators
     LaunchedEffect(data) {
         dotAnimators.clear()
         launch {
@@ -172,6 +170,7 @@ fun LineChart(
         }
     }
 
+    // animate
     LaunchedEffect(data) {
         delay(animationDelay)
 
@@ -241,7 +240,7 @@ fun LineChart(
                 Canvas(modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
-                    .pointerInput(data) {
+                    .pointerInput(data, minValue, maxValue) {
                         detectDragGestures(
                             onDragEnd = {
                                 scope.launch {

@@ -35,7 +35,7 @@ internal fun getPopupValue(
         )
         Value(calculatedValue = points.last(), offset = offset)
     } else {
-        if (rounded) {
+        if (rounded && points.count() > 1) {
             val calculateHeight = { value: Double ->
                 calculateOffset(
                     maxValue = maxValue,
@@ -69,13 +69,14 @@ internal fun getPopupValue(
                 offset = size.height - outputY
             )
 
+            println("$outputY,$outputX")
             Value(calculatedValue = calculatedValue, offset = Offset(x = outputX, y = outputY))
         } else {
             val p1 = points[roundedIndex]
-            val p2 = points[roundedIndex + 1]
+            val p2 = points.getOrNull(roundedIndex + 1) ?: p1
             val calculatedValue = ((p2 - p1) * (index - roundedIndex) + p1)
             val offset = Offset(
-                x = (fraction * size.width).toFloat(),
+                x = if (points.count() > 1) (fraction * size.width).toFloat() else 0f,
                 y = size.height - calculateOffset(
                     minValue = minValue,
                     maxValue = maxValue,

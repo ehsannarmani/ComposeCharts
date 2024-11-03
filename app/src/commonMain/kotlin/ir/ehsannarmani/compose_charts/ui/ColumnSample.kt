@@ -135,7 +135,7 @@ fun RowScope.ColumnSample() {
                 ),
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = 4,
+                    count = IndicatorCount.CountBased(count = 4),
                     position = IndicatorPosition.Horizontal.Start,
                 ),
                 gridProperties = columnGridProperties,
@@ -339,7 +339,7 @@ fun RowScope.ColumnSample2() {
                 ),
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = 4
+                    count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = columnGridProperties,
                 labelProperties = LabelProperties(
@@ -406,7 +406,7 @@ fun RowScope.ColumnSample3() {
                 ),
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = 4,
+                    count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = columnGridProperties,
                 labelProperties = LabelProperties(

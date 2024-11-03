@@ -50,6 +50,8 @@ import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
+import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
+import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -85,18 +87,8 @@ fun ColumnChart(
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
 ) {
-    require(data.isNotEmpty()) {
-        "Chart data is empty"
-    }
-    require(maxValue >= data.maxOf { it.values.maxOf { it.value } }) {
-        "Chart data must be at most $maxValue (Specified Max Value)"
-    }
-    require(minValue <= 0) {
-        "Min value in column chart must be 0 or lower."
-    }
-    require(minValue <= data.minOf { it.values.minOf { it.value } }) {
-        "Chart data must be at least $minValue (Specified Min Value)"
-    }
+    checkRCMinValue(minValue, data)
+    checkRCMaxValue(maxValue, data)
 
     val density = LocalDensity.current
 
@@ -300,46 +292,54 @@ fun ColumnChart(
 
                     data.forEachIndexed { dataIndex, columnChart ->
                         columnChart.values.forEachIndexed { valueIndex, col ->
-                            val stroke = (col.properties?.thickness ?: barProperties.thickness).toPx()
-                            val spacing = (col.properties?.spacing ?: barProperties.spacing).toPx()
+                            if (col.value != 0.0) {
+                                val stroke =
+                                    (col.properties?.thickness ?: barProperties.thickness).toPx()
+                                val spacing =
+                                    (col.properties?.spacing ?: barProperties.spacing).toPx()
 
-                            val barHeight =
-                                ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
-                            val everyBarWidth = (stroke + spacing)
+                                val barHeight =
+                                    ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
+                                val everyBarWidth = (stroke + spacing)
 
-                            val barX =
-                                (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
-                                    itemCount = data.count(),
-                                    index = dataIndex
-                                ) + xPadding + (averageSpacingBetweenBars / 2).toFloat()
-                            val rect = Rect(
-                                offset = Offset(
-                                    x = barX,
-                                    y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
-                                ),
-                                size = Size(width = stroke, height = barHeight.absoluteValue.toFloat()),
-                            )
-                            if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
-                            val path = Path()
+                                val barX =
+                                    (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
+                                        itemCount = data.count(),
+                                        index = dataIndex
+                                    ) + xPadding + (averageSpacingBetweenBars / 2).toFloat()
+                                val rect = Rect(
+                                    offset = Offset(
+                                        x = barX,
+                                        y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
+                                    ),
+                                    size = Size(
+                                        width = stroke,
+                                        height = barHeight.absoluteValue.toFloat()
+                                    ),
+                                )
+                                if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
+                                val path = Path()
 
-                            var radius = (col.properties?.cornerRadius ?: barProperties.cornerRadius)
-                            if (col.value < 0) {
-                                radius = radius.reverse()
+                                var radius =
+                                    (col.properties?.cornerRadius ?: barProperties.cornerRadius)
+                                if (col.value < 0) {
+                                    radius = radius.reverse()
+                                }
+
+                                path.addRoundRect(rect = rect, radius = radius)
+                                val alpha = if (rect == selectedValue.value?.rect) {
+                                    1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
+                                } else {
+                                    1f
+                                }
+                                drawPath(
+                                    path = path,
+                                    brush = col.color,
+                                    alpha = alpha,
+                                    style = (col.properties?.style
+                                        ?: barProperties.style).getStyle(density.density)
+                                )
                             }
-
-                            path.addRoundRect(rect = rect, radius = radius)
-                            val alpha = if (rect == selectedValue.value?.rect) {
-                                1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
-                            } else {
-                                1f
-                            }
-                            drawPath(
-                                path = path,
-                                brush = col.color,
-                                alpha = alpha,
-                                style = (col.properties?.style
-                                    ?: barProperties.style).getStyle(density.density)
-                            )
                         }
                     }
                     selectedValue.value?.let { selectedValue ->
@@ -353,7 +353,7 @@ fun ColumnChart(
 
                 }
             }
-            if (labelProperties.enabled) {
+            if (labelProperties.enabled && data.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(labelProperties.padding))
 
                 val widthModifier =
@@ -371,7 +371,7 @@ fun ColumnChart(
 
                 var textModifier: Modifier = Modifier
                 var shouldRotate = labelProperties.forceRotation
-                if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5) {
+                if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotationDegreeOnSizeConflict != 0f) {
                     textModifier = textModifier.width((minLabelWidth / density.density).dp)
                     shouldRotate = true
                 }
@@ -392,8 +392,8 @@ fun ColumnChart(
                             } else textModifier,
                             text = bar.label,
                             style = labelProperties.textStyle,
-                            overflow = TextOverflow.Visible,
-                            softWrap = false,
+                            overflow = if (shouldRotate) TextOverflow.Visible else TextOverflow.Clip,
+                            softWrap = !shouldRotate,
                         )
                     }
                 }
