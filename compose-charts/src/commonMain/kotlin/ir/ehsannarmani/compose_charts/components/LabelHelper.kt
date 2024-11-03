@@ -56,10 +56,14 @@ fun RCChartLabelHelper(
     data:List<Bars>,
     textStyle: TextStyle =  TextStyle.Default.copy(fontSize = 13.sp)
 ) {
-    val labels = data.map { it.values.map { it.label } }.flatten().toSet().toList()
-    val colors = labels.map { label-> data.map { it.values.find { it.label == label }?.color }.firstOrNull() }
+    val labels = data.flatMap { it.values.map { it.label } }.distinct()
+    val colors = labels.map { label ->
+        data.flatMap { bars ->
+            bars.values.filter { it.label == label }.map { it.color }
+        }.firstOrNull() ?: SolidColor(Color.Unspecified)
+    }
     LabelHelper(
-        data = labels.mapIndexed { index, label -> label.orEmpty() to (colors[index] ?: SolidColor(Color.Unspecified))  },
+        data = labels.mapIndexed { index, label -> label.orEmpty() to colors[index] },
         textStyle = textStyle
     )
 }
