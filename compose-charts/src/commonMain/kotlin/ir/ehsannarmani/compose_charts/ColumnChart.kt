@@ -117,7 +117,7 @@ fun ColumnChart(
         Animatable(0f)
     }
 
-    val indicators = remember {
+    val indicators = remember(minValue, maxValue) {
         split(
             count = indicatorProperties.count,
             minValue = minValue,
