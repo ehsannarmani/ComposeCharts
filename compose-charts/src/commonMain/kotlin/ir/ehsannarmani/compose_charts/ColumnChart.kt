@@ -5,6 +5,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicText
@@ -177,7 +178,7 @@ fun ColumnChart(
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         if (popupProperties.enabled) {
-                            detectDragGestures { change, dragAmount ->
+                            detectHorizontalDragGestures { change, dragAmount ->
                                 barWithRect
                                     .lastOrNull { (_, rect) ->
                                         change.position.x in rect.left..rect.right

@@ -5,6 +5,8 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +31,12 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -60,6 +68,7 @@ import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 private data class Popup(
     val properties: PopupProperties,
@@ -241,7 +250,8 @@ fun LineChart(
                     .weight(1f)
                     .fillMaxSize()
                     .pointerInput(data, minValue, maxValue) {
-                        detectDragGestures(
+                        if (!popupProperties.enabled) return@pointerInput
+                        detectHorizontalDragGestures(
                             onDragEnd = {
                                 scope.launch {
                                     popupAnimation.animateTo(0f, animationSpec = tween(500))
@@ -249,44 +259,42 @@ fun LineChart(
                                     popupsOffsetAnimators.clear()
                                 }
                             },
-                            onDrag = { change, amount ->
+                            onHorizontalDrag = { change, amount ->
                                 val _size = size.toSize()
                                     .copy(height = (size.height - labelAreaHeight).toFloat())
                                 popups.clear()
                                 data.forEach {
                                     val properties = it.popupProperties ?: popupProperties
 
-                                    if (properties.enabled) {
-                                        val positionX =
-                                            (change.position.x).coerceIn(
-                                                0f,
-                                                size.width.toFloat()
-                                            )
-                                        val fraction = (positionX / size.width)
-                                        val popupValue = getPopupValue(
-                                            points = it.values,
-                                            fraction = fraction.toDouble(),
-                                            rounded = it.curvedEdges ?: curvedEdges,
-                                            size = _size,
-                                            minValue = minValue,
-                                            maxValue = maxValue
+                                    val positionX =
+                                        (change.position.x).coerceIn(
+                                            0f,
+                                            size.width.toFloat()
                                         )
-                                        popups.add(
-                                            Popup(
-                                                position = popupValue.offset,
-                                                value = popupValue.calculatedValue,
-                                                properties = properties
-                                            )
+                                    val fraction = (positionX / size.width)
+                                    val popupValue = getPopupValue(
+                                        points = it.values,
+                                        fraction = fraction.toDouble(),
+                                        rounded = it.curvedEdges ?: curvedEdges,
+                                        size = _size,
+                                        minValue = minValue,
+                                        maxValue = maxValue
+                                    )
+                                    popups.add(
+                                        Popup(
+                                            position = popupValue.offset,
+                                            value = popupValue.calculatedValue,
+                                            properties = properties
                                         )
-                                        // add popup offset animators
-                                        if (popupsOffsetAnimators.count() < popups.count()) {
-                                            repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                                popupsOffsetAnimators.add(
-                                                    Animatable(0f) to Animatable(
-                                                        0f
-                                                    )
+                                    )
+                                    // add popup offset animators
+                                    if (popupsOffsetAnimators.count() < popups.count()) {
+                                        repeat(popups.count() - popupsOffsetAnimators.count()) {
+                                            popupsOffsetAnimators.add(
+                                                Animatable(0f) to Animatable(
+                                                    0f
                                                 )
-                                            }
+                                            )
                                         }
                                     }
                                 }
