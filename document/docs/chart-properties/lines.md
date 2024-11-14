@@ -8,11 +8,11 @@
 | `thickness` | Dp          | `(0.5).dp`           | specifies axis line stroke width |
 
 !!! Example
-```kotlin linenums="1"
-val lineProperties = LineProperties(
-enabled = true,
-style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
-color = Color.Gray,
-thickness = (.5).dp,
-)
-```
+    ```kotlin linenums="1"
+    val lineProperties = LineProperties(
+        enabled = true,
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
+        color = Color.Gray,
+        thickness = (.5).dp,
+    )
+    ```

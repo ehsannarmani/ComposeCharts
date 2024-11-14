@@ -1,7 +1,7 @@
 # Popup Properties
 
 !!! info "Usage"
-In every chart you can set properties of popup which shown when user click or drag on chart
+    In every chart you can set properties of popup which shown when user click or drag on chart
 
 | Property                   | Type                 | Default                 | Description                                                                                     |
 |----------------------------|----------------------|-------------------------|-------------------------------------------------------------------------------------------------|
@@ -17,23 +17,23 @@ In every chart you can set properties of popup which shown when user click or dr
 | `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | specifies popup content creation template                                                       |
 
 !!! tip "Tip"
-In line charts your can set specific popup properties for each line, for example you can disable one
-of lines popup
-and e.g.
+    In line charts your can set specific popup properties for each line, for example you can disable one
+    of lines popup
+    and e.g.
 
 !!! Example
-```kotlin linenums="1"
-val popupProperties = PopupProperties(
-enabled = true,
-animationSpec = tween(300),
-duration = 2000L,
-textStyle = MaterialTheme.typography.labelSmall,
-containerColor = Color.White,
-cornerRadius = 8.dp,
-contentHorizontalPadding = 4.dp,
-contentVerticalPadding = 2.dp,
-contentBuilder = { value->
-"%.1f".format(value)+"Million"
-}
-)
-```
+    ```kotlin linenums="1"
+    val popupProperties = PopupProperties(
+        enabled = true,
+        animationSpec = tween(300),
+        duration = 2000L,
+        textStyle = MaterialTheme.typography.labelSmall,
+        containerColor = Color.White,
+        cornerRadius = 8.dp,
+        contentHorizontalPadding = 4.dp,
+        contentVerticalPadding = 2.dp,
+        contentBuilder = { value->
+            "%.1f".format(value)+"Million"
+        }
+    )
+    ```

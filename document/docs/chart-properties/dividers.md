@@ -1,7 +1,7 @@
 # Divider Properties
 
 !!! info "Usage"
-In every chart you can set properties of dividers between labels and chart, indicators and chart
+    In every chart you can set properties of dividers between labels and chart, indicators and chart
 
 | Property          | Type           | Default              | Description                             |
 |-------------------|----------------|----------------------|-----------------------------------------|
@@ -10,14 +10,14 @@ In every chart you can set properties of dividers between labels and chart, indi
 | `yAxisProperties` | LineProperties | `LineProperties(..)` | specifies vertical divider properties   
 
 !!! Example
-```kotlin linenums="1"
-val dividerProperties = DividerProperties(
-enabled = true,
-xAxisProperties = LineProperties(
-...
-),
-yAxisProperties = LineProperties(
-...
-)
-)
-```
+    ```kotlin linenums="1"
+    val dividerProperties = DividerProperties(
+        enabled = true,
+        xAxisProperties = LineProperties(
+        ...
+        ),
+        yAxisProperties = LineProperties(
+        ...
+        )
+    )
+    ```

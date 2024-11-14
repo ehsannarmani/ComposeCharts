@@ -1,7 +1,7 @@
 # Label Properties
 
 !!! info "Usage"
-In every chart you can set properties of the labels (Apr, Jan, ...)
+    In every chart you can set properties of the labels (Apr, Jan, ...)
 
 | Property                       | Type         | Default             | Description                                                                                                                                          |
 |--------------------------------|--------------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -17,11 +17,11 @@ In every chart you can set properties of the labels (Apr, Jan, ...)
 <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/rotation_degree_sample.png?raw=true" width="300">
 
 !!! Example
-```kotlin linenums="1"
-val labelProperties = LabelProperties(
-enabled = true,
-textStyle = MaterialTheme.typography.labelSmall,
-verticalPadding = 16.dp,
-labels = listOf("Apr","Mar",...)
-)
-```
+    ```kotlin linenums="1"
+    val labelProperties = LabelProperties(
+        enabled = true,
+        textStyle = MaterialTheme.typography.labelSmall,
+        verticalPadding = 16.dp,
+        labels = listOf("Apr","Mar",...)
+    )
+    ```

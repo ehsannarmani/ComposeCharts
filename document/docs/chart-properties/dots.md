@@ -1,7 +1,7 @@
 # Dot Properties]
 
 !!! info "Usage"
-In Line Charts you can set data dot shape properties with this property
+    In Line Charts you can set data dot shape properties with this property
 
 | Property           | Type                 | Default                           | Description                                                      |
 |--------------------|----------------------|-----------------------------------|------------------------------------------------------------------|
@@ -15,15 +15,15 @@ In Line Charts you can set data dot shape properties with this property
 | `animationSpec`    | AnimationSpec<Float> | `tween(300)`                      | specifies dots visibility animation spec                         |\
 
 !!! Example
-```kotlin linenums="1"
-val dotProperties = DotProperties(
-enabled = true,
-radius = 4.dp,
-color = SolidColor(Color.Red),
-strokeWidth = 3.dp,
-strokeColor = Color.White,
-strokeStyle = StrokeStyle.Normal,
-animationEnabled = true,
-animationSpec = tween(500)
-)
-```
+    ```kotlin linenums="1"
+    val dotProperties = DotProperties(
+        enabled = true,
+        radius = 4.dp,
+        color = SolidColor(Color.Red),
+        strokeWidth = 3.dp,
+        strokeColor = Color.White,
+        strokeStyle = StrokeStyle.Normal,
+        animationEnabled = true,
+        animationSpec = tween(500)
+    )
+    ```

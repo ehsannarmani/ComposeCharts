@@ -1,7 +1,7 @@
 # Grid Properties
 
 !!! info "Usage"
-In every chart you can set properties of grid lines
+    In every chart you can set properties of grid lines
 
 | Property          | Type           | Default              | Description                                |
 |-------------------|----------------|----------------------|--------------------------------------------|
@@ -11,13 +11,13 @@ In every chart you can set properties of grid lines
 
 !!! Example
 ```kotlin linenums="1"
-val gridProperties = GridProperties(
-enabled = true,
-xAxisProperties = AxisProperties(
-...
-),
-yAxisProperties = AxisProperties(
-...
-)
-)
-```
+    val gridProperties = GridProperties(
+        enabled = true,
+        xAxisProperties = AxisProperties(
+            ...
+        ),
+        yAxisProperties = AxisProperties(
+            ...
+        )
+    )
+    ```

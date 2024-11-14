@@ -8,11 +8,11 @@ In Row/Column/Line charts you can set running animations at the same time types:
 | `Together` | By default, animations will run async, but you can set delay for next animations                                        | 
 
 !!! Example
-```kotlin linenums="1" hl_lines="3 8"
-LineChart(
-...,
-animationMode = AnimationMode.OneByOne
-)
+    ```kotlin linenums="1" hl_lines="3 8"
+    LineChart(
+        ...,
+        animationMode = AnimationMode.OneByOne
+    )
 
     LineChart(
        ...,

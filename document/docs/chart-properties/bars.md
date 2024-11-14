@@ -1,7 +1,7 @@
 # Bar Properties
 
 !!! info "Usage"
-In Column/Row Charts you can set bar properties with this property
+    In Column/Row Charts you can set bar properties with this property
 
 | Property       | Type             | Default                 | Description                                                                 |
 |----------------|------------------|-------------------------|-----------------------------------------------------------------------------|
@@ -11,11 +11,11 @@ In Column/Row Charts you can set bar properties with this property
 | `style`        | DrawStyle        | `DrawStyle.Fill`        | specifies bar style                                                         |\
 
 !!! Example
-```kotlin linenums="1"
-val barProperties = BarProperties(
-thickness = 15.dp,
-spacing = 4.dp,
-cornerRadius = Bars.Data.Radius.Circular(6.dp),
-style = DrawStyle.Fill
-)
-```
+    ```kotlin linenums="1"
+    val barProperties = BarProperties(
+    thickness = 15.dp,
+    spacing = 4.dp,
+    cornerRadius = Bars.Data.Radius.Circular(6.dp),
+    style = DrawStyle.Fill
+    )
+    ```

@@ -1,7 +1,7 @@
 # LabelHelper Properties
 
 !!! info "Usage"
-In every chart you can set properties of the labels helper which positioned in top of chart
+    In every chart you can set properties of the labels helper which positioned in top of chart
 
 | Property    | Type      | Default             | Description                        |
 |-------------|-----------|---------------------|------------------------------------|
@@ -9,9 +9,9 @@ In every chart you can set properties of the labels helper which positioned in t
 | `textStyle` | TextStyle | `TextStyle.Default` | specifies label helper textStyle   |
 
 !!! Example
-```kotlin linenums="1"
-val labelHelperProperties = LabelHelperProperties(
-enabled = true,
-textStyle = MaterialTheme.typography.labelMedium
-)
-```
+    ```kotlin linenums="1"
+    val labelHelperProperties = LabelHelperProperties(
+        enabled = true,
+        textStyle = MaterialTheme.typography.labelMedium
+    )
+    ```

@@ -1,7 +1,7 @@
 # Indicator Properties
 
 !!! info "Usage"
-In every chart you can set properties of counters next to the chart
+    In every chart you can set properties of counters next to the chart
 
 | Property         | Type               | Default                        | Description                                                                                                      |
 |------------------|--------------------|--------------------------------|------------------------------------------------------------------------------------------------------------------|
@@ -13,19 +13,18 @@ In every chart you can set properties of counters next to the chart
 | `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`        | specifies counter content creation template                                                                      |
 
 !!! Example
-=== "Line & Column Chart"
-```kotlin linenums="1"
-val indicatorProperties = HorizontalIndicatorProperties(
-enabled = true,
-textStyle = MaterialTheme.typography.labelSmall,
-count = IndicatorCount.CountBased(count = 5),
-position = IndicatorPosition.Horizontal.End,
-padding = 32.dp,
-contentBuilder = { indicator ->
-"%.2f".format(indicator) + " Million"
-}
-)
-
+    === "Line & Column Chart"
+        ```kotlin linenums="1"
+        val indicatorProperties = HorizontalIndicatorProperties(
+            enabled = true,
+            textStyle = MaterialTheme.typography.labelSmall,
+            count = IndicatorCount.CountBased(count = 5),
+            position = IndicatorPosition.Horizontal.End,
+            padding = 32.dp,
+            contentBuilder = { indicator ->
+                "%.2f".format(indicator) + " Million"
+            }
+        )
         ```
     === "Row Chart"
         ```kotlin linenums="1"
@@ -46,10 +45,10 @@ contentBuilder = { indicator ->
 ### Indicators Bases
 
 !!! tip "You can specify type of indicator counts, we have two type: CountBased, StepBased"
-- <strong>`CountBased`</strong>: it will receive a count number and will divide & calculate and in
-the end it will show the requested count
-of indicators.
-
+    - <strong>`CountBased`</strong>: it will receive a count number and will divide & calculate and in
+    the end it will show the requested count
+    of indicators.
+    
     - <strong>`StepBased`</strong>: it will receive a stepBy value and will split step by given value until it reach min value, for example
     if (max value = 20, min value = -10) and stepBy value is 5, the indicators will be: 20,15,10,5,0,-5,-10
 
