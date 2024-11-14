@@ -561,7 +561,7 @@ private fun DrawScope.drawPopup(
     }
     if (offsetAnimator != null) {
         val animatedOffset = if (popup.properties.mode is PopupProperties.Mode.PointMode) {
-            popup.position
+            rectOffset
         } else {
             Offset(
                 x = offsetAnimator.first.value,
