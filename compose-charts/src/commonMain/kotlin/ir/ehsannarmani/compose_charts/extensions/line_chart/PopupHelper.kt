@@ -69,7 +69,6 @@ internal fun getPopupValue(
                 offset = size.height - outputY
             )
 
-            println("$outputY,$outputX")
             Value(calculatedValue = calculatedValue, offset = Offset(x = outputX, y = outputY))
         } else {
             val p1 = points[roundedIndex]

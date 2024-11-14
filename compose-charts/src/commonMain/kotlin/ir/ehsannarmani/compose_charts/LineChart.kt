@@ -47,6 +47,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.*
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
+import ir.ehsannarmani.compose_charts.extensions.line_chart.PathData
 import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
 import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
 import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
@@ -155,6 +156,9 @@ fun LineChart(
             0
         }
     }
+    val linesPathData = remember {
+        mutableStateListOf<PathData>()
+    }
 
 
 
@@ -223,6 +227,9 @@ fun LineChart(
             }
         }
     }
+    LaunchedEffect(data, minValue, maxValue) {
+        linesPathData.clear()
+    }
 
     Column(modifier = modifier) {
         if (labelHelperProperties.enabled) {
@@ -249,7 +256,7 @@ fun LineChart(
                 Canvas(modifier = Modifier
                     .weight(1f)
                     .fillMaxSize()
-                    .pointerInput(data, minValue, maxValue) {
+                    .pointerInput(data, minValue, maxValue, linesPathData) {
                         if (!popupProperties.enabled) return@pointerInput
                         detectHorizontalDragGestures(
                             onDragEnd = {
@@ -263,38 +270,55 @@ fun LineChart(
                                 val _size = size.toSize()
                                     .copy(height = (size.height - labelAreaHeight).toFloat())
                                 popups.clear()
-                                data.forEach {
-                                    val properties = it.popupProperties ?: popupProperties
+                                data.forEachIndexed { index, line ->
+                                    val properties = line.popupProperties ?: popupProperties
 
                                     val positionX =
                                         (change.position.x).coerceIn(
                                             0f,
                                             size.width.toFloat()
                                         )
-                                    val fraction = (positionX / size.width)
-                                    val popupValue = getPopupValue(
-                                        points = it.values,
-                                        fraction = fraction.toDouble(),
-                                        rounded = it.curvedEdges ?: curvedEdges,
-                                        size = _size,
-                                        minValue = minValue,
-                                        maxValue = maxValue
-                                    )
-                                    popups.add(
-                                        Popup(
-                                            position = popupValue.offset,
-                                            value = popupValue.calculatedValue,
-                                            properties = properties
+                                    val pathData = linesPathData[index]
+
+
+                                    val showOnPointsThreshold =
+                                        ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
+                                            ?: 0.dp).toPx()
+                                    val pointX =
+                                        pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
+                                    if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
+                                        val fraction =
+                                            ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
+                                                ?: 0f) else positionX) / size.width)
+                                        val popupValue = getPopupValue(
+                                            points = line.values,
+                                            fraction = fraction.toDouble(),
+                                            rounded = line.curvedEdges ?: curvedEdges,
+                                            size = _size,
+                                            minValue = minValue,
+                                            maxValue = maxValue
                                         )
-                                    )
-                                    // add popup offset animators
-                                    if (popupsOffsetAnimators.count() < popups.count()) {
-                                        repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                            popupsOffsetAnimators.add(
-                                                Animatable(0f) to Animatable(
-                                                    0f
-                                                )
+                                        popups.add(
+                                            Popup(
+                                                position = popupValue.offset,
+                                                value = popupValue.calculatedValue,
+                                                properties = properties
                                             )
+                                        )
+
+                                        if (popupsOffsetAnimators.count() < popups.count()) {
+                                            repeat(popups.count() - popupsOffsetAnimators.count()) {
+                                                popupsOffsetAnimators.add(
+                                                    // add fixed position for popup when mode is point mode
+                                                    if (properties.mode is PopupProperties.Mode.PointMode) {
+                                                        Animatable(popupValue.offset.x) to Animatable(
+                                                            popupValue.offset.y
+                                                        )
+                                                    } else {
+                                                        Animatable(0f) to Animatable(0f)
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -341,6 +365,19 @@ fun LineChart(
                             )
                         }
                     }
+                    if (linesPathData.isEmpty()) {
+                        data.map {
+                            getLinePath(
+                                dataPoints = it.values.map { it.toFloat() },
+                                maxValue = maxValue.toFloat(),
+                                minValue = minValue.toFloat(),
+                                rounded = it.curvedEdges ?: curvedEdges,
+                                size = size.copy(height = chartAreaHeight)
+                            )
+                        }.also {
+                            linesPathData.addAll(it)
+                        }
+                    }
 
                     drawGridLines(
                         dividersProperties = dividerProperties,
@@ -354,15 +391,9 @@ fun LineChart(
                         drawZeroLine()
                     }
                     data.forEachIndexed { index, line ->
-                        val path = getLinePath(
-                            dataPoints = line.values.map { it.toFloat() },
-                            maxValue = maxValue.toFloat(),
-                            minValue = minValue.toFloat(),
-                            rounded = line.curvedEdges ?: curvedEdges,
-                            size = size.copy(height = chartAreaHeight)
-                        )
+                        val pathData = linesPathData[index]
                         val segmentedPath = Path()
-                        pathMeasure.setPath(path, false)
+                        pathMeasure.setPath(pathData.path, false)
                         pathMeasure.getSegment(
                             0f,
                             pathMeasure.length * line.strokeProgress.value,
@@ -386,7 +417,7 @@ fun LineChart(
                         )
                         if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
                             drawLineGradient(
-                                path = path,
+                                path = pathData.path,
                                 color1 = line.firstGradientFillColor,
                                 color2 = line.secondGradientFillColor,
                                 progress = line.gradientProgress.value,
@@ -398,7 +429,7 @@ fun LineChart(
                                 fillColor = line.color.value
                             }
                             drawLineGradient(
-                                path = path,
+                                path = pathData.path,
                                 color1 = fillColor,
                                 color2 = fillColor,
                                 progress = 1f,
@@ -513,7 +544,7 @@ private fun DrawScope.drawPopup(
         offset
     }
     offsetAnimator?.also { (x, y) ->
-        if (x.value == 0f || y.value == 0f) {
+        if (x.value == 0f || y.value == 0f || popupProperties.mode is PopupProperties.Mode.PointMode) {
             scope.launch {
                 x.snapTo(rectOffset.x)
                 y.snapTo(rectOffset.y)
@@ -529,10 +560,14 @@ private fun DrawScope.drawPopup(
 
     }
     if (offsetAnimator != null) {
-        val animatedOffset = Offset(
-            x = offsetAnimator.first.value,
-            y = offsetAnimator.second.value
-        )
+        val animatedOffset = if (popup.properties.mode is PopupProperties.Mode.PointMode) {
+            popup.position
+        } else {
+            Offset(
+                x = offsetAnimator.first.value,
+                y = offsetAnimator.second.value
+            )
+        }
         val rect = Rect(
             offset = animatedOffset,
             size = rectSize

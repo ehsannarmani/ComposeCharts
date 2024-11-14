@@ -18,7 +18,13 @@ data class PopupProperties(
     val cornerRadius: Dp = 6.dp,
     val contentHorizontalPadding: Dp = 4.dp,
     val contentVerticalPadding: Dp = 2.dp,
+    val mode: Mode = Mode.Normal,
     val contentBuilder: (value: Double) -> String = {
         it.format(1)
     }
-)
+) {
+    sealed class Mode {
+        data object Normal : Mode()
+        data class PointMode(val threshold: Dp = 16.dp) : Mode()
+    }
+}
