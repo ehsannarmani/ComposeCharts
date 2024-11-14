@@ -1,0 +1,97 @@
+site_name: Compose Charts
+site_description: Compose Charts library document
+
+theme:
+  name: material
+  font:
+    text: Roboto
+    code: Cascadia Code
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+  language: en
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+      primary: teal
+      accent: light blue
+
+    - scheme: slate
+      toggle:
+        icon: material/lightbulb
+        name: switch to light mode
+      primary: teal
+      accent: light blue
+
+repo_name: ComposeCharts
+repo_url: https://github.com/ehsannarmani/ComposeCharts
+site_author: Ehsan Narmani
+
+nav:
+  - Getting Started:
+      - index.md
+      - getting-started/installation.md
+  - Charts:
+      - charts/pie-chart.md
+      - charts/line-chart.md
+      - charts/column-chart.md
+      - charts/row-chart.md
+  - animation-mode.md
+
+  - Chart Properties:
+      - chart-properties/bars.md
+      - chart-properties/dots.md
+      - chart-properties/indicators.md
+      - chart-properties/grid-lines.md
+      - chart-properties/axis.md
+      - chart-properties/dividers.md
+      - chart-properties/lines.md
+      - chart-properties/labels.md
+      - chart-properties/label-helpers.md
+      - chart-properties/popups.md
+  - todos.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://google.com
+copyright: |
+  &copy; 2024 <a href="" target="_blank">Ehsan Narmani</a>
+
