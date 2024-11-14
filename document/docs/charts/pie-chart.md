@@ -3,15 +3,18 @@
 <img src="https://github.com/ehsannarmani/ComposeCharts/blob/master/assets/charts/pie1.gif?raw=true" width="300">
 
 ```kotlin linenums="1"
-PieChart(
-    modifier = Modifier.size(200.dp),
-    data = remember {
+var data by remember {
+    mutableStateOf(
         listOf(
             Pie(label = "Android", data = 20.0, color = Color.Red, selectedColor = Color.Green),
             Pie(label = "Windows", data = 45.0, color = Color.Cyan, selectedColor = Color.Blue),
             Pie(label = "Linux", data = 35.0, color = Color.Gray, selectedColor = Color.Yellow),
         )
-    },
+    )
+}
+PieChart(
+    modifier = Modifier.size(200.dp),
+    data = data,
     onPieClick = {
         println("${it.label} Clicked")
         val pieIndex = data.indexOf(it)
