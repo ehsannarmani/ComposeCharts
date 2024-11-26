@@ -365,7 +365,7 @@ fun LineChart(
                             )
                         }
                     }
-                    if (linesPathData.isEmpty()) {
+                    if (linesPathData.isEmpty() || linesPathData.count() != data.count()) {
                         data.map {
                             getLinePath(
                                 dataPoints = it.values.map { it.toFloat() },
@@ -391,7 +391,7 @@ fun LineChart(
                         drawZeroLine()
                     }
                     data.forEachIndexed { index, line ->
-                        val pathData = linesPathData[index]
+                        val pathData = linesPathData.getOrNull(index) ?: return@Canvas
                         val segmentedPath = Path()
                         pathMeasure.setPath(pathData.path, false)
                         pathMeasure.getSegment(
