@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Color
@@ -47,7 +46,7 @@ fun PieChart(
     style: Pie.Style = Pie.Style.Fill
 ) {
 
-    require(data.none { it.data < 0 }){
+    require(data.none { it.data < 0 }) {
         "Data must be at least 0"
     }
 
@@ -65,19 +64,25 @@ fun PieChart(
     }
 
     LaunchedEffect(data) {
+        val currDetailsSize = details.size
         details = if (details.isNotEmpty()) {
             data.mapIndexed { mapIndex, chart ->
-                PieDetails(
-                    id = details[mapIndex].id,
-                    pie = chart,
-                    scale = details[mapIndex].scale,
-                    color = details[mapIndex].color,
-                    space = details[mapIndex].space
-                )
+                if (mapIndex < currDetailsSize) {
+                    PieDetails(
+                        id = details[mapIndex].id,
+                        pie = chart,
+                        scale = details[mapIndex].scale,
+                        color = details[mapIndex].color,
+                        space = details[mapIndex].space
+                    )
+                } else {
+                    PieDetails(pie = chart)
+                }
             }
         } else {
             data.map { PieDetails(pie = it) }
         }
+        pieces.clear()
     }
 
     LaunchedEffect(details) {
@@ -139,13 +144,13 @@ fun PieChart(
             }
         }
     ) {
-        val radius:Float = when(style){
-            is Pie.Style.Fill->{
-                (minOf(size.width,size.height)/2)
+        val radius: Float = when (style) {
+            is Pie.Style.Fill -> {
+                (minOf(size.width, size.height) / 2)
             }
 
-            is Pie.Style.Stroke->{
-                (minOf(size.width,size.height)/2) - (style.width.toPx()/2)
+            is Pie.Style.Stroke -> {
+                (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2)
             }
         }
         val total = details.sumOf { it.pie.data } // 360 degree for total
@@ -214,7 +219,6 @@ fun PieChart(
         }
     }
 }
-
 
 
 private data class PieDetails(
