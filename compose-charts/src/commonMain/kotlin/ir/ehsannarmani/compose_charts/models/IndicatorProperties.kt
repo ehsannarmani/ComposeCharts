@@ -12,7 +12,8 @@ sealed class IndicatorProperties(
     open val count: IndicatorCount,
     open val position: IndicatorPosition,
     open val padding: Dp,
-    open val contentBuilder: (Double) -> String
+    open val contentBuilder: (Double) -> String,
+    open val indicators:List<Double> = emptyList()
 )
 
 
@@ -24,14 +25,16 @@ data class VerticalIndicatorProperties(
     override val padding: Dp = 12.dp,
     override val contentBuilder: (Double) -> String = {
         it.format(1)
-    }
+    },
+    override val indicators: List<Double> = emptyList()
 ) : IndicatorProperties(
     enabled = enabled,
     textStyle = textStyle,
     count = count,
     position = position,
     contentBuilder = contentBuilder,
-    padding = padding
+    padding = padding,
+    indicators = indicators
 )
 
 data class HorizontalIndicatorProperties(
@@ -42,14 +45,16 @@ data class HorizontalIndicatorProperties(
     override val padding: Dp = 12.dp,
     override val contentBuilder: (Double) -> String = {
         it.format(1)
-    }
+    },
+    override val indicators: List<Double> = emptyList(),
 ) : IndicatorProperties(
     enabled = enabled,
     textStyle = textStyle,
     count = count,
     position = position,
     contentBuilder = contentBuilder,
-    padding = padding
+    padding = padding ,
+    indicators = indicators
 )
 
 sealed interface IndicatorPosition {

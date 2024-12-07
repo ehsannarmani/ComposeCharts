@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -29,6 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,7 +103,8 @@ fun ColumnChart(
         } ?: 0f
     }
     val averageSpacingBetweenBars = with(density) {
-        data.map { it.values }.flatten().map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
+        data.map { it.values }.flatten()
+            .map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
     }
 
     val barWithRect = remember {
@@ -119,11 +120,13 @@ fun ColumnChart(
     }
 
     val indicators = remember(minValue, maxValue) {
-        split(
-            count = indicatorProperties.count,
-            minValue = minValue,
-            maxValue = maxValue
-        )
+        indicatorProperties.indicators.ifEmpty {
+            split(
+                count = indicatorProperties.count,
+                minValue = minValue,
+                maxValue = maxValue
+            )
+        }
     }
     val indicatorAreaWidth = remember {
         if (indicatorProperties.enabled) {
@@ -354,52 +357,84 @@ fun ColumnChart(
 
                 }
             }
-            if (labelProperties.enabled && data.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(labelProperties.padding))
+            Labels(
+                labelProperties = labelProperties,
+                labels = labelProperties.labels.ifEmpty {
+                    data
+                        .map { it.label }
+                },
+                indicatorProperties = indicatorProperties,
+                chartWidth = chartWidth,
+                density = density,
+                textMeasurer = textMeasurer,
+                xPadding = xPadding
+            )
+        }
+    }
+}
 
-                val widthModifier =
-                    if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                        Modifier.width((chartWidth.value / density.density).dp)
-                    } else {
-                        Modifier.fillMaxWidth()
-                    }
+@Composable
+private fun Labels(
+    labelProperties: LabelProperties,
+    labels: List<String>,
+    indicatorProperties: HorizontalIndicatorProperties,
+    chartWidth: MutableFloatState,
+    density: Density,
+    textMeasurer: TextMeasurer,
+    xPadding: Float
+) {
+    if (labelProperties.enabled && labels.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(labelProperties.padding))
 
-                val labelMeasures =
-                    data.map { textMeasurer.measure(it.label, style = labelProperties.textStyle, maxLines = 1) }
-                val labelWidths = labelMeasures.map { it.size.width }
-                val maxLabelWidth = labelWidths.max()
-                val minLabelWidth = labelWidths.min()
-
-                var textModifier: Modifier = Modifier
-                var shouldRotate = labelProperties.forceRotation
-                if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotationDegreeOnSizeConflict != 0f) {
-                    textModifier = textModifier.width((minLabelWidth / density.density).dp)
-                    shouldRotate = true
-                }
-                Row(
-                    modifier = widthModifier
-                        .padding(
-                            start = (xPadding / density.density).dp,
-                        ), horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    data.forEachIndexed { index, bar ->
-                        BasicText(
-                            modifier = if (shouldRotate) textModifier.graphicsLayer {
-                                rotationZ = labelProperties.rotationDegreeOnSizeConflict
-                                transformOrigin =
-                                    TransformOrigin((labelMeasures[index].size.width / minLabelWidth.toFloat()), .5f)
-                                translationX =
-                                    -(labelMeasures[index].size.width - minLabelWidth.toFloat()) - minLabelWidth / 2
-                            } else textModifier,
-                            text = bar.label,
-                            style = labelProperties.textStyle,
-                            overflow = if (shouldRotate) TextOverflow.Visible else TextOverflow.Clip,
-                            softWrap = !shouldRotate,
-                        )
-                    }
-                }
+        val widthModifier =
+            if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                Modifier.width((chartWidth.value / density.density).dp)
+            } else {
+                Modifier.fillMaxWidth()
             }
 
+        val labelMeasures =
+            labels.map {
+                textMeasurer.measure(
+                    it,
+                    style = labelProperties.textStyle,
+                    maxLines = 1
+                )
+            }
+        val labelWidths = labelMeasures.map { it.size.width }
+        val maxLabelWidth = labelWidths.max()
+        val minLabelWidth = labelWidths.min()
+
+        var textModifier: Modifier = Modifier
+        var shouldRotate = labelProperties.forceRotation
+        if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotationDegreeOnSizeConflict != 0f) {
+            textModifier = textModifier.width((minLabelWidth / density.density).dp)
+            shouldRotate = true
+        }
+        Row(
+            modifier = widthModifier
+                .padding(
+                    start = (xPadding / density.density).dp,
+                ), horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            labels.forEachIndexed { index, label ->
+                BasicText(
+                    modifier = if (shouldRotate) textModifier.graphicsLayer {
+                        rotationZ = labelProperties.rotationDegreeOnSizeConflict
+                        transformOrigin =
+                            TransformOrigin(
+                                (labelMeasures[index].size.width / minLabelWidth.toFloat()),
+                                .5f
+                            )
+                        translationX =
+                            -(labelMeasures[index].size.width - minLabelWidth.toFloat()) - minLabelWidth / 2
+                    } else textModifier,
+                    text = label,
+                    style = labelProperties.textStyle,
+                    overflow = if (shouldRotate) TextOverflow.Visible else TextOverflow.Clip,
+                    softWrap = !shouldRotate,
+                )
+            }
         }
     }
 }

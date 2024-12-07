@@ -491,16 +491,19 @@ private fun Indicators(
     minValue: Double,
     maxValue: Double
 ) {
+    val indicators = indicatorProperties.indicators.ifEmpty {
+        split(
+            count = indicatorProperties.count,
+            minValue = minValue,
+            maxValue = maxValue
+        )
+    }
     Column(
         modifier = modifier
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        split(
-            count = indicatorProperties.count,
-            minValue = minValue,
-            maxValue = maxValue
-        ).forEach {
+        indicators.forEach {
             BasicText(
                 text = indicatorProperties.contentBuilder(it),
                 style = indicatorProperties.textStyle
