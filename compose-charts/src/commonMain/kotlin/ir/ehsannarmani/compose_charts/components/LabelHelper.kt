@@ -19,16 +19,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.Bars
+import kotlin.math.min
 
 @Composable
 fun LabelHelper(
     data: List<Pair<String, Brush>>,
     textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
 ) {
-    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier) {
+    val numberOfGridCells = min(data.size, 3)
+    LazyVerticalGrid(columns = GridCells.Fixed(numberOfGridCells), modifier = Modifier) {
         items(data) { (label, color) ->
             Row(
                 modifier = Modifier
@@ -42,7 +45,12 @@ fun LabelHelper(
                         .clip(CircleShape)
                         .background(color)
                 )
-                BasicText(text = label, style = textStyle)
+                BasicText(
+                    text = label,
+                    style = textStyle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -53,8 +61,8 @@ fun LabelHelper(
  */
 @Composable
 fun RCChartLabelHelper(
-    data:List<Bars>,
-    textStyle: TextStyle =  TextStyle.Default.copy(fontSize = 13.sp)
+    data: List<Bars>,
+    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
 ) {
     val labels = data.flatMap { it.values.map { it.label } }.distinct()
     val colors = labels.map { label ->
