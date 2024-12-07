@@ -65,6 +65,7 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
+import ir.ehsannarmani.compose_charts.utils.HorizontalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -130,6 +131,9 @@ fun LineChart(
     val zeroLineAnimation = remember {
         Animatable(0f)
     }
+    val chartWidth = remember {
+        mutableFloatStateOf(0f)
+    }
 
     val dotAnimators = remember {
         mutableStateListOf<List<Animatable<Float, AnimationVector1D>>>()
@@ -140,28 +144,33 @@ fun LineChart(
     val popupsOffsetAnimators = remember {
         mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
     }
-    val labelAreaHeight = remember {
-        if (labelProperties.enabled) {
-            if (labelProperties.labels.isNotEmpty()) {
-                labelProperties.labels.maxOf {
-                    textMeasurer.measure(
-                        it,
-                        style = labelProperties.textStyle
-                    ).size.height
-                } + (labelProperties.padding.value * density.density).toInt()
-            } else {
-                error("Labels enabled, but there is no label provided to show, disable labels or fill 'labels' parameter in LabelProperties")
-            }
-        } else {
-            0
-        }
-    }
     val linesPathData = remember {
         mutableStateListOf<PathData>()
     }
+    val indicators = remember(indicatorProperties.indicators,minValue,maxValue) {
+        indicatorProperties.indicators.ifEmpty {
+            split(
+                count = indicatorProperties.count,
+                minValue = minValue,
+                maxValue = maxValue
+            )
+        }
+    }
+    val indicatorAreaWidth = remember {
+        if (indicatorProperties.enabled) {
+            indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (indicatorProperties.padding.value * density.density)
+        } else {
+            0f
+        }
+    }
 
-
-
+    val xPadding = remember {
+        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+            indicatorAreaWidth
+        } else {
+            0f
+        }
+    }
     LaunchedEffect(Unit) {
         if (zeroLineProperties.enabled) {
             zeroLineAnimation.snapTo(0f)
@@ -239,15 +248,12 @@ fun LineChart(
             )
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }
-        Row(modifier = Modifier.fillMaxSize()) {
-            val paddingBottom = (labelAreaHeight / density.density).dp
+        Row(modifier = Modifier.fillMaxSize().weight(1f)) {
             if (indicatorProperties.enabled) {
                 if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
                     Indicators(
-                        modifier = Modifier.padding(bottom = paddingBottom),
                         indicatorProperties = indicatorProperties,
-                        minValue = minValue,
-                        maxValue = maxValue
+                        indicators = indicators
                     )
                     Spacer(modifier = Modifier.width(indicatorProperties.padding))
                 }
@@ -268,7 +274,7 @@ fun LineChart(
                             },
                             onHorizontalDrag = { change, amount ->
                                 val _size = size.toSize()
-                                    .copy(height = (size.height - labelAreaHeight).toFloat())
+                                    .copy(height = (size.height).toFloat())
                                 popups.clear()
                                 data.forEachIndexed { index, line ->
                                     val properties = line.popupProperties ?: popupProperties
@@ -332,7 +338,8 @@ fun LineChart(
                         )
                     }
                 ) {
-                    val chartAreaHeight = size.height - labelAreaHeight
+                    val chartAreaHeight = size.height
+                    chartWidth.value = size.width
                     val drawZeroLine = {
                         val zeroY = chartAreaHeight - calculateOffset(
                             minValue = minValue,
@@ -347,23 +354,6 @@ fun LineChart(
                             pathEffect = zeroLineProperties.style.pathEffect,
                             strokeWidth = zeroLineProperties.thickness.toPx()
                         )
-                    }
-
-                    if (labelProperties.enabled) {
-                        labelProperties.labels.forEachIndexed { index, label ->
-                            val measureResult =
-                                textMeasurer.measure(label, style = labelProperties.textStyle)
-                            drawText(
-                                textLayoutResult = measureResult,
-                                topLeft = Offset(
-                                    (size.width - measureResult.size.width).spaceBetween(
-                                        itemCount = labelProperties.labels.count(),
-                                        index = index
-                                    ),
-                                    size.height - labelAreaHeight + labelProperties.padding.toPx()
-                                )
-                            )
-                        }
                     }
                     if (linesPathData.isEmpty() || linesPathData.count() != data.count()) {
                         data.map {
@@ -473,31 +463,32 @@ fun LineChart(
                 if (indicatorProperties.position == IndicatorPosition.Horizontal.End) {
                     Spacer(modifier = Modifier.width(indicatorProperties.padding))
                     Indicators(
-                        modifier = Modifier.padding(bottom = paddingBottom),
                         indicatorProperties = indicatorProperties,
-                        minValue = minValue,
-                        maxValue = maxValue
+                        indicators = indicators
                     )
                 }
             }
         }
+        HorizontalLabels(
+            labelProperties = labelProperties,
+            labels = labelProperties.labels,
+            indicatorProperties = indicatorProperties,
+            chartWidth = chartWidth.value,
+            density = density,
+            textMeasurer = textMeasurer,
+            xPadding = xPadding
+        )
     }
 }
+
+
 
 @Composable
 private fun Indicators(
     modifier: Modifier = Modifier,
+    indicators:List<Double>,
     indicatorProperties: HorizontalIndicatorProperties,
-    minValue: Double,
-    maxValue: Double
 ) {
-    val indicators = indicatorProperties.indicators.ifEmpty {
-        split(
-            count = indicatorProperties.count,
-            minValue = minValue,
-            maxValue = maxValue
-        )
-    }
     Column(
         modifier = modifier
             .fillMaxHeight(),
