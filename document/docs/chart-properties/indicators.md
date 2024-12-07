@@ -11,6 +11,7 @@
 | `position`       | IndicatorPosition  | `Depends on chart`             | specifies indicator position, in line & column charts can be: start or end, in line charts can be: top or bottom |
 | `padding`        | Dp                 | `12.dp`                        | specifies indicator area padding with chart area                                                                 |
 | `contentBuilder` | (Double) -> String | `{ "%.2f".format(it) }`        | specifies counter content creation template                                                                      |
+| `indicators`     | List<Double>       | `emptyList()`                  | overrides chart indicators                                                                                       |
 
 !!! Example
     === "Line & Column Chart"
@@ -23,7 +24,8 @@
             padding = 32.dp,
             contentBuilder = { indicator ->
                 "%.2f".format(indicator) + " Million"
-            }
+            },
+            indicators = listOf(10.0,50.0,30.0)
         )
         ```
     === "Row Chart"
