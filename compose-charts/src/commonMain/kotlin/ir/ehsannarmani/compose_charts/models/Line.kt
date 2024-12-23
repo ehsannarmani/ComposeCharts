@@ -24,4 +24,5 @@ data class Line(
     val curvedEdges:Boolean? = null,
     val strokeProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),
     val gradientProgress: Animatable<Float, AnimationVector1D> = Animatable(0f),
+    val viewRange: ViewRange = ViewRange()
 )

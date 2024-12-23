@@ -11,14 +11,16 @@ internal fun DrawScope.drawLineGradient(
     color1: Color,
     color2: Color,
     progress: Float,
-    size: Size? = null
+    size: Size? = null,
+    startOffset: Float,
+    endOffset: Float
 ) {
     val _size = size ?: this.size
     drawIntoCanvas {
         val p = Path()
         p.addPath(path)
-        p.lineTo(_size.width, _size.height)
-        p.lineTo(0f, _size.height)
+        p.lineTo(endOffset, _size.height)
+        p.lineTo(startOffset, _size.height)
         p.close()
         val paint = Paint()
         paint.shader = LinearGradientShader(
