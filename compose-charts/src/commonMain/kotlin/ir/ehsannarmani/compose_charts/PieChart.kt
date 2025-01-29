@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Color
@@ -24,9 +25,11 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
+import ir.ehsannarmani.compose_charts.extensions.isDegreeBetween
+import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
-import kotlin.math.atan2
 import kotlin.random.Random
 
 @Composable
@@ -52,11 +55,15 @@ fun PieChart(
 
     val scope = rememberCoroutineScope()
 
+    var pieChartCenter by remember {
+        mutableStateOf(Offset.Zero)
+    }
+
     var details by remember {
         mutableStateOf(emptyList<PieDetails>())
     }
     val pieces = remember {
-        mutableListOf<Pair<String, Rect>>()
+        mutableListOf<PiePiece>()
     }
 
     val pathMeasure = remember {
@@ -132,8 +139,14 @@ fun PieChart(
     Canvas(modifier = modifier
         .pointerInput(Unit) {
             detectTapGestures { offset ->
-                pieces
-                    .firstOrNull { it.second.contains(offset) }
+                val angleInDegree = getAngleInDegree(
+                    touchTapOffset = offset,
+                    pieceOffset = pieChartCenter
+                )
+
+                pieces.firstOrNull { piece ->
+                    isDegreeBetween(angleInDegree, piece.startFromDegree, piece.endToDegree)
+                        && isInsideCircle(offset, pieChartCenter, piece.radius) }
                     ?.let {
                         val (id, _) = it
                         details.find { it.id == id }
@@ -144,6 +157,8 @@ fun PieChart(
             }
         }
     ) {
+        pieChartCenter = center
+
         val radius: Float = when (style) {
             is Pie.Style.Fill -> {
                 (minOf(size.width, size.height) / 2)
@@ -164,6 +179,15 @@ fun PieChart(
             }
             val piecePath = if (degree >= 360.0) {
                 // draw circle instead of arc
+
+                pieces.add(
+                    PiePiece(
+                        id = detail.id,
+                        radius = radius * detail.scale.value,
+                        startFromDegree = 0f,
+                        endToDegree = 360f
+                    )
+                )
 
                 Path().apply {
                     addOval(
@@ -206,11 +230,18 @@ fun PieChart(
                         (size.height / 2)
                     )
                 }
+
+                pieces.add(
+                    PiePiece(
+                        id = detail.id,
+                        radius = radius * detail.scale.value,
+                        startFromDegree = arcStart,
+                        endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep,
+                    )
+                )
                 piecePath
             }
-            val rect = piecePath.getBounds()
 
-            pieces.add(detail.id to rect)
             drawPath(
                 path = piecePath,
                 color = detail.color.value,
@@ -227,4 +258,11 @@ private data class PieDetails(
     val color: Animatable<Color, AnimationVector4D> = Animatable(pie.color),
     val scale: Animatable<Float, AnimationVector1D> = Animatable(1f),
     val space: Animatable<Float, AnimationVector1D> = Animatable(0f)
+)
+
+private data class PiePiece(
+    val id: String,
+    val radius: Float,
+    val startFromDegree: Float,
+    val endToDegree: Float,
 )
