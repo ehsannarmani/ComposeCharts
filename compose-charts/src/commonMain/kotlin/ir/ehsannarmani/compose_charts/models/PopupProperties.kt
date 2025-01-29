@@ -19,8 +19,15 @@ data class PopupProperties(
     val contentHorizontalPadding: Dp = 4.dp,
     val contentVerticalPadding: Dp = 2.dp,
     val mode: Mode = Mode.Normal,
+    @Deprecated(
+        message = "Use contentBuilderNew instead for enhanced functionality",
+        replaceWith = ReplaceWith("contentBuilderFunction: (label: String?, value: Double)")
+    )
     val contentBuilder: (value: Double) -> String = {
         it.format(1)
+    },
+    val contentBuilderFunction: (label: String?, value: Double) -> String = { label, value ->
+        contentBuilder(value)
     }
 ) {
     sealed class Mode {
