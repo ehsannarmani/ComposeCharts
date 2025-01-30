@@ -20,8 +20,6 @@ dependencies {
     implementation ("io.github.ehsannarmani:compose-charts:latest_version")
 }
 ```
-> [!NOTE]
-> We migrated to maven central repository in 0.0.5v, so if you want to access previous versions of library, see [this](https://github.com/ehsannarmani/ComposeCharts/tree/0.0.4).
 
 ### Document
 You can read full guide and document [here](https://ehsannarmani.github.io/ComposeCharts/).
