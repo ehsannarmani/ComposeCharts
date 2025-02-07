@@ -4,7 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
@@ -57,5 +57,31 @@ data class Bars(
                 }
             }
         }
+
+        sealed class RadiusPx {
+            data object None : RadiusPx()
+            data class Circular(val radius: Float) : RadiusPx()
+            data class Rectangle(
+              val topLeft: Float = 0f,
+              val topRight: Float = 0f,
+              val bottomLeft: Float = 0f,
+              val bottomRight: Float = 0f
+            ) : RadiusPx()
+        }
     }
+}
+
+fun Bars.Data.Radius.asRadiusPx(density: Density): Bars.Data.RadiusPx {
+  with(density) {
+    return when (this@asRadiusPx) {
+      is Bars.Data.Radius.None -> Bars.Data.RadiusPx.None
+      is Bars.Data.Radius.Circular -> Bars.Data.RadiusPx.Circular(radius.toPx())
+      is Bars.Data.Radius.Rectangle -> Bars.Data.RadiusPx.Rectangle(
+        topLeft = topLeft.toPx(),
+        topRight = topRight.toPx(),
+        bottomLeft = bottomLeft.toPx(),
+        bottomRight = bottomRight.toPx()
+      )
+    }
+  }
 }
