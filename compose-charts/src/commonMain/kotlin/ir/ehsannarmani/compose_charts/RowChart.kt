@@ -49,6 +49,7 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.asRadiusPx
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.VerticalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
@@ -312,7 +313,7 @@ fun RowChart(
                                     radius = radius.reverse(horizontal = true)
                                 }
 
-                                path.addRoundRect(rect = rect, radius = radius)
+                                path.addRoundRect(rect = rect, radius = radius.asRadiusPx(this))
 
                                 val alpha = if (rect == selectedBar.value?.rect) {
                                     1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
