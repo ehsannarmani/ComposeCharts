@@ -161,8 +161,8 @@ fun RowScope.RowSample() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    contentBuilderFunction = { label, value ->
+                        "$label: ${value.format(1)} Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -372,8 +372,8 @@ fun RowScope.RowSample2() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    contentBuilderFunction = { label, value ->
+                        "$label: ${value.format(1)} Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -444,8 +444,8 @@ fun RowScope.RowSample3() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    contentBuilderFunction = { label, value ->
+                        "$label: ${value.format(1)} Million"
                     },
                     containerColor = Color(0xff414141),
                 ),

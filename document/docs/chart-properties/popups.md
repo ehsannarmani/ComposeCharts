@@ -14,7 +14,8 @@
 | `contentHorizontalPadding` | Dp                   | `4.dp`                  | specifies popup horizontal padding                                                              |
 | `contentVerticalPadding`   | Dp                   | `2.dp`                  | specifies popup vertical padding                                                                |
 | `mode`                     | PopupProperties.Mode | `Mode.Normal`           | specifies popup visibility mode ( you can pass PointMode to make popup visible just on points ) |
-| `contentBuilder`           | (Double)->String     | `{ "%.2f".format(it) }` | specifies popup content creation template                                                       |
+| `contentBuilder` **(Deprecated)** | (Double)->String | `{ "%.2f".format(it) }` | specifies popup content creation template                                                       |
+| `contentBuilderFunction`   | (String, Double)->String | `{ "%.2f".format(it) }` | specifies popup content creation template                                                       |
 
 !!! tip "Tip"
     In line charts your can set specific popup properties for each line, for example you can disable one
@@ -32,8 +33,8 @@
         cornerRadius = 8.dp,
         contentHorizontalPadding = 4.dp,
         contentVerticalPadding = 2.dp,
-        contentBuilder = { value->
-            "%.1f".format(value)+"Million"
+        contentBuilderFuntion = { label, value->
+            label + ": %.1f".format(value)+" Million"
         }
     )
     ```
