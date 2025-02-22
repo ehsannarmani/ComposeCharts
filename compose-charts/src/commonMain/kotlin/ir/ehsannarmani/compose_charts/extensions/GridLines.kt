@@ -40,10 +40,10 @@ fun DrawScope.drawGridLines(
         for (i in 0 until yAxisProperties.lineCount) {
             val x = _size.width.spaceBetween(itemCount = yAxisProperties.lineCount, index = i)
             drawLine(
-                brush = xAxisProperties.color,
+                brush = yAxisProperties.color,
                 start = Offset(x + xPadding, 0f + yPadding),
                 end = Offset(x + xPadding, _size.height + yPadding),
-                strokeWidth = xAxisProperties.thickness.toPx(),
+                strokeWidth = yAxisProperties.thickness.toPx(),
                 pathEffect = yAxisPathEffect
             )
         }
