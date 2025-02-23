@@ -75,7 +75,8 @@ import kotlin.math.abs
 private data class Popup(
     val properties: PopupProperties,
     val position: Offset,
-    val value: Double
+    val value: Double,
+    val label: String = ""
 )
 
 @Composable
@@ -309,7 +310,8 @@ fun LineChart(
                                                 Popup(
                                                     position = popupValue.offset,
                                                     value = popupValue.calculatedValue,
-                                                    properties = properties
+                                                    properties = properties,
+                                                    label = line.label
                                                 )
                                             )
 
@@ -539,7 +541,7 @@ private fun DrawScope.drawPopup(
     val offset = popup.position
     val popupProperties = popup.properties
     val measureResult = textMeasurer.measure(
-        popupProperties.contentBuilder(popup.value),
+        popupProperties.contentBuilderFunction(popup.label, popup.value),
         style = popupProperties.textStyle.copy(
             color = popupProperties.textStyle.color.copy(
                 alpha = 1f * progress
