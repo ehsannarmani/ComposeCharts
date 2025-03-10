@@ -94,6 +94,7 @@ fun PieChart(
 
     LaunchedEffect(details) {
         details.forEach {
+            println(it.pie.selected)
             if (it.pie.selected) {
                 scope.launch {
                     it.color.animateTo(

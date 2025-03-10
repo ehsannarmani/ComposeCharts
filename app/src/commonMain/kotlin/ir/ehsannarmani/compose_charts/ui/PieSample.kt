@@ -87,10 +87,13 @@ fun RowScope.PieSample() {
                     .size(200.dp),
                 data = data,
                 onPieClick = {
-                    println("${it.label} Clicked")
+                    //println("${it.label} Clicked")
                     val pieIndex = data.indexOf(it)
                     data =
-                        data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
+                        data.mapIndexed { mapIndex, pie ->
+                            println("onPieClick = $pieIndex, ${mapIndex}, $pie")
+                            pie.copy(selected = pieIndex == mapIndex)
+                        }
                 },
                 selectedScale = 1.2f,
                 spaceDegreeAnimEnterSpec = floatSpec,
@@ -180,10 +183,19 @@ fun RowScope.PieSample3() {
                     .size(200.dp),
                 data = data,
                 onPieClick = {
-                    println("${it.label} Clicked")
                     val pieIndex = data.indexOf(it)
                     data =
-                        data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
+                        data.mapIndexed { mapIndex, pie ->
+                            println("onPieClick = $pieIndex, ${mapIndex}, $pie")
+                            //pie.copy(selected = pieIndex == mapIndex)
+                            if (mapIndex == pieIndex) {
+                                // 切换当前扇区的选中状态
+                                pie.copy(selected = !pie.selected)
+                            } else {
+                                // 取消其他扇区的选中状态
+                                pie.copy(selected = false)
+                            }
+                        }
                 },
                 selectedScale = 1.2f,
                 spaceDegreeAnimEnterSpec = floatSpec,
