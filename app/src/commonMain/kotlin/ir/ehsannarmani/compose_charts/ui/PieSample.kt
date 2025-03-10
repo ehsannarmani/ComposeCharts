@@ -186,7 +186,7 @@ fun RowScope.PieSample3() {
                     val pieIndex = data.indexOf(it)
                     data =
                         data.mapIndexed { mapIndex, pie ->
-                            println("onPieClick = $pieIndex, ${mapIndex}, $pie")
+                            //println("onPieClick = $pieIndex, ${mapIndex}, $pie")
                             //pie.copy(selected = pieIndex == mapIndex)
                             if (mapIndex == pieIndex) {
                                 // 切换当前扇区的选中状态
