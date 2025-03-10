@@ -103,7 +103,8 @@ fun RowScope.PieSample() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 0f,
-                style = Pie.Style.Fill
+                style = Pie.Style.Fill,
+
             )
         }
     }
@@ -173,7 +174,7 @@ fun RowScope.PieSample3() {
         .border(2.dp, Color.Transparent, RoundedCornerShape(12.dp)),
         elevation = CardDefaults.elevatedCardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
+            containerColor = Color.White
         )
 
     ) {
@@ -206,7 +207,8 @@ fun RowScope.PieSample3() {
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
                 style = Pie.Style.Stroke(),
-                spaceDegree = 7f
+                spaceDegree = 7f,
+                centerTitle = "饼图center text text text"
             )
         }
     }

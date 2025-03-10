@@ -25,6 +25,12 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
 import ir.ehsannarmani.compose_charts.extensions.isDegreeBetween
 import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
@@ -46,7 +52,10 @@ fun PieChart(
     colorAnimExitSpec: AnimationSpec<Color> = colorAnimEnterSpec,
     scaleAnimExitSpec: AnimationSpec<Float> = scaleAnimEnterSpec,
     spaceDegreeAnimExitSpec: AnimationSpec<Float> = spaceDegreeAnimEnterSpec,
-    style: Pie.Style = Pie.Style.Fill
+    style: Pie.Style = Pie.Style.Fill,
+    centerTitle: String? = null, // 中心文本
+    centerTextColor: Color = Color.Black, // 文本颜色
+    centerTextStyle: TextStyle = TextStyle.Default // 文本样式
 ) {
 
     require(data.none { it.data < 0 }) {
@@ -136,6 +145,8 @@ fun PieChart(
             }
         }
     }
+
+    val textMeasurer = rememberTextMeasurer()
 
     Canvas(modifier = modifier
         .pointerInput(Unit) {
@@ -248,6 +259,60 @@ fun PieChart(
                 color = detail.color.value,
                 style = drawStyle,
             )
+            // 绘制中心文本
+            centerTitle?.let { title ->
+                // 1. 截断字符长度
+                val truncatedTitle = if (title.length > 8) title.take(8) else title
+
+                // 2. 计算可用区域
+                val availableDiameter = when (style) {
+                    is Pie.Style.Stroke -> {
+                        val strokeWidth = style.width.toPx()
+                        minOf(size.width, size.height) - 2 * strokeWidth
+                    }
+                    else -> minOf(size.width, size.height) // Fill 样式按需调整
+                }
+
+                // 3. 动态调整字体大小
+                // 3. 动态调整字体大小
+                val maxTextWidth = availableDiameter * 0.9f
+                var dynamicTextStyle = centerTextStyle.copy()
+
+                // 确保 fontSize 的类型是明确的
+                val initialFontSize = if (dynamicTextStyle.fontSize.type == TextUnitType.Unspecified) {
+                    TextUnit(16f, TextUnitType.Sp) // 赋予默认值
+                } else {
+                    dynamicTextStyle.fontSize
+                }
+                dynamicTextStyle = dynamicTextStyle.copy(fontSize = initialFontSize)
+                var textLayoutResult = textMeasurer.measure(
+                    AnnotatedString(truncatedTitle),
+                    dynamicTextStyle
+                )
+
+                if (textLayoutResult.size.width > maxTextWidth) {
+                    val scale = maxTextWidth / textLayoutResult.size.width
+                    dynamicTextStyle = dynamicTextStyle.copy(
+                        fontSize = dynamicTextStyle.fontSize * scale
+                    )
+                    textLayoutResult = textMeasurer.measure(
+                        AnnotatedString(truncatedTitle),
+                        dynamicTextStyle
+                    )
+                }
+
+                // 4. 绘制居中文本
+                val textOffset = Offset(
+                    x = center.x - textLayoutResult.size.width / 2,
+                    y = center.y - textLayoutResult.size.height / 2
+                )
+                drawText(
+                    textLayoutResult = textLayoutResult,
+                    topLeft = textOffset,
+                    color = centerTextColor
+                )
+            }
+
         }
     }
 }
