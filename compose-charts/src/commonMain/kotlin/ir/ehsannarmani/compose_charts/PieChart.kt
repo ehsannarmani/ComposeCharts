@@ -54,9 +54,9 @@ fun PieChart(
     spaceDegreeAnimExitSpec: AnimationSpec<Float> = spaceDegreeAnimEnterSpec,
     appearanceAnimationSpec: AnimationSpec<Float> = tween(2000),
     style: Pie.Style = Pie.Style.Fill,
-    centerTitle: String? = null, // 中心文本
-    centerTextColor: Color = Color.Black, // 文本颜色
-    centerTextStyle: TextStyle = TextStyle.Default // 文本样式
+    centerTitle: String? = null,
+    centerTextColor: Color = Color.Black,
+    centerTextStyle: TextStyle = TextStyle.Default
 ) {
 
     require(data.none { it.data < 0 }) {
@@ -80,11 +80,13 @@ fun PieChart(
         PathMeasure()
     }
 
-    val transitionProgress = remember(data) { Animatable(0f) }
+    val appearanceProgress = remember {
+        Animatable(0f)
+    }
 
     LaunchedEffect(Unit) {
-        transitionProgress.snapTo(0f)
-        transitionProgress.animateTo(
+        appearanceProgress.snapTo(0f)
+        appearanceProgress.animateTo(
             targetValue = 1f,
             animationSpec = appearanceAnimationSpec
         )
@@ -186,7 +188,7 @@ fun PieChart(
         details.forEachIndexed { index, detail ->
             val degree = ((detail.pie.data * 360) / total).toFloat()
             // Calculate the sweep angle based on both the progress and the actual degree
-            val progress = transitionProgress.value
+            val progress = appearanceProgress.value
             val animatedDegree = degree * progress
 
             val drawStyle = if ((detail.pie.style ?: style) is Pie.Style.Stroke) {
@@ -266,26 +268,24 @@ fun PieChart(
                 color = color,
                 style = drawStyle,
             )
-            // 绘制中心文本
+
             centerTitle?.let { title ->
-                // 1. 截断字符长度
+
                 val truncatedTitle = if (title.length > 8) title.take(8) else title
 
-                // 2. 计算可用区域
+
                 val availableDiameter = when (style) {
                     is Pie.Style.Stroke -> {
                         val strokeWidth = style.width.toPx()
                         minOf(size.width, size.height) - 2 * strokeWidth
                     }
-                    else -> minOf(size.width, size.height) // Fill 样式按需调整
+                    else -> minOf(size.width, size.height)
                 }
 
-                // 3. 动态调整字体大小
-                // 3. 动态调整字体大小
                 val maxTextWidth = availableDiameter * 0.9f
                 var dynamicTextStyle = centerTextStyle.copy()
 
-                // 确保 fontSize 的类型是明确的
+
                 val initialFontSize = if (dynamicTextStyle.fontSize.type == TextUnitType.Unspecified) {
                     TextUnit(16f, TextUnitType.Sp) // 赋予默认值
                 } else {
@@ -308,7 +308,6 @@ fun PieChart(
                     )
                 }
 
-                // 4. 绘制居中文本
                 val textOffset = Offset(
                     x = center.x - textLayoutResult.size.width / 2,
                     y = center.y - textLayoutResult.size.height / 2

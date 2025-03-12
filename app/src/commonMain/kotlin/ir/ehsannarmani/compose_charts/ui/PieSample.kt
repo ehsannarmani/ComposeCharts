@@ -188,14 +188,14 @@ fun RowScope.PieSample3() {
                     data =
                         data.mapIndexed { mapIndex, pie ->
                             //println("onPieClick = $pieIndex, ${mapIndex}, $pie")
-                            //pie.copy(selected = pieIndex == mapIndex)
-                            if (mapIndex == pieIndex) {
-                                // 切换当前扇区的选中状态
-                                pie.copy(selected = !pie.selected)
-                            } else {
-                                // 取消其他扇区的选中状态
-                                pie.copy(selected = false)
-                            }
+                            pie.copy(selected = pieIndex == mapIndex)
+//                            if (mapIndex == pieIndex) {
+//                                // 切换当前扇区的选中状态
+//                                pie.copy(selected = !pie.selected)
+//                            } else {
+//                                // 取消其他扇区的选中状态
+//                                pie.copy(selected = false)
+//                            }
                         }
                 },
                 selectedScale = 1.2f,
