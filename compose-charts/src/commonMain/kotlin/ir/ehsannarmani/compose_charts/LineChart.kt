@@ -300,7 +300,7 @@ fun LineChart(
                                                 ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
                                                     ?: 0f) else positionX) / size.width)
 
-                                            //Calculate the value index
+                                            //Calculate the data index
                                             val dataIndex = calculateValueIndex(
                                                 fraction = fraction.toDouble(),
                                                 values = line.values,
