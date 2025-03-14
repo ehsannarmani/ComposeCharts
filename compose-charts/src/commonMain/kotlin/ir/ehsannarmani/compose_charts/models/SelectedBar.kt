@@ -6,5 +6,7 @@ import androidx.compose.ui.geometry.Rect
 data class SelectedBar(
     val bar: Bars.Data,
     val offset: Offset,
-    val rect: Rect
+    val rect: Rect,
+    val dataIndex: Int,
+    val valueIndex: Int
 )

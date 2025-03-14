@@ -70,8 +70,8 @@ fun ColumnChart(
     modifier: Modifier = Modifier,
     data: List<Bars>,
     barProperties: BarProperties = BarProperties(),
-    onBarClick: ((Bars.Data) -> Unit)? = null,
-    onBarLongClick: ((Bars.Data) -> Unit)? = null,
+    onBarClick: ((Bars.Data, Pair<Int, Int>) -> Unit)? = null,
+    onBarLongClick: ((Bars.Data, Pair<Int, Int>) -> Unit)? = null,
     labelProperties: LabelProperties = LabelProperties(
         textStyle = TextStyle.Default,
         enabled = true
@@ -116,7 +116,7 @@ fun ColumnChart(
     }
 
     val barWithRect = remember {
-        mutableStateListOf<Pair<Bars.Data, Rect>>()
+        mutableStateListOf<Triple<Bars.Data, Rect, Pair<Int, Int>>>()
     }
 
     val selectedValue = remember {
@@ -191,17 +191,19 @@ fun ColumnChart(
                         if (popupProperties.enabled) {
                             detectHorizontalDragGestures { change, dragAmount ->
                                 barWithRect
-                                    .lastOrNull { (_, rect) ->
+                                    .lastOrNull { (_, rect, _ ) ->
                                         change.position.x in rect.left..rect.right
                                     }
-                                    ?.let { (bar, rect) ->
+                                    ?.let { (bar, rect, indices) ->
                                         selectedValue.value = SelectedBar(
                                             bar = bar,
                                             rect = rect,
                                             offset = Offset(
                                                 rect.left,
                                                 if (bar.value < 0) rect.bottom else rect.top
-                                            )
+                                            ),
+                                            dataIndex = indices.first,
+                                            valueIndex = indices.second
                                         )
                                         scope.launch {
                                             if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
@@ -220,10 +222,10 @@ fun ColumnChart(
                             onTap = {
                                 val position = Offset(it.x, it.y)
                                 barWithRect
-                                    .lastOrNull { (_, rect) ->
+                                    .lastOrNull { (_, rect, _) ->
                                         rect.contains(position)
                                     }
-                                    ?.let { (bar, rect) ->
+                                    ?.let { (bar, rect, indices) ->
                                         if (popupProperties.enabled) {
                                             selectedValue.value = SelectedBar(
                                                 bar = bar,
@@ -231,7 +233,9 @@ fun ColumnChart(
                                                 offset = Offset(
                                                     rect.left,
                                                     if (bar.value < 0) rect.bottom else rect.top
-                                                )
+                                                ),
+                                                dataIndex = indices.first,
+                                                valueIndex = indices.second
                                             )
                                             scope.launch {
                                                 popupAnimation.snapTo(0f)
@@ -241,17 +245,17 @@ fun ColumnChart(
                                                 )
                                             }
                                         }
-                                        onBarClick?.invoke(bar)
+                                        onBarClick?.invoke(bar, indices)
                                     }
                             },
                             onLongPress = {
                                 val position = Offset(it.x, it.y)
                                 barWithRect
-                                    .lastOrNull { (_, rect) ->
+                                    .lastOrNull { (_, rect, indices) ->
                                         rect.contains(position)
                                     }
-                                    ?.let { (bar, _) ->
-                                        onBarLongClick?.invoke(bar)
+                                    ?.let { (bar, _, indices) ->
+                                        onBarLongClick?.invoke(bar, indices)
                                     }
                             }
                         )
@@ -329,7 +333,9 @@ fun ColumnChart(
                                         height = barHeight.absoluteValue.toFloat()
                                     ),
                                 )
-                                if (barWithRect.none { it.second == rect }) barWithRect.add(col to rect)
+                                if (barWithRect.none { it.second == rect }) {
+                                    barWithRect.add(Triple(col, rect, Pair(dataIndex, valueIndex)))
+                                }
                                 val path = Path()
 
                                 var radius =
@@ -388,7 +394,7 @@ private fun DrawScope.drawPopup(
     progress: Float,
 ) {
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.bar.value),
+        properties.contentBuilderFunction(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress

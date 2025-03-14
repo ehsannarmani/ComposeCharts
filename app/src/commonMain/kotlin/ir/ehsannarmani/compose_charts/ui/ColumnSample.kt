@@ -155,17 +155,17 @@ fun RowScope.ColumnSample() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141),
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
-                onBarClick = {
-                    println(it)
+                onBarClick = { bar, indices ->
+                    println(bar)
                 },
-                onBarLongClick = {
-                    println("long: $it")
+                onBarLongClick = { bar, indices ->
+                    println("long: $bar")
                 }
             )
         }

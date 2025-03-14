@@ -110,7 +110,7 @@ fun RowChart(
     }
 
     val barWithRect = remember {
-        mutableStateListOf<Pair<Bars.Data, Rect>>()
+        mutableStateListOf<Triple<Bars.Data, Rect, Pair<Int, Int>>>()
     }
 
     val selectedBar = remember {
@@ -174,23 +174,26 @@ fun RowChart(
                     indicatorProperties = indicatorProperties,
                     everyDataHeight = everyDataHeight
                 )
-                Canvas(modifier = Modifier
+                Canvas(
+                    modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         if (!popupProperties.enabled) return@pointerInput
                         detectDragGestures { change, dragAmount ->
                             barWithRect
-                                .lastOrNull { (bar, rect) ->
+                                .lastOrNull { (bar, rect, indices) ->
                                     change.position.y in rect.top..rect.bottom
                                 }
-                                ?.let { (bar, rect) ->
+                                ?.let { (bar, rect, indices) ->
                                     selectedBar.value = SelectedBar(
                                         bar = bar,
                                         rect = rect,
                                         offset = Offset(
                                             x = if (bar.value > 0) rect.right else rect.left,
                                             y = rect.top
-                                        )
+                                        ),
+                                        dataIndex = indices.first,
+                                        valueIndex = indices.second
                                     )
                                     scope.launch {
                                         if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
@@ -219,7 +222,9 @@ fun RowChart(
                                                 offset = Offset(
                                                     x = if (bar.value > 0) rect.right else rect.left,
                                                     y = rect.top
-                                                )
+                                                ),
+                                                dataIndex = 0,
+                                                valueIndex = 0
                                             )
                                             scope.launch {
                                                 popupAnimation.snapTo(0f)
@@ -305,8 +310,9 @@ fun RowChart(
 
                                 val path = Path()
 
-                                if (barWithRect.none { it.second == rect }) barWithRect.add(bar to rect)
-
+                                if (barWithRect.none { it.second == rect }) {
+                                    barWithRect.add(Triple(bar, rect, Pair(dataIndex, barIndex)))
+                                }
                                 var radius =
                                     (bar.properties?.cornerRadius ?: barProperties.cornerRadius)
                                 if (bar.value < 0) {
@@ -374,7 +380,7 @@ private fun DrawScope.drawPopUp(
     progress: Float,
 ) {
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.bar.value),
+        properties.contentBuilderFunction(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress

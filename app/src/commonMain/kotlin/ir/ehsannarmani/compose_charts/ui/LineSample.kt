@@ -307,8 +307,9 @@ fun RowScope.LineSample3() {
                         color = Color.White,
                         fontFamily = ubuntu
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    mode = PopupProperties.Mode.PointMode(),
+                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141)
                 ),

@@ -21,6 +21,9 @@ data class PopupProperties(
     val mode: Mode = Mode.Normal,
     val contentBuilder: (value: Double) -> String = {
         it.format(1)
+    },
+    val contentBuilderFunction: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
+        contentBuilder(value)
     }
 ) {
     sealed class Mode {

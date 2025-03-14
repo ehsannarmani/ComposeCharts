@@ -75,7 +75,9 @@ import kotlin.math.abs
 private data class Popup(
     val properties: PopupProperties,
     val position: Offset,
-    val value: Double
+    val value: Double,
+    val dataIndex: Int,
+    val valueIndex: Int
 )
 
 @Composable
@@ -276,7 +278,7 @@ fun LineChart(
                                 val _size = size.toSize()
                                     .copy(height = (size.height).toFloat())
                                 popups.clear()
-                                data.forEachIndexed { index, line ->
+                                data.forEachIndexed { valueIndex, line ->
                                     val properties = line.popupProperties ?: popupProperties
 
                                     val positionX =
@@ -284,9 +286,9 @@ fun LineChart(
                                             0f,
                                             size.width.toFloat()
                                         )
-                                    val pathData = linesPathData[index]
+                                    val pathData = linesPathData[valueIndex]
 
-                                    if(positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
+                                    if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
                                         val showOnPointsThreshold =
                                             ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
                                                 ?: 0.dp).toPx()
@@ -297,6 +299,14 @@ fun LineChart(
                                             val fraction =
                                                 ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
                                                     ?: 0f) else positionX) / size.width)
+
+                                            //Calculate the value index
+                                            val dataIndex = calculateValueIndex(
+                                                fraction = fraction.toDouble(),
+                                                values = line.values,
+                                                pathData = pathData
+                                            )
+
                                             val popupValue = getPopupValue(
                                                 points = line.values,
                                                 fraction = fraction.toDouble(),
@@ -309,10 +319,11 @@ fun LineChart(
                                                 Popup(
                                                     position = popupValue.offset,
                                                     value = popupValue.calculatedValue,
-                                                    properties = properties
+                                                    properties = properties,
+                                                    dataIndex = dataIndex,
+                                                    valueIndex = valueIndex
                                                 )
                                             )
-
                                             if (popupsOffsetAnimators.count() < popups.count()) {
                                                 repeat(popups.count() - popupsOffsetAnimators.count()) {
                                                     popupsOffsetAnimators.add(
@@ -528,6 +539,18 @@ private fun Indicators(
     }
 }
 
+private fun calculateValueIndex(
+    fraction: Double,
+    values: List<Double>,
+    pathData: PathData
+): Int {
+    val xPosition = (fraction * pathData.path.getBounds().width).toFloat()
+    val closestXIndex = pathData.xPositions.indexOfFirst { x ->
+        x >= xPosition
+    }
+    return if (closestXIndex >= 0) closestXIndex else values.size - 1
+}
+
 private fun DrawScope.drawPopup(
     popup: Popup,
     nextPopup: Popup?,
@@ -539,7 +562,7 @@ private fun DrawScope.drawPopup(
     val offset = popup.position
     val popupProperties = popup.properties
     val measureResult = textMeasurer.measure(
-        popupProperties.contentBuilder(popup.value),
+        popupProperties.contentBuilderFunction(popup.dataIndex, popup.valueIndex, popup.value),
         style = popupProperties.textStyle.copy(
             color = popupProperties.textStyle.color.copy(
                 alpha = 1f * progress
