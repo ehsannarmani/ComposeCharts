@@ -23,7 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.*
+import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.BarProperties
+import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorCount
+import ir.ehsannarmani.compose_charts.models.IndicatorPosition
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.PopupProperties
 
 
 val columnGridProperties = GridProperties(
@@ -155,17 +164,17 @@ fun RowScope.ColumnSample() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                    valueFormatter = { dataIndex, valueIndex, value ->
                         value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141),
                 ),
                 labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
-                onBarClick = { bar, indices ->
-                    println(bar)
+                onBarClick = { popupData ->
+                    println(popupData.bar)
                 },
-                onBarLongClick = { bar, indices ->
-                    println("long: $bar")
+                onBarLongClick = { popupData ->
+                    println("long: ${popupData.bar}")
                 }
             )
         }

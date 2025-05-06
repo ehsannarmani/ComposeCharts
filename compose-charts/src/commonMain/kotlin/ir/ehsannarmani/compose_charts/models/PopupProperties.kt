@@ -21,12 +21,12 @@ data class PopupProperties(
     val mode: Mode = Mode.Normal,
     @Deprecated(
         message = "Use contentBuilderNew instead for enhanced functionality",
-        replaceWith = ReplaceWith("contentBuilderFunction: (dataIndex: Int, valueIndex: Int, value: Double)")
+        replaceWith = ReplaceWith("valueFormatter: (dataIndex: Int, valueIndex: Int, value: Double)")
     )
     val contentBuilder: (value: Double) -> String = {
         it.format(1)
     },
-    val contentBuilderFunction: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
+    val valueFormatter: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
         contentBuilder(value)
     }
 ) {

@@ -24,7 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.RowChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.*
+import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.BarProperties
+import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorCount
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
 
 val rowGridProperties = GridProperties(
     enabled = true,
@@ -161,7 +169,7 @@ fun RowScope.RowSample() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                    valueFormatter = { dataIndex, valueIndex, value ->
                         value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141),
@@ -372,7 +380,7 @@ fun RowScope.RowSample2() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                    valueFormatter = { dataIndex, valueIndex, value ->
                         value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141),
@@ -444,7 +452,7 @@ fun RowScope.RowSample3() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilderFunction = { dataIndex, valueIndex, value ->
+                    valueFormatter = { dataIndex, valueIndex, value ->
                         value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141),
