@@ -562,7 +562,7 @@ private fun DrawScope.drawPopup(
     val offset = popup.position
     val popupProperties = popup.properties
     val measureResult = textMeasurer.measure(
-        popupProperties.valueFormatter(popup.dataIndex, popup.valueIndex, popup.value),
+        popupProperties.contentBuilder(popup.dataIndex, popup.valueIndex, popup.value),
         style = popupProperties.textStyle.copy(
             color = popupProperties.textStyle.color.copy(
                 alpha = 1f * progress
