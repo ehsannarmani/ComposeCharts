@@ -15,7 +15,7 @@ mavenPublishing{
     coordinates(
         groupId = "io.github.ehsannarmani",
         artifactId = "compose-charts",
-        version = "0.1.6"
+        version = "0.1.7"
     )
     pom{
         name.set("Compose Charts")
