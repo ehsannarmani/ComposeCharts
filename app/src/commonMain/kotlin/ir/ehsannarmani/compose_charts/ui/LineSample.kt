@@ -23,7 +23,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.extensions.format
-import ir.ehsannarmani.compose_charts.models.*
+import ir.ehsannarmani.compose_charts.models.AnimationMode
+import ir.ehsannarmani.compose_charts.models.DividerProperties
+import ir.ehsannarmani.compose_charts.models.DotProperties
+import ir.ehsannarmani.compose_charts.models.DrawStyle
+import ir.ehsannarmani.compose_charts.models.GridProperties
+import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
+import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.Line
+import ir.ehsannarmani.compose_charts.models.LineProperties
+import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.StrokeStyle
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 
 val gridProperties = GridProperties(
     xAxisProperties = GridProperties.AxisProperties(
@@ -307,8 +319,9 @@ fun RowScope.LineSample3() {
                         color = Color.White,
                         fontFamily = ubuntu
                     ),
-                    contentBuilder = {
-                        it.format(1) + " Million"
+                    mode = PopupProperties.Mode.PointMode(),
+                    valueFormatter = { dataIndex, valueIndex, value ->
+                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
                     },
                     containerColor = Color(0xff414141)
                 ),

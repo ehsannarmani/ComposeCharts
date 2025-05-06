@@ -4,9 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +12,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -31,12 +34,6 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -44,7 +41,11 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.line_chart.PathData
@@ -70,12 +71,13 @@ import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 private data class Popup(
     val properties: PopupProperties,
     val position: Offset,
-    val value: Double
+    val value: Double,
+    val dataIndex: Int,
+    val valueIndex: Int
 )
 
 @Composable
@@ -276,7 +278,7 @@ fun LineChart(
                                 val _size = size.toSize()
                                     .copy(height = (size.height).toFloat())
                                 popups.clear()
-                                data.forEachIndexed { index, line ->
+                                data.forEachIndexed { valueIndex, line ->
                                     val properties = line.popupProperties ?: popupProperties
 
                                     val positionX =
@@ -284,9 +286,9 @@ fun LineChart(
                                             0f,
                                             size.width.toFloat()
                                         )
-                                    val pathData = linesPathData[index]
+                                    val pathData = linesPathData[valueIndex]
 
-                                    if(positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
+                                    if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
                                         val showOnPointsThreshold =
                                             ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
                                                 ?: 0.dp).toPx()
@@ -297,6 +299,14 @@ fun LineChart(
                                             val fraction =
                                                 ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
                                                     ?: 0f) else positionX) / size.width)
+
+                                            //Calculate the data index
+                                            val dataIndex = calculateValueIndex(
+                                                fraction = fraction.toDouble(),
+                                                values = line.values,
+                                                pathData = pathData
+                                            )
+
                                             val popupValue = getPopupValue(
                                                 points = line.values,
                                                 fraction = fraction.toDouble(),
@@ -309,10 +319,11 @@ fun LineChart(
                                                 Popup(
                                                     position = popupValue.offset,
                                                     value = popupValue.calculatedValue,
-                                                    properties = properties
+                                                    properties = properties,
+                                                    dataIndex = dataIndex,
+                                                    valueIndex = valueIndex
                                                 )
                                             )
-
                                             if (popupsOffsetAnimators.count() < popups.count()) {
                                                 repeat(popups.count() - popupsOffsetAnimators.count()) {
                                                     popupsOffsetAnimators.add(
@@ -528,6 +539,18 @@ private fun Indicators(
     }
 }
 
+private fun calculateValueIndex(
+    fraction: Double,
+    values: List<Double>,
+    pathData: PathData
+): Int {
+    val xPosition = (fraction * pathData.path.getBounds().width).toFloat()
+    val closestXIndex = pathData.xPositions.indexOfFirst { x ->
+        x >= xPosition
+    }
+    return if (closestXIndex >= 0) closestXIndex else values.size - 1
+}
+
 private fun DrawScope.drawPopup(
     popup: Popup,
     nextPopup: Popup?,
@@ -539,7 +562,7 @@ private fun DrawScope.drawPopup(
     val offset = popup.position
     val popupProperties = popup.properties
     val measureResult = textMeasurer.measure(
-        popupProperties.contentBuilder(popup.value),
+        popupProperties.valueFormatter(popup.dataIndex, popup.valueIndex, popup.value),
         style = popupProperties.textStyle.copy(
             color = popupProperties.textStyle.color.copy(
                 alpha = 1f * progress
