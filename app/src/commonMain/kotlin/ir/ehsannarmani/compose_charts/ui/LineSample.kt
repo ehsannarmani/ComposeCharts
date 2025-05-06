@@ -63,6 +63,17 @@ val dividerProperties = DividerProperties(
 )
 @Composable
 fun RowScope.LineSample() {
+    val popupProperties = PopupProperties(
+        textStyle = TextStyle(
+            fontSize = 11.sp,
+            color = Color.White,
+            fontFamily = ubuntu
+        ),
+        contentBuilder = { dataIndex,valueIndex,value->
+            value.format(1) + " Million, lineIndex: $dataIndex, valueIndex: $valueIndex"
+        },
+        containerColor = Color(0xff414141)
+    )
     val data = remember {
         listOf(
             Line(
@@ -80,7 +91,8 @@ fun RowScope.LineSample() {
                 strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
                 gradientAnimationDelay = 1000,
                 drawStyle = DrawStyle.Stroke(.5.dp),
-                curvedEdges = true
+                curvedEdges = true,
+                popupProperties = popupProperties
             ),
             Line(
                 label = "Linux",
@@ -96,7 +108,8 @@ fun RowScope.LineSample() {
                 secondGradientFillColor = Color.Transparent,
                 strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
                 gradientAnimationDelay = 1000,
-                drawStyle = DrawStyle.Stroke(.5.dp)
+                drawStyle = DrawStyle.Stroke(.5.dp),
+                popupProperties = popupProperties.copy(enabled = false)
             ),
             Line(
                 label = "MacOS",
@@ -114,6 +127,7 @@ fun RowScope.LineSample() {
                 gradientAnimationDelay = 1000,
                 drawStyle = DrawStyle.Stroke(.5.dp),
                 curvedEdges = true,
+                popupProperties = popupProperties
             ),
         )
     }
@@ -135,17 +149,6 @@ fun RowScope.LineSample() {
                 }),
                 gridProperties = gridProperties,
                 dividerProperties = dividerProperties,
-                popupProperties = PopupProperties(
-                    textStyle = TextStyle(
-                        fontSize = 11.sp,
-                        color = Color.White,
-                        fontFamily = ubuntu
-                    ),
-                    contentBuilder = { dataIndex,valueIndex,value->
-                        value.format(1) + " Million, lineIndex: $dataIndex, valueIndex: $valueIndex"
-                    },
-                    containerColor = Color(0xff414141)
-                ),
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,

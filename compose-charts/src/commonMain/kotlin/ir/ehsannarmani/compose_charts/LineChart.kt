@@ -265,7 +265,7 @@ fun LineChart(
                     .weight(1f)
                     .fillMaxSize()
                     .pointerInput(data, minValue, maxValue, linesPathData) {
-                        if (!popupProperties.enabled) return@pointerInput
+                        if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false }) return@pointerInput
                         detectHorizontalDragGestures(
                             onDragEnd = {
                                 scope.launch {
@@ -280,66 +280,68 @@ fun LineChart(
                                 popups.clear()
                                 data.forEachIndexed { dataIndex, line ->
                                     val properties = line.popupProperties ?: popupProperties
-
-                                    val positionX =
-                                        (change.position.x).coerceIn(
-                                            0f,
-                                            size.width.toFloat()
-                                        )
-                                    val pathData = linesPathData[dataIndex]
-
-                                    if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
-                                        val showOnPointsThreshold =
-                                            ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
-                                                ?: 0.dp).toPx()
-                                        val pointX =
-                                            pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
-
-                                        if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
-                                            val fraction =
-                                                ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
-                                                    ?: 0f) else positionX) / size.width)
-
-                                            //Calculate the data index
-                                            val valueIndex = calculateValueIndex(
-                                                fraction = fraction.toDouble(),
-                                                values = line.values,
-                                                pathData = pathData
+                                    if(properties.enabled){
+                                        val positionX =
+                                            (change.position.x).coerceIn(
+                                                0f,
+                                                size.width.toFloat()
                                             )
+                                        val pathData = linesPathData[dataIndex]
 
-                                            val popupValue = getPopupValue(
-                                                points = line.values,
-                                                fraction = fraction.toDouble(),
-                                                rounded = line.curvedEdges ?: curvedEdges,
-                                                size = _size,
-                                                minValue = minValue,
-                                                maxValue = maxValue
-                                            )
-                                            popups.add(
-                                                Popup(
-                                                    position = popupValue.offset,
-                                                    value = popupValue.calculatedValue,
-                                                    properties = properties,
-                                                    dataIndex = dataIndex,
-                                                    valueIndex = valueIndex
+                                        if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
+                                            val showOnPointsThreshold =
+                                                ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
+                                                    ?: 0.dp).toPx()
+                                            val pointX =
+                                                pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
+
+                                            if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
+                                                val fraction =
+                                                    ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
+                                                        ?: 0f) else positionX) / size.width)
+
+                                                //Calculate the data index
+                                                val valueIndex = calculateValueIndex(
+                                                    fraction = fraction.toDouble(),
+                                                    values = line.values,
+                                                    pathData = pathData
                                                 )
-                                            )
-                                            if (popupsOffsetAnimators.count() < popups.count()) {
-                                                repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                                    popupsOffsetAnimators.add(
-                                                        // add fixed position for popup when mode is point mode
-                                                        if (properties.mode is PopupProperties.Mode.PointMode) {
-                                                            Animatable(popupValue.offset.x) to Animatable(
-                                                                popupValue.offset.y
-                                                            )
-                                                        } else {
-                                                            Animatable(0f) to Animatable(0f)
-                                                        }
+
+                                                val popupValue = getPopupValue(
+                                                    points = line.values,
+                                                    fraction = fraction.toDouble(),
+                                                    rounded = line.curvedEdges ?: curvedEdges,
+                                                    size = _size,
+                                                    minValue = minValue,
+                                                    maxValue = maxValue
+                                                )
+                                                popups.add(
+                                                    Popup(
+                                                        position = popupValue.offset,
+                                                        value = popupValue.calculatedValue,
+                                                        properties = properties,
+                                                        dataIndex = dataIndex,
+                                                        valueIndex = valueIndex
                                                     )
+                                                )
+                                                if (popupsOffsetAnimators.count() < popups.count()) {
+                                                    repeat(popups.count() - popupsOffsetAnimators.count()) {
+                                                        popupsOffsetAnimators.add(
+                                                            // add fixed position for popup when mode is point mode
+                                                            if (properties.mode is PopupProperties.Mode.PointMode) {
+                                                                Animatable(popupValue.offset.x) to Animatable(
+                                                                    popupValue.offset.y
+                                                                )
+                                                            } else {
+                                                                Animatable(0f) to Animatable(0f)
+                                                            }
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
                                     }
+
                                 }
                                 scope.launch {
                                     // animate popup (alpha)
