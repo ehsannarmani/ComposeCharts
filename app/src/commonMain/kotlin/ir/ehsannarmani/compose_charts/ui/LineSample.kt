@@ -141,8 +141,8 @@ fun RowScope.LineSample() {
                         color = Color.White,
                         fontFamily = ubuntu
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { dataIndex,valueIndex,value->
+                        value.format(1) + " Million, lineIndex: $dataIndex, valueIndex: $valueIndex"
                     },
                     containerColor = Color(0xff414141)
                 ),

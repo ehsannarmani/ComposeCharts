@@ -278,7 +278,7 @@ fun LineChart(
                                 val _size = size.toSize()
                                     .copy(height = (size.height).toFloat())
                                 popups.clear()
-                                data.forEachIndexed { valueIndex, line ->
+                                data.forEachIndexed { dataIndex, line ->
                                     val properties = line.popupProperties ?: popupProperties
 
                                     val positionX =
@@ -286,7 +286,7 @@ fun LineChart(
                                             0f,
                                             size.width.toFloat()
                                         )
-                                    val pathData = linesPathData[valueIndex]
+                                    val pathData = linesPathData[dataIndex]
 
                                     if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
                                         val showOnPointsThreshold =
@@ -301,7 +301,7 @@ fun LineChart(
                                                     ?: 0f) else positionX) / size.width)
 
                                             //Calculate the data index
-                                            val dataIndex = calculateValueIndex(
+                                            val valueIndex = calculateValueIndex(
                                                 fraction = fraction.toDouble(),
                                                 values = line.values,
                                                 pathData = pathData

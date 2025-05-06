@@ -19,7 +19,7 @@ data class PopupProperties(
     val contentHorizontalPadding: Dp = 4.dp,
     val contentVerticalPadding: Dp = 2.dp,
     val mode: Mode = Mode.Normal,
-    val contentBuilder: (valueIndex: Int, lineIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
+    val contentBuilder: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
         value.format(1)
     }
 ) {
