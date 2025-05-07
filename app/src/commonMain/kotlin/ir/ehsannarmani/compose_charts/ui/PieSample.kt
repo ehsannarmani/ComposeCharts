@@ -87,10 +87,13 @@ fun RowScope.PieSample() {
                     .size(200.dp),
                 data = data,
                 onPieClick = {
-                    println("${it.label} Clicked")
+                    //println("${it.label} Clicked")
                     val pieIndex = data.indexOf(it)
                     data =
-                        data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
+                        data.mapIndexed { mapIndex, pie ->
+                            println("onPieClick = $pieIndex, ${mapIndex}, $pie")
+                            pie.copy(selected = pieIndex == mapIndex)
+                        }
                 },
                 selectedScale = 1.2f,
                 spaceDegreeAnimEnterSpec = floatSpec,
@@ -100,7 +103,8 @@ fun RowScope.PieSample() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 0f,
-                style = Pie.Style.Fill
+                style = Pie.Style.Fill,
+
             )
         }
     }
@@ -170,7 +174,7 @@ fun RowScope.PieSample3() {
         .border(2.dp, Color.Transparent, RoundedCornerShape(12.dp)),
         elevation = CardDefaults.elevatedCardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
+            containerColor = Color.White
         )
 
     ) {
@@ -180,10 +184,19 @@ fun RowScope.PieSample3() {
                     .size(200.dp),
                 data = data,
                 onPieClick = {
-                    println("${it.label} Clicked")
                     val pieIndex = data.indexOf(it)
                     data =
-                        data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
+                        data.mapIndexed { mapIndex, pie ->
+                            //println("onPieClick = $pieIndex, ${mapIndex}, $pie")
+                            pie.copy(selected = pieIndex == mapIndex)
+//                            if (mapIndex == pieIndex) {
+//                                // 切换当前扇区的选中状态
+//                                pie.copy(selected = !pie.selected)
+//                            } else {
+//                                // 取消其他扇区的选中状态
+//                                pie.copy(selected = false)
+//                            }
+                        }
                 },
                 selectedScale = 1.2f,
                 spaceDegreeAnimEnterSpec = floatSpec,
@@ -194,7 +207,8 @@ fun RowScope.PieSample3() {
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
                 style = Pie.Style.Stroke(),
-                spaceDegree = 7f
+                spaceDegree = 7f,
+                centerTitle = "饼图center text text text"
             )
         }
     }

@@ -25,6 +25,12 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
 import ir.ehsannarmani.compose_charts.extensions.isDegreeBetween
 import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
@@ -46,7 +52,11 @@ fun PieChart(
     colorAnimExitSpec: AnimationSpec<Color> = colorAnimEnterSpec,
     scaleAnimExitSpec: AnimationSpec<Float> = scaleAnimEnterSpec,
     spaceDegreeAnimExitSpec: AnimationSpec<Float> = spaceDegreeAnimEnterSpec,
-    style: Pie.Style = Pie.Style.Fill
+    appearanceAnimationSpec: AnimationSpec<Float> = tween(2000),
+    style: Pie.Style = Pie.Style.Fill,
+    centerTitle: String? = null,
+    centerTextColor: Color = Color.Black,
+    centerTextStyle: TextStyle = TextStyle.Default
 ) {
 
     require(data.none { it.data < 0 }) {
@@ -68,6 +78,18 @@ fun PieChart(
 
     val pathMeasure = remember {
         PathMeasure()
+    }
+
+    val appearanceProgress = remember {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(Unit) {
+        appearanceProgress.snapTo(0f)
+        appearanceProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = appearanceAnimationSpec
+        )
     }
 
     LaunchedEffect(data) {
@@ -93,48 +115,40 @@ fun PieChart(
     }
 
     LaunchedEffect(details) {
-        details.forEach {
-            if (it.pie.selected) {
-                scope.launch {
-                    it.color.animateTo(
-                        it.pie.selectedColor,
-                        animationSpec = it.pie.colorAnimEnterSpec ?: colorAnimEnterSpec
-                    )
-                }
-                scope.launch {
-                    it.scale.animateTo(
-                        it.pie.selectedScale ?: selectedScale,
-                        animationSpec = it.pie.scaleAnimEnterSpec ?: scaleAnimEnterSpec
-                    )
-                }
-                scope.launch {
-                    it.space.animateTo(
-                        it.pie.selectedPaddingDegree ?: selectedPaddingDegree,
-                        animationSpec = it.pie.spaceDegreeAnimEnterSpec ?: spaceDegreeAnimEnterSpec
-                    )
-                }
+        details.forEach { pieDetail ->
+            if (pieDetail.pie.selected) {
+                // 选中状态的动画
+                pieDetail.color.animateTo(
+                    pieDetail.pie.selectedColor,
+                    animationSpec = pieDetail.pie.colorAnimEnterSpec ?: colorAnimEnterSpec
+                )
+                pieDetail.scale.animateTo(
+                    pieDetail.pie.selectedScale ?: selectedScale,
+                    animationSpec = pieDetail.pie.scaleAnimEnterSpec ?: scaleAnimEnterSpec
+                )
+                pieDetail.space.animateTo(
+                    pieDetail.pie.selectedPaddingDegree ?: selectedPaddingDegree,
+                    animationSpec = pieDetail.pie.spaceDegreeAnimEnterSpec ?: spaceDegreeAnimEnterSpec
+                )
             } else {
-                scope.launch {
-                    it.color.animateTo(
-                        it.pie.color,
-                        animationSpec = it.pie.colorAnimExitSpec ?: colorAnimExitSpec
-                    )
-                }
-                scope.launch {
-                    it.scale.animateTo(
-                        1f,
-                        animationSpec = it.pie.scaleAnimExitSpec ?: scaleAnimExitSpec
-                    )
-                }
-                scope.launch {
-                    it.space.animateTo(
-                        0f,
-                        animationSpec = it.pie.spaceDegreeAnimExitSpec ?: spaceDegreeAnimExitSpec
-                    )
-                }
+                // 非选中状态的动画
+                pieDetail.color.animateTo(
+                    pieDetail.pie.color,
+                    animationSpec = pieDetail.pie.colorAnimExitSpec ?: colorAnimExitSpec
+                )
+                pieDetail.scale.animateTo(
+                    1f,
+                    animationSpec = pieDetail.pie.scaleAnimExitSpec ?: scaleAnimExitSpec
+                )
+                pieDetail.space.animateTo(
+                    0f,
+                    animationSpec = pieDetail.pie.spaceDegreeAnimExitSpec ?: spaceDegreeAnimExitSpec
+                )
             }
         }
     }
+
+    val textMeasurer = rememberTextMeasurer()
 
     Canvas(modifier = modifier
         .pointerInput(Unit) {
@@ -169,15 +183,21 @@ fun PieChart(
             }
         }
         val total = details.sumOf { it.pie.data } // 360 degree for total
+        var currentAngle = 0f // Track the current angle for progressive animation
+        
         details.forEachIndexed { index, detail ->
-            val degree = ((detail.pie.data * 360) / total)
+            val degree = ((detail.pie.data * 360) / total).toFloat()
+            // Calculate the sweep angle based on both the progress and the actual degree
+            val progress = appearanceProgress.value
+            val animatedDegree = degree * progress
 
             val drawStyle = if ((detail.pie.style ?: style) is Pie.Style.Stroke) {
                 Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width.toPx())
             } else {
                 Fill
             }
-            val piecePath = if (degree >= 360.0) {
+
+            val piecePath = if (animatedDegree >= 360f) {
                 // draw circle instead of arc
 
                 pieces.add(
@@ -199,36 +219,32 @@ fun PieChart(
                 }
             } else {
                 val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
-                val startFromDegree = beforeItems.sumOf { (it.data * 360) / total }
+                val startFromDegree = currentAngle // Use currentAngle instead of calculating from beforeItems
 
                 val arcRect = Rect(
                     center = center,
                     radius = radius * detail.scale.value
                 )
 
-                val arcStart = startFromDegree.toFloat() + detail.space.value
-                val arcSweep = degree.toFloat() - ((detail.space.value * 2) + spaceDegree)
+                val arcStart = startFromDegree + detail.space.value
+                val arcSweep = (animatedDegree - ((detail.space.value * 2) + spaceDegree)).coerceAtLeast(0f)
 
                 val piecePath = Path().apply {
-                    arcTo(arcRect, arcStart, arcSweep, true)
-                }
-
-                if ((detail.pie.style ?: style) is Pie.Style.Fill) {
-                    pathMeasure.setPath(piecePath, false)
-                    piecePath.reset()
-                    val start = pathMeasure.getPosition(0f)
-                    if (!start.isUnspecified) {
-                        piecePath.moveTo(start.x, start.y)
+                    // Move to center first for filled style
+                    if ((detail.pie.style ?: style) is Pie.Style.Fill) {
+                        moveTo(center.x, center.y)
                     }
-                    piecePath.lineTo(
-                        (size.width / 2),
-                        ((size.height / 2))
+                    // Draw the arc
+                    arcTo(
+                        rect = arcRect,
+                        startAngleDegrees = arcStart,
+                        sweepAngleDegrees = arcSweep,
+                        forceMoveTo = true
                     )
-                    piecePath.arcTo(arcRect, arcStart, arcSweep, true)
-                    piecePath.lineTo(
-                        (size.width / 2),
-                        (size.height / 2)
-                    )
+                    // Complete the path for filled style
+                    if ((detail.pie.style ?: style) is Pie.Style.Fill) {
+                        lineTo(center.x, center.y)
+                    }
                 }
 
                 pieces.add(
@@ -236,17 +252,73 @@ fun PieChart(
                         id = detail.id,
                         radius = radius * detail.scale.value,
                         startFromDegree = arcStart,
-                        endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep,
+                        endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep
                     )
                 )
+                
+                currentAngle += degree // Update the current angle for the next piece
                 piecePath
             }
 
+            // Animate both the path and the opacity
+            val color = detail.color.value.copy(alpha = detail.color.value.alpha * progress)
+            
             drawPath(
                 path = piecePath,
-                color = detail.color.value,
+                color = color,
                 style = drawStyle,
             )
+
+            centerTitle?.let { title ->
+
+                val truncatedTitle = if (title.length > 8) title.take(8) else title
+
+
+                val availableDiameter = when (style) {
+                    is Pie.Style.Stroke -> {
+                        val strokeWidth = style.width.toPx()
+                        minOf(size.width, size.height) - 2 * strokeWidth
+                    }
+                    else -> minOf(size.width, size.height)
+                }
+
+                val maxTextWidth = availableDiameter * 0.9f
+                var dynamicTextStyle = centerTextStyle.copy()
+
+
+                val initialFontSize = if (dynamicTextStyle.fontSize.type == TextUnitType.Unspecified) {
+                    TextUnit(16f, TextUnitType.Sp) // 赋予默认值
+                } else {
+                    dynamicTextStyle.fontSize
+                }
+                dynamicTextStyle = dynamicTextStyle.copy(fontSize = initialFontSize)
+                var textLayoutResult = textMeasurer.measure(
+                    AnnotatedString(truncatedTitle),
+                    dynamicTextStyle
+                )
+
+                if (textLayoutResult.size.width > maxTextWidth) {
+                    val scale = maxTextWidth / textLayoutResult.size.width
+                    dynamicTextStyle = dynamicTextStyle.copy(
+                        fontSize = dynamicTextStyle.fontSize * scale
+                    )
+                    textLayoutResult = textMeasurer.measure(
+                        AnnotatedString(truncatedTitle),
+                        dynamicTextStyle
+                    )
+                }
+
+                val textOffset = Offset(
+                    x = center.x - textLayoutResult.size.width / 2,
+                    y = center.y - textLayoutResult.size.height / 2
+                )
+                drawText(
+                    textLayoutResult = textLayoutResult,
+                    topLeft = textOffset,
+                    color = centerTextColor
+                )
+            }
+
         }
     }
 }
