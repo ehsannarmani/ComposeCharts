@@ -96,6 +96,7 @@ fun ColumnChart(
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
+    labelCountPerLine: Int = 3
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
@@ -177,7 +178,11 @@ fun ColumnChart(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Column(modifier = modifier) {
             if (labelHelperProperties.enabled) {
-                RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
+                RCChartLabelHelper(
+                    data = data,
+                    textStyle = labelHelperProperties.textStyle,
+                    labelCountPerLine = labelCountPerLine
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
             Row(
