@@ -55,6 +55,7 @@ import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
+import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
@@ -97,6 +98,7 @@ fun RowChart(
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
+    labelCountPerLine: Int = 3
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
@@ -168,7 +170,11 @@ fun RowChart(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Column(modifier = modifier) {
             if (labelHelperProperties.enabled) {
-                RCChartLabelHelper(data = data, textStyle = labelHelperProperties.textStyle)
+                RCChartLabelHelper(
+                    data = data,
+                    textStyle = labelHelperProperties.textStyle,
+                    labelCountPerLine = labelCountPerLine
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
             Row(modifier = Modifier.fillMaxSize()) {
