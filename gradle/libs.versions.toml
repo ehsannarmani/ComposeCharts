@@ -4,7 +4,7 @@ kotlin = "2.0.0"
 coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.2"
 activityCompose = "1.9.0"
-compose-plugin = "1.6.11"
+compose-plugin = "1.8.1"
 maven-publish="0.28.0"
 
 [libraries]
