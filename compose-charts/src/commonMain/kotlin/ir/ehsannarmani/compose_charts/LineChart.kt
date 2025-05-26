@@ -108,8 +108,7 @@ fun LineChart(
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it < 0.0 } }) data.minOfOrNull {
         it.values.minOfOrNull { it } ?: 0.0
-    } ?: 0.0 else 0.0,
-    labelCountPerLine: Int = 3
+    } ?: 0.0 else 0.0
 ) {
     if (data.isNotEmpty()) {
         require(minValue <= (data.minOfOrNull { it.values.minOfOrNull { it } ?: 0.0 } ?: 0.0)) {
@@ -248,7 +247,7 @@ fun LineChart(
             LabelHelper(
                 data = data.map { it.label to it.color },
                 textStyle = labelHelperProperties.textStyle,
-                labelCountPerLine = labelCountPerLine
+                labelCountPerLine = labelHelperProperties.labelCountPerLine
             )
             Spacer(modifier = Modifier.height(labelHelperPadding))
         }

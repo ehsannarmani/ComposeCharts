@@ -97,8 +97,7 @@ fun RowChart(
     ),
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
-    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
-    labelCountPerLine: Int = 3
+    minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
@@ -173,7 +172,7 @@ fun RowChart(
                 RCChartLabelHelper(
                     data = data,
                     textStyle = labelHelperProperties.textStyle,
-                    labelCountPerLine = labelCountPerLine
+                    labelCountPerLine = labelHelperProperties.labelCountPerLine
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
