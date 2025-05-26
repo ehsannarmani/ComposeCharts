@@ -28,9 +28,10 @@ import kotlin.math.min
 @Composable
 fun LabelHelper(
     data: List<Pair<String, Brush>>,
-    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
+    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp),
+    labelCountPerLine: Int
 ) {
-    val numberOfGridCells = min(data.size, 3)
+    val numberOfGridCells = min(data.size, labelCountPerLine)
     LazyVerticalGrid(columns = GridCells.Fixed(numberOfGridCells), modifier = Modifier) {
         items(data) { (label, color) ->
             Row(
@@ -62,7 +63,8 @@ fun LabelHelper(
 @Composable
 fun RCChartLabelHelper(
     data: List<Bars>,
-    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp)
+    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp),
+    labelCountPerLine: Int
 ) {
     val labels = data.flatMap { it.values.map { it.label } }.distinct()
     val colors = labels.map { label ->
@@ -72,6 +74,7 @@ fun RCChartLabelHelper(
     }
     LabelHelper(
         data = labels.mapIndexed { index, label -> label.orEmpty() to colors[index] },
-        textStyle = textStyle
+        textStyle = textStyle,
+        labelCountPerLine
     )
 }

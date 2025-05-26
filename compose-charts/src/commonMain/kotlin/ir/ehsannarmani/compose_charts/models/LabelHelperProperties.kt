@@ -5,5 +5,6 @@ import androidx.compose.ui.unit.sp
 
 data class LabelHelperProperties(
     val enabled:Boolean = true,
-    val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp)
+    val textStyle: TextStyle = TextStyle.Default.copy(fontSize = 12.sp),
+    val labelCountPerLine: Int = 3,
 )
