@@ -74,12 +74,12 @@ kotlin {
 }
 android {
     namespace = "ir.ehsannarmani.compose_charts"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ir.ehsannarmani.compose_charts"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
