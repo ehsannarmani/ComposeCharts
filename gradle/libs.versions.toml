@@ -5,7 +5,7 @@ coreKtx = "1.16.0"
 lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
 compose-plugin = "1.8.2"
-maven-publish="0.32.0"
+maven-publish="0.34.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
