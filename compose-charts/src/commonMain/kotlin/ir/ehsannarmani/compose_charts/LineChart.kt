@@ -366,7 +366,9 @@ fun LineChart(
                         .weight(1f)
                         .fillMaxSize()
                         .pointerInput(data, minValue, maxValue, linesPathData) {
-                            if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false }) return@pointerInput
+                            if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
+                                return@pointerInput
+
                             detectHorizontalDragGestures(
                                 onDragEnd = {
                                     scope.launch {
@@ -383,6 +385,9 @@ fun LineChart(
                             )
                         }
                         .pointerInput(Unit) {
+                            if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
+                                return@pointerInput
+
                             detectTapGestures(
                                 onTap = {
                                     if (tapJob != null && tapJob?.isActive == true) {
