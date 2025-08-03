@@ -252,7 +252,7 @@ fun LineChart(
         withAnimation: Boolean = true
     ) {
         val duration = if (withAnimation) {
-            500
+            300
         } else {
             0
         }
