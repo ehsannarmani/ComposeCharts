@@ -5,6 +5,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -42,6 +44,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +72,7 @@ import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.HorizontalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -149,7 +153,7 @@ fun LineChart(
     val linesPathData = remember {
         mutableStateListOf<PathData>()
     }
-    val indicators = remember(indicatorProperties.indicators,minValue,maxValue) {
+    val indicators = remember(indicatorProperties.indicators, minValue, maxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
@@ -186,7 +190,7 @@ fun LineChart(
         launch {
             data.forEach {
                 val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
-                it.values.forEach {
+                repeat(it.values.size) {
                     animators.add(Animatable(0f))
                 }
                 dotAnimators.add(animators)
@@ -242,6 +246,101 @@ fun LineChart(
         linesPathData.clear()
     }
 
+    var tapJob: Job? = null
+    var isDisplayingPopup = false
+    suspend fun hidePopup(
+        withAnimation: Boolean = true
+    ) {
+        val duration = if (withAnimation) {
+            500
+        } else {
+            0
+        }
+
+        popupAnimation.animateTo(0f, animationSpec = tween(duration))
+        popups.clear()
+        popupsOffsetAnimators.clear()
+        isDisplayingPopup = false
+    }
+
+    fun PointerInputScope.showPopup(
+        data: List<Line>,
+        size: IntSize,
+        position: Offset
+    ) {
+        isDisplayingPopup = true
+        popups.clear()
+
+        data.forEachIndexed { dataIndex, line ->
+            val properties = line.popupProperties ?: popupProperties
+            if (!properties.enabled) return@forEachIndexed
+
+            val positionX = position.x.coerceIn(0f, size.width.toFloat())
+            val pathData = linesPathData[dataIndex]
+
+            if (positionX >= pathData.xPositions[pathData.startIndex] &&
+                positionX <= pathData.xPositions[pathData.endIndex]
+            ) {
+                val showOnPointsThreshold =
+                    ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
+                        ?: 0.dp).toPx()
+                val pointX = pathData.xPositions.find {
+                    it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold
+                }
+
+                if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
+                    val relevantX =
+                        if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
+                            ?: 0f) else positionX
+                    val fraction = (relevantX / size.width)
+
+                    val valueIndex = calculateValueIndex(
+                        fraction = fraction.toDouble(),
+                        values = line.values,
+                        pathData = pathData
+                    )
+
+                    val popupValue = getPopupValue(
+                        points = line.values,
+                        fraction = fraction.toDouble(),
+                        rounded = line.curvedEdges ?: curvedEdges,
+                        size = size.toSize(),
+                        minValue = minValue,
+                        maxValue = maxValue
+                    )
+
+                    popups.add(
+                        Popup(
+                            position = popupValue.offset,
+                            value = popupValue.calculatedValue,
+                            properties = properties,
+                            dataIndex = dataIndex,
+                            valueIndex = valueIndex
+                        )
+                    )
+
+                    if (popupsOffsetAnimators.count() < popups.count()) {
+                        repeat(popups.count() - popupsOffsetAnimators.count()) {
+                            popupsOffsetAnimators.add(
+                                if (properties.mode is PopupProperties.Mode.PointMode) {
+                                    Animatable(popupValue.offset.x) to Animatable(popupValue.offset.y)
+                                } else {
+                                    Animatable(0f) to Animatable(0f)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                popupAnimation.animateTo(1f, animationSpec = tween(500))
+            }
+        }
+    }
+
     Column(modifier = modifier) {
         if (labelHelperProperties.enabled) {
             LabelHelper(
@@ -262,97 +361,59 @@ fun LineChart(
                 }
             }
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Canvas(modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
-                    .pointerInput(data, minValue, maxValue, linesPathData) {
-                        if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false }) return@pointerInput
-                        detectHorizontalDragGestures(
-                            onDragEnd = {
-                                scope.launch {
-                                    popupAnimation.animateTo(0f, animationSpec = tween(500))
-                                    popups.clear()
-                                    popupsOffsetAnimators.clear()
+                Canvas(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .pointerInput(data, minValue, maxValue, linesPathData) {
+                            if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
+                                return@pointerInput
+
+                            detectHorizontalDragGestures(
+                                onDragEnd = {
+                                    scope.launch {
+                                        hidePopup()
+                                    }
+                                },
+                                onHorizontalDrag = { change, amount ->
+                                    showPopup(
+                                        data = data,
+                                        size = size,
+                                        position = change.position
+                                    )
                                 }
-                            },
-                            onHorizontalDrag = { change, amount ->
-                                val _size = size.toSize()
-                                    .copy(height = (size.height).toFloat())
-                                popups.clear()
-                                data.forEachIndexed { dataIndex, line ->
-                                    val properties = line.popupProperties ?: popupProperties
-                                    if(properties.enabled){
-                                        val positionX =
-                                            (change.position.x).coerceIn(
-                                                0f,
-                                                size.width.toFloat()
-                                            )
-                                        val pathData = linesPathData[dataIndex]
+                            )
+                        }
+                        .pointerInput(Unit) {
+                            if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
+                                return@pointerInput
 
-                                        if (positionX >= pathData.xPositions[pathData.startIndex] && positionX <= pathData.xPositions[pathData.endIndex]) {
-                                            val showOnPointsThreshold =
-                                                ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
-                                                    ?: 0.dp).toPx()
-                                            val pointX =
-                                                pathData.xPositions.find { it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold }
+                            detectTapGestures(
+                                onTap = {
+                                    if (tapJob != null && tapJob?.isActive == true) {
+                                        tapJob?.cancel()
+                                        tapJob = null
+                                    }
 
-                                            if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
-                                                val fraction =
-                                                    ((if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
-                                                        ?: 0f) else positionX) / size.width)
+                                    tapJob = scope.launch {
+                                        if (isDisplayingPopup) {
+                                            hidePopup(withAnimation = false)
+                                        }
 
-                                                //Calculate the data index
-                                                val valueIndex = calculateValueIndex(
-                                                    fraction = fraction.toDouble(),
-                                                    values = line.values,
-                                                    pathData = pathData
-                                                )
+                                        showPopup(
+                                            data = data,
+                                            size = size,
+                                            position = it
+                                        )
 
-                                                val popupValue = getPopupValue(
-                                                    points = line.values,
-                                                    fraction = fraction.toDouble(),
-                                                    rounded = line.curvedEdges ?: curvedEdges,
-                                                    size = _size,
-                                                    minValue = minValue,
-                                                    maxValue = maxValue
-                                                )
-                                                popups.add(
-                                                    Popup(
-                                                        position = popupValue.offset,
-                                                        value = popupValue.calculatedValue,
-                                                        properties = properties,
-                                                        dataIndex = dataIndex,
-                                                        valueIndex = valueIndex
-                                                    )
-                                                )
-                                                if (popupsOffsetAnimators.count() < popups.count()) {
-                                                    repeat(popups.count() - popupsOffsetAnimators.count()) {
-                                                        popupsOffsetAnimators.add(
-                                                            // add fixed position for popup when mode is point mode
-                                                            if (properties.mode is PopupProperties.Mode.PointMode) {
-                                                                Animatable(popupValue.offset.x) to Animatable(
-                                                                    popupValue.offset.y
-                                                                )
-                                                            } else {
-                                                                Animatable(0f) to Animatable(0f)
-                                                            }
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                        delay(500)
+                                        if (isDisplayingPopup) {
+                                            hidePopup(withAnimation = true)
                                         }
                                     }
-
-                                }
-                                scope.launch {
-                                    // animate popup (alpha)
-                                    if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                        popupAnimation.animateTo(1f, animationSpec = tween(500))
-                                    }
-                                }
-                            }
-                        )
-                    }
+                                },
+                            )
+                        }
                 ) {
                     val chartAreaHeight = size.height
                     chartWidth.value = size.width
@@ -373,9 +434,12 @@ fun LineChart(
                     }
                     if (linesPathData.isEmpty() || linesPathData.count() != data.count()) {
                         data.map {
-                            val startIndex = if(it.viewRange.startIndex < 0 || it.viewRange.startIndex >= it.values.size - 1) 0 else it.viewRange.startIndex
-                            val endIndex = if(it.viewRange.endIndex < 0 || it.viewRange.endIndex <= it.viewRange.startIndex
-                                || it.viewRange.endIndex > it.values.size - 1) it.values.size - 1  else it.viewRange.endIndex
+                            val startIndex =
+                                if (it.viewRange.startIndex < 0 || it.viewRange.startIndex >= it.values.size - 1) 0 else it.viewRange.startIndex
+                            val endIndex =
+                                if (it.viewRange.endIndex < 0 || it.viewRange.endIndex <= it.viewRange.startIndex
+                                    || it.viewRange.endIndex > it.values.size - 1
+                                ) it.values.size - 1 else it.viewRange.endIndex
 
                             getLinePath(
                                 dataPoints = it.values.map { it.toFloat() },
@@ -430,11 +494,11 @@ fun LineChart(
 
                         var startOffset = 0f
                         var endOffset = size.width
-                        if(pathData.startIndex > 0) {
-                            startOffset = pathData.xPositions[pathData.startIndex] .toFloat()
+                        if (pathData.startIndex > 0) {
+                            startOffset = pathData.xPositions[pathData.startIndex].toFloat()
                         }
 
-                        if(pathData.endIndex < line.values.size - 1) {
+                        if (pathData.endIndex < line.values.size - 1) {
                             endOffset = pathData.xPositions[pathData.endIndex].toFloat()
                         }
 
@@ -521,11 +585,10 @@ fun LineChart(
 }
 
 
-
 @Composable
 private fun Indicators(
     modifier: Modifier = Modifier,
-    indicators:List<Double>,
+    indicators: List<Double>,
     indicatorProperties: HorizontalIndicatorProperties,
 ) {
     Column(
@@ -676,7 +739,7 @@ fun DrawScope.drawDots(
     pathMeasure.setPath(linePath, false)
     val lastPosition = pathMeasure.getPosition(pathMeasure.length)
     dataPoints.forEachIndexed { valueIndex, value ->
-        if(valueIndex in startIndex..endIndex)  {
+        if (valueIndex in startIndex..endIndex) {
             val dotOffset = Offset(
                 x = _size.width.spaceBetween(
                     itemCount = dataPoints.count(),
