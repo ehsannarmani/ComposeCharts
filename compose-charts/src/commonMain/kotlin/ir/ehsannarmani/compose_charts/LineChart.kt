@@ -246,21 +246,10 @@ fun LineChart(
         linesPathData.clear()
     }
 
-    var tapJob: Job? = null
-    var isDisplayingPopup = false
-    suspend fun hidePopup(
-        withAnimation: Boolean = true
-    ) {
-        val duration = if (withAnimation) {
-            300
-        } else {
-            0
-        }
-
-        popupAnimation.animateTo(0f, animationSpec = tween(duration))
+    suspend fun hidePopup() {
+        popupAnimation.animateTo(0f, animationSpec = tween(300))
         popups.clear()
         popupsOffsetAnimators.clear()
-        isDisplayingPopup = false
     }
 
     fun PointerInputScope.showPopup(
@@ -268,7 +257,6 @@ fun LineChart(
         size: IntSize,
         position: Offset
     ) {
-        isDisplayingPopup = true
         popups.clear()
 
         data.forEachIndexed { dataIndex, line ->
@@ -336,10 +324,12 @@ fun LineChart(
 
         scope.launch {
             if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                popupAnimation.animateTo(1f, animationSpec = tween(500))
+                popupAnimation.animateTo(1f, animationSpec = popupProperties.animationSpec)
             }
         }
     }
+
+    var onPressJob: Job? = null
 
     Column(modifier = modifier) {
         if (labelHelperProperties.enabled) {
@@ -389,27 +379,23 @@ fun LineChart(
                                 return@pointerInput
 
                             detectTapGestures(
-                                onTap = {
-                                    if (tapJob != null && tapJob?.isActive == true) {
-                                        tapJob?.cancel()
-                                        tapJob = null
+                                onPress = {
+                                    if (onPressJob?.isActive == true) {
+                                        onPressJob?.cancel()
+                                        onPressJob = null
                                     }
 
-                                    tapJob = scope.launch {
-                                        if (isDisplayingPopup) {
-                                            hidePopup(withAnimation = false)
-                                        }
-
+                                    onPressJob = scope.launch {
                                         showPopup(
                                             data = data,
                                             size = size,
                                             position = it
                                         )
 
-                                        delay(500)
-                                        if (isDisplayingPopup) {
-                                            hidePopup(withAnimation = true)
-                                        }
+                                        tryAwaitRelease()
+                                        delay(timeMillis = popupProperties.duration)
+
+                                        hidePopup()
                                     }
                                 },
                             )
