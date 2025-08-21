@@ -71,7 +71,7 @@ import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.HorizontalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
-import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
+import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -155,7 +155,7 @@ fun LineChart(
         mutableStateListOf<PathData>()
     }
 
-    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
+    val computedMaxValue = rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(indicatorProperties.indicators, minValue, maxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(

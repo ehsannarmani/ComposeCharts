@@ -55,7 +55,6 @@ import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
-import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
@@ -65,7 +64,7 @@ import ir.ehsannarmani.compose_charts.utils.VerticalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
-import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
+import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -132,7 +131,7 @@ fun RowChart(
         Animatable(0f)
     }
 
-    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
+    val computedMaxValue = rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
