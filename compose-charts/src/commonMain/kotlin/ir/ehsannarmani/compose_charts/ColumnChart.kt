@@ -51,6 +51,7 @@ import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorCount
 import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
@@ -62,6 +63,7 @@ import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -128,12 +130,13 @@ fun ColumnChart(
         Animatable(0f)
     }
 
-    val indicators = remember(minValue, maxValue) {
+    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
+    val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
                 minValue = minValue,
-                maxValue = maxValue
+                maxValue = computedMaxValue
             )
         }
     }
@@ -270,7 +273,7 @@ fun ColumnChart(
                     val barsAreaWidth = size.width - (indicatorAreaWidth)
                     chartWidth.value = barsAreaWidth
                     val zeroY = size.height - calculateOffset(
-                        maxValue = maxValue,
+                        maxValue = computedMaxValue,
                         minValue = minValue,
                         total = size.height,
                         value = 0.0f
@@ -320,7 +323,7 @@ fun ColumnChart(
                                     (col.properties?.spacing ?: barProperties.spacing).toPx()
 
                                 val barHeight =
-                                    ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
+                                    ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
                                 val everyBarWidth = (stroke + spacing)
 
                                 val barX =

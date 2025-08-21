@@ -17,7 +17,7 @@ fun split(
         is IndicatorCount.StepBased -> {
             val result = mutableListOf<Double>()
             var cache = maxValue
-            while (cache > minValue) {
+            while (cache > minValue - count.stepBy) {
                 result.add(cache.coerceAtLeast(minValue))
                 cache -= count.stepBy
             }

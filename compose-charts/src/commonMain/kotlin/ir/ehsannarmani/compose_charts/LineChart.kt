@@ -71,6 +71,7 @@ import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.utils.HorizontalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
+import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -153,12 +154,14 @@ fun LineChart(
     val linesPathData = remember {
         mutableStateListOf<PathData>()
     }
+
+    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(indicatorProperties.indicators, minValue, maxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
                 minValue = minValue,
-                maxValue = maxValue
+                maxValue = computedMaxValue
             )
         }
     }
@@ -242,7 +245,7 @@ fun LineChart(
             }
         }
     }
-    LaunchedEffect(data, minValue, maxValue) {
+    LaunchedEffect(data, minValue, computedMaxValue) {
         linesPathData.clear()
     }
 
@@ -294,7 +297,7 @@ fun LineChart(
                         rounded = line.curvedEdges ?: curvedEdges,
                         size = size.toSize(),
                         minValue = minValue,
-                        maxValue = maxValue
+                        maxValue = computedMaxValue
                     )
 
                     popups.add(
@@ -355,7 +358,7 @@ fun LineChart(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize()
-                        .pointerInput(data, minValue, maxValue, linesPathData) {
+                        .pointerInput(data, minValue, computedMaxValue, linesPathData) {
                             if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
                                 return@pointerInput
 
@@ -406,7 +409,7 @@ fun LineChart(
                     val drawZeroLine = {
                         val zeroY = chartAreaHeight - calculateOffset(
                             minValue = minValue,
-                            maxValue = maxValue,
+                            maxValue = computedMaxValue,
                             total = chartAreaHeight,
                             value = 0f
                         ).toFloat()
@@ -429,7 +432,7 @@ fun LineChart(
 
                             getLinePath(
                                 dataPoints = it.values.map { it.toFloat() },
-                                maxValue = maxValue.toFloat(),
+                                maxValue = computedMaxValue.toFloat(),
                                 minValue = minValue.toFloat(),
                                 rounded = it.curvedEdges ?: curvedEdges,
                                 size = size.copy(height = chartAreaHeight),
@@ -523,7 +526,7 @@ fun LineChart(
                                 },
                                 properties = line.dotProperties ?: dotsProperties,
                                 linePath = segmentedPath,
-                                maxValue = maxValue.toFloat(),
+                                maxValue = computedMaxValue.toFloat(),
                                 minValue = minValue.toFloat(),
                                 pathMeasure = pathMeasure,
                                 scope = scope,
