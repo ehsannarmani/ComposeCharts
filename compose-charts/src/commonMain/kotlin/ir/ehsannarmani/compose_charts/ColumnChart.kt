@@ -63,6 +63,7 @@ import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -129,21 +130,7 @@ fun ColumnChart(
         Animatable(0f)
     }
 
-    val computedMaxValue = remember(minValue, maxValue, indicatorProperties.count) {
-        when (indicatorProperties.count) {
-            is IndicatorCount.CountBased -> maxValue
-            is IndicatorCount.StepBased -> {
-                val span = maxValue - minValue
-                val remainder = span % indicatorProperties.count.stepBy
-
-                if (remainder == 0.0) {
-                    maxValue
-                } else {
-                    maxValue + (indicatorProperties.count.stepBy - remainder)
-                }
-            }
-        }
-    }
+    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(

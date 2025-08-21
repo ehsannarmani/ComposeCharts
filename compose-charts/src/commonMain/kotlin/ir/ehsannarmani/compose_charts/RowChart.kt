@@ -65,6 +65,7 @@ import ir.ehsannarmani.compose_charts.utils.VerticalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.rememberComputedMaxValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -131,12 +132,13 @@ fun RowChart(
         Animatable(0f)
     }
 
-    val indicators = remember(minValue, maxValue) {
+    val computedMaxValue = rememberComputedMaxValue(minValue, maxValue, indicatorProperties.count)
+    val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
                 minValue = minValue,
-                maxValue = maxValue
+                maxValue = computedMaxValue
             )
         }
     }
@@ -273,7 +275,7 @@ fun RowChart(
                     val barAreaWidth = size.width
 
                     val zeroX = size.width - calculateOffset(
-                        maxValue = maxValue,
+                        maxValue = computedMaxValue,
                         minValue = minValue,
                         total = size.width,
                         value = 0.0f
@@ -299,7 +301,7 @@ fun RowChart(
                                 val spacing =
                                     (bar.properties?.spacing ?: barProperties.spacing).toPx()
                                 val width =
-                                    ((barAreaWidth * bar.value) / (maxValue - minValue)) * bar.animator.value
+                                    ((barAreaWidth * bar.value) / (computedMaxValue - minValue)) * bar.animator.value
 
                                 val everyBarHeight = (stroke + spacing)
 
