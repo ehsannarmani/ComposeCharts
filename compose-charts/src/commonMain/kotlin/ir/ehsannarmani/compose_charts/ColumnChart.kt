@@ -51,6 +51,7 @@ import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DividerProperties
 import ir.ehsannarmani.compose_charts.models.GridProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.IndicatorCount
 import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
@@ -128,12 +129,27 @@ fun ColumnChart(
         Animatable(0f)
     }
 
-    val indicators = remember(minValue, maxValue) {
+    val computedMaxValue = remember(minValue, maxValue, indicatorProperties.count) {
+        when (indicatorProperties.count) {
+            is IndicatorCount.CountBased -> maxValue
+            is IndicatorCount.StepBased -> {
+                val span = maxValue - minValue
+                val remainder = span % indicatorProperties.count.stepBy
+
+                if (remainder == 0.0) {
+                    maxValue
+                } else {
+                    maxValue + (indicatorProperties.count.stepBy - remainder)
+                }
+            }
+        }
+    }
+    val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
                 minValue = minValue,
-                maxValue = maxValue
+                maxValue = computedMaxValue
             )
         }
     }
@@ -270,7 +286,7 @@ fun ColumnChart(
                     val barsAreaWidth = size.width - (indicatorAreaWidth)
                     chartWidth.value = barsAreaWidth
                     val zeroY = size.height - calculateOffset(
-                        maxValue = maxValue,
+                        maxValue = computedMaxValue,
                         minValue = minValue,
                         total = size.height,
                         value = 0.0f
@@ -320,7 +336,7 @@ fun ColumnChart(
                                     (col.properties?.spacing ?: barProperties.spacing).toPx()
 
                                 val barHeight =
-                                    ((col.value * size.height) / (maxValue - minValue)) * col.animator.value
+                                    ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
                                 val everyBarWidth = (stroke + spacing)
 
                                 val barX =
