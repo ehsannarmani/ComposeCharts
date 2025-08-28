@@ -1,7 +1,5 @@
-import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -15,7 +13,7 @@ mavenPublishing{
     coordinates(
         groupId = "io.github.ehsannarmani",
         artifactId = "compose-charts",
-        version = "0.1.10"
+        version = "0.1.11"
     )
     pom{
         name.set("Compose Charts")
@@ -44,18 +42,17 @@ mavenPublishing{
             url.set("https://github.com/ehsannarmani/ComposeCharts")
         }
     }
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 }
 kotlin {
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-Xcontext-receivers")
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "compose-charts"
+        outputModuleName = "compose-charts"
         browser {
             commonWebpackConfig {
                 outputFileName = "compose-charts.js"
@@ -71,7 +68,6 @@ kotlin {
     }
 
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
@@ -105,7 +101,7 @@ kotlin {
 
 android {
     namespace = "ir.ehsannarmani.compose_charts"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
