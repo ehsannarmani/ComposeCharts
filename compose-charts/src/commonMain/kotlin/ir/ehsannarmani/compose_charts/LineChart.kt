@@ -726,7 +726,6 @@ private fun DrawScope.drawPopup(
 }
 
 fun DrawScope.drawDots(
-//    dataPoints: List<Triple<Animatable<Float, AnimationVector1D>, Float, Int>>,
     dataPoints: List<DotInfo>,
     properties: DotProperties,
     linePath: Path,
