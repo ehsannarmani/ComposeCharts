@@ -19,13 +19,19 @@ data class PopupProperties(
     val contentHorizontalPadding: Dp = 4.dp,
     val contentVerticalPadding: Dp = 2.dp,
     val mode: Mode = Mode.Normal,
-    val contentBuilder: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
-        value.format(1)
+    val contentBuilder: (Popup) -> String = { popup ->
+        popup.value.format(1)
     },
-    val confirmDraw: (dataIndex: Int, valueIndex: Int, value: Double) -> Boolean = { dataIndex, valueIndex, value ->
+    val confirmDraw: (Popup) -> Boolean = { popup ->
         true
     }
 ) {
+    data class Popup(
+        val dataIndex: Int,
+        val valueIndex: Int,
+        val value: Double
+    )
+
     sealed class Mode {
         data object Normal : Mode()
         data class PointMode(val threshold: Dp = 16.dp) : Mode()
