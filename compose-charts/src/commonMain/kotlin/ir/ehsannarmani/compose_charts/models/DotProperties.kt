@@ -16,5 +16,8 @@ data class DotProperties(
     val strokeColor: Brush = SolidColor(Color.Unspecified),
     val strokeStyle: StrokeStyle = StrokeStyle.Normal,
     val animationEnabled:Boolean = true,
-    val animationSpec: AnimationSpec<Float> = tween(300)
+    val animationSpec: AnimationSpec<Float> = tween(300),
+    val confirmDraw: (dataIndex: Int, valueIndex: Int, value: Double) -> Boolean = { dataIndex, valueIndex, value ->
+        true
+    }
 )

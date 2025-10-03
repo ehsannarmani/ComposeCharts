@@ -520,9 +520,14 @@ fun LineChart(
                         if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
                             drawDots(
                                 dataPoints = line.values.mapIndexed { mapIndex, value ->
-                                    (dotAnimators.getOrNull(
-                                        index
-                                    )?.getOrNull(mapIndex) ?: Animatable(0f)) to value.toFloat()
+                                    Triple(
+                                        first = dotAnimators
+                                            .getOrNull(index)
+                                            ?.getOrNull(mapIndex)
+                                            ?: Animatable(0f),
+                                        second = value.toFloat(),
+                                        third = index
+                                    )
                                 },
                                 properties = line.dotProperties ?: dotsProperties,
                                 linePath = segmentedPath,
@@ -710,7 +715,7 @@ private fun DrawScope.drawPopup(
 }
 
 fun DrawScope.drawDots(
-    dataPoints: List<Pair<Animatable<Float, AnimationVector1D>, Float>>,
+    dataPoints: List<Triple<Animatable<Float, AnimationVector1D>, Float, Int>>,
     properties: DotProperties,
     linePath: Path,
     maxValue: Float,
@@ -728,7 +733,10 @@ fun DrawScope.drawDots(
     pathMeasure.setPath(linePath, false)
     val lastPosition = pathMeasure.getPosition(pathMeasure.length)
     dataPoints.forEachIndexed { valueIndex, value ->
-        if (valueIndex in startIndex..endIndex) {
+        if (
+            properties.confirmDraw(value.third, valueIndex, value.second.toDouble()) &&
+            valueIndex in startIndex..endIndex
+        ) {
             val dotOffset = Offset(
                 x = _size.width.spaceBetween(
                     itemCount = dataPoints.count(),
