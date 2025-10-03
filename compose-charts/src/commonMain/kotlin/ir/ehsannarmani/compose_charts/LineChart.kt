@@ -614,8 +614,11 @@ private fun DrawScope.drawPopup(
     progress: Float,
     offsetAnimator: Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>? = null
 ) {
-    val offset = popup.position
     val popupProperties = popup.properties
+    if (!popupProperties.confirmDraw(popup.dataIndex, popup.valueIndex, popup.value))
+        return
+
+    val offset = popup.position
     val measureResult = textMeasurer.measure(
         popupProperties.contentBuilder(popup.dataIndex, popup.valueIndex, popup.value),
         style = popupProperties.textStyle.copy(
