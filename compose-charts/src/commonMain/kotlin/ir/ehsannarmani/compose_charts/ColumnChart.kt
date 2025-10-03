@@ -400,6 +400,9 @@ private fun DrawScope.drawPopup(
     textMeasurer: TextMeasurer,
     progress: Float,
 ) {
+    if (!properties.confirmDraw(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value))
+        return
+
     val measure = textMeasurer.measure(
         properties.contentBuilder(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value),
         style = properties.textStyle.copy(

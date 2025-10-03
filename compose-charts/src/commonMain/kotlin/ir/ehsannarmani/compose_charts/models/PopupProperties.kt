@@ -21,6 +21,9 @@ data class PopupProperties(
     val mode: Mode = Mode.Normal,
     val contentBuilder: (dataIndex: Int, valueIndex: Int, value: Double) -> String = { dataIndex, valueIndex, value ->
         value.format(1)
+    },
+    val confirmDraw: (dataIndex: Int, valueIndex: Int, value: Double) -> Boolean = { dataIndex, valueIndex, value ->
+        true
     }
 ) {
     sealed class Mode {
