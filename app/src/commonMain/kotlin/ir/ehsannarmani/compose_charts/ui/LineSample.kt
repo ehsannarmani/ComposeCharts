@@ -69,8 +69,8 @@ fun RowScope.LineSample() {
             color = Color.White,
             fontFamily = ubuntu
         ),
-        contentBuilder = { dataIndex,valueIndex,value->
-            value.format(1) + " Million, lineIndex: $dataIndex, valueIndex: $valueIndex"
+        contentBuilder = { popup ->
+            popup.value.format(1) + " Million, lineIndex: ${popup.dataIndex}, valueIndex: ${popup.valueIndex}"
         },
         containerColor = Color(0xff414141)
     )
@@ -223,8 +223,8 @@ fun RowScope.LineSample2() {
                         color = Color.White,
                         fontFamily = ubuntu
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " °C"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " °C"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -294,6 +294,9 @@ fun RowScope.LineSample3() {
                     color = SolidColor(Color(0xffE1E2EC)),
                     strokeWidth = 2.dp,
                     strokeColor = SolidColor(Color(0xff0FB9B1)),
+                    confirmDraw = {
+                        it.valueIndex in listOf(0,4)
+                    }
                 )
             ),
         )
@@ -323,8 +326,8 @@ fun RowScope.LineSample3() {
                         fontFamily = ubuntu
                     ),
                     mode = PopupProperties.Mode.PointMode(),
-                    contentBuilder = { dataIndex, valueIndex, value ->
-                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
+                    contentBuilder = { popup ->
+                        popup.value.format(1) + " Million" + " - dataIdx: " + popup.dataIndex + ", valueIdx: " + popup.valueIndex
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -406,8 +409,8 @@ fun RowScope.LineSample4() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -471,8 +474,8 @@ fun RowScope.LineSample5() {
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White,
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -577,8 +580,8 @@ fun RowScope.LineSample6() {
                         fontSize = 11.sp,
                         fontFamily = ubuntu, color = Color.White
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -653,8 +656,8 @@ fun RowScope.LineSample7() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -719,8 +722,8 @@ fun RowScope.LineSample8() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
                     },
                     containerColor = Color(0xff414141)
                 ),
@@ -746,7 +749,7 @@ fun RowScope.LineSample9() {
                 strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
                 gradientAnimationDelay = 1000,
                 drawStyle = DrawStyle.Fill,
-                curvedEdges = true
+                curvedEdges = true,
             ),
         )
     }
@@ -774,8 +777,11 @@ fun RowScope.LineSample9() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { _,_,value->
-                        value.format(1) + " Million"
+                    contentBuilder = { popup->
+                        popup.value.format(1) + " Million"
+                    },
+                    confirmDraw = {
+                        it.value > 50
                     },
                     containerColor = Color(0xff414141)
                 ),

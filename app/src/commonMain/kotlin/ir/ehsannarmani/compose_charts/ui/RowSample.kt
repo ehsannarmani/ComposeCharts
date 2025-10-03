@@ -169,8 +169,8 @@ fun RowScope.RowSample() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { dataIndex, valueIndex, value ->
-                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
+                    contentBuilder = { popup ->
+                        popup.value.format(1) + " Million" + " - dataIdx: " + popup.dataIndex + ", valueIdx: " + popup.valueIndex
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -380,8 +380,8 @@ fun RowScope.RowSample2() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { dataIndex, valueIndex, value ->
-                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
+                    contentBuilder = { popup ->
+                        popup.value.format(1) + " Million" + " - dataIdx: " + popup.dataIndex + ", valueIdx: " + popup.valueIndex
                     },
                     containerColor = Color(0xff414141),
                 ),
@@ -452,8 +452,8 @@ fun RowScope.RowSample3() {
                         color = Color.White,
                         fontFamily = ubuntu,
                     ),
-                    contentBuilder = { dataIndex, valueIndex, value ->
-                        value.format(1) + " Million" + " - dataIdx: " + dataIndex + ", valueIdx: " + valueIndex
+                    contentBuilder = { popup ->
+                        popup.value.format(1) + " Million" + " - dataIdx: " + popup.dataIndex + ", valueIdx: " + popup.valueIndex
                     },
                     containerColor = Color(0xff414141),
                 ),

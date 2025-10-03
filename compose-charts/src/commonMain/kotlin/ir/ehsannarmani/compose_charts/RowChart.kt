@@ -394,11 +394,16 @@ private fun DrawScope.drawPopUp(
     textMeasurer: TextMeasurer,
     progress: Float,
 ) {
-    if (!properties.confirmDraw(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value))
+    val popup = PopupProperties.Popup(
+        dataIndex = selectedBar.dataIndex,
+        valueIndex = selectedBar.valueIndex,
+        value = selectedBar.bar.value
+    )
+    if (!properties.confirmDraw(popup))
         return
 
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value),
+        properties.contentBuilder(popup),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress

@@ -524,13 +524,13 @@ fun LineChart(
                         if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
                             drawDots(
                                 dataPoints = line.values.mapIndexed { mapIndex, value ->
-                                    Triple(
-                                        first = dotAnimators
+                                    DotInfo(
+                                        animator = dotAnimators
                                             .getOrNull(index)
                                             ?.getOrNull(mapIndex)
                                             ?: Animatable(0f),
-                                        second = value.toFloat(),
-                                        third = index
+                                        dataIndex = index,
+                                        value = value.toFloat()
                                     )
                                 },
                                 properties = line.dotProperties ?: dotsProperties,
@@ -624,12 +624,16 @@ private fun DrawScope.drawPopup(
     offsetAnimator: Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>? = null
 ) {
     val popupProperties = popup.properties
-    if (!popupProperties.confirmDraw(popup.dataIndex, popup.valueIndex, popup.value))
-        return
+    val popupData = PopupProperties.Popup(
+        dataIndex = popup.dataIndex,
+        valueIndex = popup.valueIndex,
+        value = popup.value
+    )
+    if (!popupProperties.confirmDraw(popupData)) return
 
     val offset = popup.position
     val measureResult = textMeasurer.measure(
-        popupProperties.contentBuilder(popup.dataIndex, popup.valueIndex, popup.value),
+        popupProperties.contentBuilder(popupData),
         style = popupProperties.textStyle.copy(
             color = popupProperties.textStyle.color.copy(
                 alpha = 1f * progress
@@ -722,7 +726,8 @@ private fun DrawScope.drawPopup(
 }
 
 fun DrawScope.drawDots(
-    dataPoints: List<Triple<Animatable<Float, AnimationVector1D>, Float, Int>>,
+//    dataPoints: List<Triple<Animatable<Float, AnimationVector1D>, Float, Int>>,
+    dataPoints: List<DotInfo>,
     properties: DotProperties,
     linePath: Path,
     maxValue: Float,
@@ -741,7 +746,7 @@ fun DrawScope.drawDots(
     val lastPosition = pathMeasure.getPosition(pathMeasure.length)
     dataPoints.forEachIndexed { valueIndex, value ->
         if (
-            properties.confirmDraw(value.third, valueIndex, value.second.toDouble()) &&
+            properties.confirmDraw(DotProperties.Dot(value.dataIndex, valueIndex, value.value.toDouble())) &&
             valueIndex in startIndex..endIndex
         ) {
             val dotOffset = Offset(
@@ -753,14 +758,14 @@ fun DrawScope.drawDots(
                     maxValue = maxValue.toDouble(),
                     minValue = minValue.toDouble(),
                     total = _size.height,
-                    value = value.second
+                    value = value.value
                 )).toFloat()
 
             )
             if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
-                if (!value.first.isRunning && properties.animationEnabled && value.first.value != 1f) {
+                if (!value.animator.isRunning && properties.animationEnabled && value.animator.value != 1f) {
                     scope.launch {
-                        value.first.animateTo(1f, animationSpec = properties.animationSpec)
+                        value.animator.animateTo(1f, animationSpec = properties.animationSpec)
                     }
                 }
 
@@ -768,8 +773,8 @@ fun DrawScope.drawDots(
                 val strokeRadius: Float
                 if (properties.animationEnabled) {
                     radius =
-                        (properties.radius.toPx() + properties.strokeWidth.toPx() / 2) * value.first.value
-                    strokeRadius = properties.radius.toPx() * value.first.value
+                        (properties.radius.toPx() + properties.strokeWidth.toPx() / 2) * value.animator.value
+                    strokeRadius = properties.radius.toPx() * value.animator.value
                 } else {
                     radius = properties.radius.toPx() + properties.strokeWidth.toPx() / 2
                     strokeRadius = properties.radius.toPx()
@@ -789,6 +794,11 @@ fun DrawScope.drawDots(
         }
     }
 }
+data class DotInfo(
+    val animator:Animatable<Float, AnimationVector1D>,
+    val dataIndex: Int,
+    val value: Float,
+)
 
 
 

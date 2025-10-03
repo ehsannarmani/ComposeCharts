@@ -129,7 +129,8 @@ fun ColumnChart(
         Animatable(0f)
     }
 
-    val computedMaxValue = rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
+    val computedMaxValue =
+        rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
@@ -192,7 +193,8 @@ fun ColumnChart(
                     .weight(1f)
             ) {
                 val scope = rememberCoroutineScope()
-                Canvas(modifier = Modifier
+                Canvas(
+                    modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         if (popupProperties.enabled) {
@@ -400,11 +402,15 @@ private fun DrawScope.drawPopup(
     textMeasurer: TextMeasurer,
     progress: Float,
 ) {
-    if (!properties.confirmDraw(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value))
-        return
+    val popup = PopupProperties.Popup(
+        dataIndex = selectedBar.dataIndex,
+        valueIndex = selectedBar.valueIndex,
+        value = selectedBar.bar.value
+    )
+    if (!properties.confirmDraw(popup)) return
 
     val measure = textMeasurer.measure(
-        properties.contentBuilder(selectedBar.dataIndex, selectedBar.valueIndex, selectedBar.bar.value),
+        properties.contentBuilder(popup),
         style = properties.textStyle.copy(
             color = properties.textStyle.color.copy(
                 alpha = 1f * progress
