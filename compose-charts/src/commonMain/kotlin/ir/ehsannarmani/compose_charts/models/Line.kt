@@ -6,11 +6,10 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 data class Line(
-    val label: String,
+    val label: String? = null,
     val values: List<Double>,
     val color: Brush,
     val firstGradientFillColor: Color? = null,
