@@ -336,12 +336,16 @@ fun LineChart(
 
     Column(modifier = modifier) {
         if (labelHelperProperties.enabled) {
-            LabelHelper(
-                data = data.map { it.label to it.color },
-                textStyle = labelHelperProperties.textStyle,
-                labelCountPerLine = labelHelperProperties.labelCountPerLine
-            )
-            Spacer(modifier = Modifier.height(labelHelperPadding))
+            data.mapNotNull { line -> line.label?.let { line.label to line.color } }
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    LabelHelper(
+                        data = it,
+                        textStyle = labelHelperProperties.textStyle,
+                        labelCountPerLine = labelHelperProperties.labelCountPerLine
+                    )
+                    Spacer(modifier = Modifier.height(labelHelperPadding))
+                }
         }
         Row(modifier = Modifier.fillMaxSize().weight(1f)) {
             if (indicatorProperties.enabled) {
