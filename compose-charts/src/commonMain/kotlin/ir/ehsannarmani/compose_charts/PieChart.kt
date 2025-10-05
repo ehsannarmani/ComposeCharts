@@ -46,6 +46,8 @@ fun PieChart(
     colorAnimExitSpec: AnimationSpec<Color> = colorAnimEnterSpec,
     scaleAnimExitSpec: AnimationSpec<Float> = scaleAnimEnterSpec,
     spaceDegreeAnimExitSpec: AnimationSpec<Float> = spaceDegreeAnimEnterSpec,
+    labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
+    labelHelperPadding: Dp = 26.dp,
     style: Pie.Style = Pie.Style.Fill
 ) {
 
@@ -136,117 +138,133 @@ fun PieChart(
         }
     }
 
-    Canvas(modifier = modifier
-        .pointerInput(Unit) {
-            detectTapGestures { offset ->
-                val angleInDegree = getAngleInDegree(
-                    touchTapOffset = offset,
-                    pieceOffset = pieChartCenter
-                )
-
-                pieces.firstOrNull { piece ->
-                    isDegreeBetween(angleInDegree, piece.startFromDegree, piece.endToDegree)
-                        && isInsideCircle(offset, pieChartCenter, piece.radius) }
-                    ?.let {
-                        val (id, _) = it
-                        details.find { it.id == id }
-                            ?.let {
-                                onPieClick(it.pie)
-                            }
-                    }
-            }
-        }
+    Column(
+        modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        pieChartCenter = center
+        if (labelHelperProperties.enabled) {
+            data.mapNotNull { line -> line.label?.let { line.label!! to Brush.horizontalGradient(listOf(line.color, line.color)) } }
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    LabelHelper(data = it,
+                        textStyle = labelHelperProperties.textStyle,
 
-        val radius: Float = when (style) {
-            is Pie.Style.Fill -> {
-                (minOf(size.width, size.height) / 2)
-            }
-
-            is Pie.Style.Stroke -> {
-                (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2)
-            }
+                        labelCountPerLine = labelHelperProperties.labelCountPerLine)
+                    Spacer(modifier = Modifier.height(labelHelperPadding))
+                }
         }
-        val total = details.sumOf { it.pie.data } // 360 degree for total
-        details.forEachIndexed { index, detail ->
-            val degree = ((detail.pie.data * 360) / total)
-
-            val drawStyle = if ((detail.pie.style ?: style) is Pie.Style.Stroke) {
-                Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width.toPx())
-            } else {
-                Fill
-            }
-            val piecePath = if (degree >= 360.0) {
-                // draw circle instead of arc
-
-                pieces.add(
-                    PiePiece(
-                        id = detail.id,
-                        radius = radius * detail.scale.value,
-                        startFromDegree = 0f,
-                        endToDegree = 360f
+        Canvas(modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val angleInDegree = getAngleInDegree(
+                        touchTapOffset = offset,
+                        pieceOffset = pieChartCenter
                     )
-                )
-
-                Path().apply {
-                    addOval(
-                        oval = Rect(
-                            center = center,
-                            radius = radius * detail.scale.value
+    
+                    pieces.firstOrNull { piece ->
+                        isDegreeBetween(angleInDegree, piece.startFromDegree, piece.endToDegree)
+                            && isInsideCircle(offset, pieChartCenter, piece.radius) }
+                        ?.let {
+                            val (id, _) = it
+                            details.find { it.id == id }
+                                ?.let {
+                                    onPieClick(it.pie)
+                                }
+                        }
+                }
+            }
+        ) {
+            pieChartCenter = center
+    
+            val radius: Float = when (style) {
+                is Pie.Style.Fill -> {
+                    (minOf(size.width, size.height) / 2)
+                }
+    
+                is Pie.Style.Stroke -> {
+                    (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2)
+                }
+            }
+            val total = details.sumOf { it.pie.data } // 360 degree for total
+            details.forEachIndexed { index, detail ->
+                val degree = ((detail.pie.data * 360) / total)
+    
+                val drawStyle = if ((detail.pie.style ?: style) is Pie.Style.Stroke) {
+                    Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width.toPx())
+                } else {
+                    Fill
+                }
+                val piecePath = if (degree >= 360.0) {
+                    // draw circle instead of arc
+    
+                    pieces.add(
+                        PiePiece(
+                            id = detail.id,
+                            radius = radius * detail.scale.value,
+                            startFromDegree = 0f,
+                            endToDegree = 360f
                         )
                     )
-                }
-            } else {
-                val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
-                val startFromDegree = beforeItems.sumOf { (it.data * 360) / total }
-
-                val arcRect = Rect(
-                    center = center,
-                    radius = radius * detail.scale.value
-                )
-
-                val arcStart = startFromDegree.toFloat() + detail.space.value
-                val arcSweep = degree.toFloat() - ((detail.space.value * 2) + spaceDegree)
-
-                val piecePath = Path().apply {
-                    arcTo(arcRect, arcStart, arcSweep, true)
-                }
-
-                if ((detail.pie.style ?: style) is Pie.Style.Fill) {
-                    pathMeasure.setPath(piecePath, false)
-                    piecePath.reset()
-                    val start = pathMeasure.getPosition(0f)
-                    if (!start.isUnspecified) {
-                        piecePath.moveTo(start.x, start.y)
+    
+                    Path().apply {
+                        addOval(
+                            oval = Rect(
+                                center = center,
+                                radius = radius * detail.scale.value
+                            )
+                        )
                     }
-                    piecePath.lineTo(
-                        (size.width / 2),
-                        ((size.height / 2))
+                } else {
+                    val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
+                    val startFromDegree = beforeItems.sumOf { (it.data * 360) / total }
+    
+                    val arcRect = Rect(
+                        center = center,
+                        radius = radius * detail.scale.value
                     )
-                    piecePath.arcTo(arcRect, arcStart, arcSweep, true)
-                    piecePath.lineTo(
-                        (size.width / 2),
-                        (size.height / 2)
+    
+                    val arcStart = startFromDegree.toFloat() + detail.space.value
+                    val arcSweep = degree.toFloat() - ((detail.space.value * 2) + spaceDegree)
+    
+                    val piecePath = Path().apply {
+                        arcTo(arcRect, arcStart, arcSweep, true)
+                    }
+    
+                    if ((detail.pie.style ?: style) is Pie.Style.Fill) {
+                        pathMeasure.setPath(piecePath, false)
+                        piecePath.reset()
+                        val start = pathMeasure.getPosition(0f)
+                        if (!start.isUnspecified) {
+                            piecePath.moveTo(start.x, start.y)
+                        }
+                        piecePath.lineTo(
+                            (size.width / 2),
+                            ((size.height / 2))
+                        )
+                        piecePath.arcTo(arcRect, arcStart, arcSweep, true)
+                        piecePath.lineTo(
+                            (size.width / 2),
+                            (size.height / 2)
+                        )
+                    }
+    
+                    pieces.add(
+                        PiePiece(
+                            id = detail.id,
+                            radius = radius * detail.scale.value,
+                            startFromDegree = arcStart,
+                            endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep,
+                        )
                     )
+                    piecePath
                 }
-
-                pieces.add(
-                    PiePiece(
-                        id = detail.id,
-                        radius = radius * detail.scale.value,
-                        startFromDegree = arcStart,
-                        endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep,
-                    )
+    
+                drawPath(
+                    path = piecePath,
+                    color = detail.color.value,
+                    style = drawStyle,
                 )
-                piecePath
             }
-
-            drawPath(
-                path = piecePath,
-                color = detail.color.value,
-                style = drawStyle,
-            )
         }
     }
 }
