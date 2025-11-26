@@ -103,6 +103,9 @@ fun ColumnChart(
 
     val density = LocalDensity.current
 
+    val onBarClick by rememberUpdatedState(onBarClick)
+    val onBarLongClick by rememberUpdatedState(onBarLongClick)
+
     val everyDataWidth = with(density) {
         data.maxOfOrNull { rowData ->
             rowData.values.map {
