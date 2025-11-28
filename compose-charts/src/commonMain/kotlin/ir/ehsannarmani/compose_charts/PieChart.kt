@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -53,6 +54,7 @@ fun PieChart(
         "Data must be at least 0"
     }
 
+    val onPieClick by rememberUpdatedState(onPieClick)
     val scope = rememberCoroutineScope()
 
     var pieChartCenter by remember {

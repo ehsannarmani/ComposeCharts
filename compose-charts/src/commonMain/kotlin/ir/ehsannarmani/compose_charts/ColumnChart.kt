@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -102,6 +104,9 @@ fun ColumnChart(
     checkRCMaxValue(maxValue, data)
 
     val density = LocalDensity.current
+
+    val onBarClick by rememberUpdatedState(onBarClick)
+    val onBarLongClick by rememberUpdatedState(onBarLongClick)
 
     val everyDataWidth = with(density) {
         data.maxOfOrNull { rowData ->
