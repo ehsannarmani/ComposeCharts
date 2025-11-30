@@ -30,6 +30,23 @@ kotlin {
         binaries.executable()
     }
 
+    js {
+        outputModuleName = "app"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "app.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(project.projectDir.path)
+                    }
+                }
+            }
+        }
+        binaries.executable()
+        useEsModules()
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
