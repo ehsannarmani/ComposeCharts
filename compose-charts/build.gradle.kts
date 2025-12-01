@@ -67,6 +67,22 @@ kotlin {
         binaries.library()
     }
 
+    js {
+        outputModuleName = "compose-charts"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "compose-charts.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(project.projectDir.path)
+                    }
+                }
+            }
+        }
+        binaries.library()
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
