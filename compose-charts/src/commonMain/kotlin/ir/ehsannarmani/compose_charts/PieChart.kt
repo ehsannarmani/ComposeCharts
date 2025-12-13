@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.isUnspecified
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
@@ -152,7 +152,7 @@ fun PieChart(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (labelHelperProperties.enabled) {
-            data.mapNotNull { line -> line.label?.let { line.label!! to Brush.horizontalGradient(listOf(line.color, line.color)) } }
+            data.mapNotNull { line -> line.label?.let { line.label!! to SolidColor(line.color) } }
                 .takeIf { it.isNotEmpty() }
                 ?.let {
                     LabelHelper(data = it,
