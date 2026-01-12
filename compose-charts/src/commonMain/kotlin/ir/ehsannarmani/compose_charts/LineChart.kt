@@ -225,6 +225,10 @@ fun LineChart(
                             animateStroke(line)
                         }
                     }
+
+                    is AnimationMode.None -> {
+                        line.strokeProgress.snapTo(1f)
+                    }
                 }
             }
         }
@@ -240,6 +244,10 @@ fun LineChart(
                             delay(animationMode.delayBuilder(index))
                             animateGradient(line)
                         }
+                    }
+
+                    is AnimationMode.None -> {
+                        line.gradientProgress.snapTo(1f)
                     }
                 }
             }
@@ -372,7 +380,7 @@ fun LineChart(
                                         hidePopup()
                                     }
                                 },
-                                onHorizontalDrag = { change, amount ->
+                                onHorizontalDrag = { change, _ ->
                                     showPopup(
                                         data = data,
                                         size = size,

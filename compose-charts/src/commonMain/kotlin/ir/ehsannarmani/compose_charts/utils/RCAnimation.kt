@@ -3,7 +3,6 @@ package ir.ehsannarmani.compose_charts.utils
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.Bars
 import kotlinx.coroutines.delay
@@ -24,7 +23,7 @@ fun ImplementRCAnimation(
     LaunchedEffect(data) {
         before()
         delay(delay)
-        data.map { it.values }.flatten().filter { it.value != 0.0 }.forEachIndexed { index, data ->
+        data.flatMap { it.values }.filter { it.value != 0.0 }.forEachIndexed { index, data ->
             val animate: suspend () -> Unit = {
                 data.animator.animateTo(
                     1f,
@@ -41,6 +40,10 @@ fun ImplementRCAnimation(
                         delay(animationMode.delayBuilder(index))
                         animate()
                     }
+                }
+
+                is AnimationMode.None -> {
+                    data.animator.snapTo(1f)
                 }
             }
         }

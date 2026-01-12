@@ -13,10 +13,10 @@ data class ZeroLineProperties(
     val style: StrokeStyle = StrokeStyle.Normal,
     val color: Brush = SolidColor(Color.Gray),
     val thickness: Dp = (.5).dp,
-    val animationSpec:AnimationSpec<Float> = tween(durationMillis = 1000, delayMillis = 300),
+    val animationSpec: AnimationSpec<Float> = tween(durationMillis = 1000, delayMillis = 300),
     val zType: ZType = ZType.Under
 ){
     enum class ZType{
-        Under,Above
+        Under, Above
     }
 }
