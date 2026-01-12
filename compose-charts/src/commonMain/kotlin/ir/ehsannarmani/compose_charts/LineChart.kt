@@ -129,9 +129,9 @@ fun LineChart(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    var chartSize by remember { mutableStateOf(Size(0f, 0f)) }
+    var chartSize by remember(density) { mutableStateOf(Size(0f, 0f)) }
 
-    val pathMeasure = remember(chartSize, density) {
+    val pathMeasure = remember(chartSize) {
         PathMeasure()
     }
 
