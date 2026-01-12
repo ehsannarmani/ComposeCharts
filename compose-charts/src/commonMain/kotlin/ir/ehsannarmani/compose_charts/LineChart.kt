@@ -192,14 +192,12 @@ fun LineChart(
     // make animators
     LaunchedEffect(data) {
         dotAnimators.clear()
-        launch {
-            data.forEach {
-                val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
-                repeat(it.values.size) {
-                    animators.add(Animatable(0f))
-                }
-                dotAnimators.add(animators)
+        data.forEach {
+            val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
+            repeat(it.values.size) {
+                animators.add(Animatable(0f))
             }
+            dotAnimators.add(animators)
         }
     }
 
