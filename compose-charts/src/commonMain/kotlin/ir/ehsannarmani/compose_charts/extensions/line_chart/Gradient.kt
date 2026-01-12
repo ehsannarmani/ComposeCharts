@@ -28,7 +28,7 @@ internal fun DrawScope.drawLineGradient(
             Offset(0f, _size.height),
             listOf(
                 color1.copy(alpha = color1.alpha * progress),
-                color2,
+                color2.copy(alpha = color2.alpha * progress),
             ),
             tileMode = TileMode.Mirror
         )
