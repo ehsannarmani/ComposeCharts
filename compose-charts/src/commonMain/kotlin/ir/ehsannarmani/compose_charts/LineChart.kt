@@ -37,6 +37,8 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -484,11 +486,11 @@ fun LineChart(
                             endOffset = pathData.xPositions[pathData.endIndex].toFloat()
                         }
 
-                        if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
+                        if (line.firstGradientFillColor.isSpecified) {
                             drawLineGradient(
                                 path = pathData.path,
                                 color1 = line.firstGradientFillColor,
-                                color2 = line.secondGradientFillColor,
+                                color2 = line.secondGradientFillColor.takeOrElse { line.firstGradientFillColor },
                                 progress = line.gradientProgress.value,
                                 size = size,
                                 startOffset,
