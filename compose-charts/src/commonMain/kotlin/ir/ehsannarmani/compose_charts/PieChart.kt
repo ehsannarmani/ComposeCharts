@@ -154,7 +154,7 @@ fun PieChart(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (labelHelperProperties.enabled) {
-            data.mapNotNull { line -> line.label?.let { line.label!! to SolidColor(line.color) } }
+            data.mapNotNull { line -> line.label?.let { line.label to SolidColor(line.color) } }
                 .takeIf { it.isNotEmpty() }
                 ?.let {
                     LabelHelper(data = it,
