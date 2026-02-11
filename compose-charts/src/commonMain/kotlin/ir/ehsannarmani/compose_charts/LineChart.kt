@@ -205,7 +205,7 @@ fun LineChart(
 
     // animate
     LaunchedEffect(data) {
-        delay(animationDelay)
+        if(animationMode != AnimationMode.None) delay(animationDelay)
 
         val animateStroke: suspend (Line) -> Unit = { line ->
             line.strokeProgress.animateTo(1f, animationSpec = line.strokeAnimationSpec)
@@ -236,6 +236,7 @@ fun LineChart(
 
                 is AnimationMode.None -> {
                     line.gradientProgress.snapTo(1f)
+                    line.strokeProgress.snapTo(1f)
                 }
             }
         }
