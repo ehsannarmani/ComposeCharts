@@ -46,10 +46,6 @@ mavenPublishing{
     signAllPublications()
 }
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-receivers")
-    }
-
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "compose-charts"
@@ -57,10 +53,7 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "compose-charts.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(project.projectDir.path)
-                    }
+                    static(project.projectDir.path)
                 }
             }
         }
@@ -73,10 +66,7 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "compose-charts.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(project.projectDir.path)
-                    }
+                    static(project.projectDir.path)
                 }
             }
         }
@@ -96,21 +86,11 @@ kotlin {
     iosSimulatorArm64()
 
     sourceSets {
-        val desktopMain by getting
-
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-        }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-        }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(libs.compose.foundation)
+            // @Preview annotation isn't currently used, if that changes uncomment this line
+            // and add a dependency on ui-tooling to the androidDebug variant
+            //implementation(libs.compose.ui.tooling.preview)
         }
     }
 }
