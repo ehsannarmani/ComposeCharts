@@ -18,10 +18,12 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -35,6 +37,8 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -127,31 +131,31 @@ fun LineChart(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
-    val pathMeasure = remember {
+    var chartSize by remember(density) { mutableStateOf(Size(0f, 0f)) }
+
+    val pathMeasure = remember(chartSize) {
         PathMeasure()
     }
 
-    val popupAnimation = remember {
+    val popupAnimation = remember(data) {
         Animatable(0f)
     }
 
-    val zeroLineAnimation = remember {
+    val zeroLineAnimation = remember(data) {
         Animatable(0f)
     }
-    val chartWidth = remember {
-        mutableFloatStateOf(0f)
-    }
 
-    val dotAnimators = remember {
+    val dotAnimators = remember(data) {
         mutableStateListOf<List<Animatable<Float, AnimationVector1D>>>()
     }
-    val popups = remember {
+
+    val popups = remember(data) {
         mutableStateListOf<Popup>()
     }
-    val popupsOffsetAnimators = remember {
+    val popupsOffsetAnimators = remember(chartSize, data) {
         mutableStateListOf<Pair<Animatable<Float, AnimationVector1D>, Animatable<Float, AnimationVector1D>>>()
     }
-    val linesPathData = remember {
+    val linesPathData = remember(chartSize, data) {
         mutableStateListOf<PathData>()
     }
 
@@ -165,7 +169,7 @@ fun LineChart(
             )
         }
     }
-    val indicatorAreaWidth = remember {
+    val indicatorAreaWidth = remember(chartSize, indicators) {
         if (indicatorProperties.enabled) {
             indicators.maxOf { textMeasurer.measure(indicatorProperties.contentBuilder(it)).size.width } + (indicatorProperties.padding.value * density.density)
         } else {
@@ -173,7 +177,7 @@ fun LineChart(
         }
     }
 
-    val xPadding = remember {
+    val xPadding = remember(indicatorAreaWidth) {
         if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
             indicatorAreaWidth
         } else {
@@ -190,14 +194,12 @@ fun LineChart(
     // make animators
     LaunchedEffect(data) {
         dotAnimators.clear()
-        launch {
-            data.forEach {
-                val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
-                repeat(it.values.size) {
-                    animators.add(Animatable(0f))
-                }
-                dotAnimators.add(animators)
+        data.forEach {
+            val animators = mutableListOf<Animatable<Float, AnimationVector1D>>()
+            repeat(it.values.size) {
+                animators.add(Animatable(0f))
             }
+            dotAnimators.add(animators)
         }
     }
 
@@ -212,47 +214,33 @@ fun LineChart(
             delay(line.gradientAnimationDelay)
             line.gradientProgress.animateTo(1f, animationSpec = line.gradientAnimationSpec)
         }
-        launch {
-            data.forEachIndexed { index, line ->
-                when (animationMode) {
-                    is AnimationMode.OneByOne -> {
-                        animateStroke(line)
-                    }
-
-                    is AnimationMode.Together -> {
-                        launch {
-                            delay(animationMode.delayBuilder(index))
-                            animateStroke(line)
-                        }
-                    }
-
-                    is AnimationMode.None -> {
-                        line.strokeProgress.snapTo(1f)
-                    }
-                }
-            }
-        }
-        launch {
-            data.forEachIndexed { index, line ->
-                when (animationMode) {
-                    is AnimationMode.OneByOne -> {
+        data.forEachIndexed { index, line ->
+            when (animationMode) {
+                is AnimationMode.OneByOne -> {
+                    launch {
                         animateGradient(line)
                     }
+                    animateStroke(line)
+                }
 
-                    is AnimationMode.Together -> {
-                        launch {
-                            delay(animationMode.delayBuilder(index))
-                            animateGradient(line)
-                        }
+                is AnimationMode.Together -> {
+                    launch {
+                        delay(animationMode.delayBuilder(index))
+                        animateStroke(line)
                     }
+                    launch {
+                        delay(animationMode.delayBuilder(index))
+                        animateGradient(line)
+                    }
+                }
 
-                    is AnimationMode.None -> {
-                        line.gradientProgress.snapTo(1f)
-                    }
+                is AnimationMode.None -> {
+                    line.gradientProgress.snapTo(1f)
                 }
             }
         }
     }
+
     LaunchedEffect(data, minValue, computedMaxValue) {
         linesPathData.clear()
     }
@@ -416,13 +404,12 @@ fun LineChart(
                             )
                         }
                 ) {
-                    val chartAreaHeight = size.height
-                    chartWidth.value = size.width
+                    chartSize = size
                     val drawZeroLine = {
-                        val zeroY = chartAreaHeight - calculateOffset(
+                        val zeroY = size.height - calculateOffset(
                             minValue = minValue,
                             maxValue = computedMaxValue,
-                            total = chartAreaHeight,
+                            total = size.height,
                             value = 0f
                         ).toFloat()
                         drawLine(
@@ -447,7 +434,7 @@ fun LineChart(
                                 maxValue = computedMaxValue.toFloat(),
                                 minValue = minValue.toFloat(),
                                 rounded = it.curvedEdges ?: curvedEdges,
-                                size = size.copy(height = chartAreaHeight),
+                                size = size,
                                 startIndex,
                                 endIndex
                             )
@@ -461,7 +448,7 @@ fun LineChart(
                         indicatorPosition = indicatorProperties.position,
                         xAxisProperties = gridProperties.xAxisProperties,
                         yAxisProperties = gridProperties.yAxisProperties,
-                        size = size.copy(height = chartAreaHeight),
+                        size = size,
                         gridEnabled = gridProperties.enabled
                     )
                     if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
@@ -503,13 +490,13 @@ fun LineChart(
                             endOffset = pathData.xPositions[pathData.endIndex].toFloat()
                         }
 
-                        if (line.firstGradientFillColor != null && line.secondGradientFillColor != null) {
+                        if (line.firstGradientFillColor.isSpecified) {
                             drawLineGradient(
                                 path = pathData.path,
                                 color1 = line.firstGradientFillColor,
-                                color2 = line.secondGradientFillColor,
+                                color2 = line.secondGradientFillColor.takeOrElse { line.firstGradientFillColor },
                                 progress = line.gradientProgress.value,
-                                size = size.copy(height = chartAreaHeight),
+                                size = size,
                                 startOffset,
                                 endOffset
                             )
@@ -523,7 +510,7 @@ fun LineChart(
                                 color1 = fillColor,
                                 color2 = fillColor,
                                 progress = 1f,
-                                size = size.copy(height = chartAreaHeight),
+                                size = size,
                                 startOffset,
                                 endOffset
                             )
@@ -547,7 +534,7 @@ fun LineChart(
                                 minValue = minValue.toFloat(),
                                 pathMeasure = pathMeasure,
                                 scope = scope,
-                                size = size.copy(height = chartAreaHeight),
+                                size = size,
                                 startIndex = pathData.startIndex,
                                 endIndex = pathData.endIndex
                             )
@@ -582,7 +569,7 @@ fun LineChart(
             labelProperties = labelProperties,
             labels = labelProperties.labels,
             indicatorProperties = indicatorProperties,
-            chartWidth = chartWidth.value,
+            chartWidth = chartSize.width,
             density = density,
             textMeasurer = textMeasurer,
             xPadding = xPadding
@@ -801,8 +788,9 @@ fun DrawScope.drawDots(
         }
     }
 }
+
 data class DotInfo(
-    val animator:Animatable<Float, AnimationVector1D>,
+    val animator: Animatable<Float, AnimationVector1D>,
     val dataIndex: Int,
     val value: Float,
 )
