@@ -21,8 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.PieChart
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.Pie
 
 private const val unselectedPieAlpha = 1f
@@ -84,7 +87,7 @@ fun RowScope.PieSample() {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(200.dp),
+                    .size(300.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -100,7 +103,8 @@ fun RowScope.PieSample() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 0f,
-                style = Pie.Style.Fill
+                style = Pie.Style.Fill,
+                labelHelperProperties = labelHelperProperties,
             )
         }
     }
@@ -131,7 +135,7 @@ fun RowScope.PieSample2() {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(200.dp),
+                    .size(300.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -147,7 +151,8 @@ fun RowScope.PieSample2() {
                 scaleAnimExitSpec = tween(300),
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
-                style = Pie.Style.Stroke(width = 32.dp)
+                style = Pie.Style.Stroke(width = 32.dp),
+                labelHelperProperties = labelHelperProperties
             )
         }
     }
@@ -177,7 +182,7 @@ fun RowScope.PieSample3() {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(200.dp),
+                    .size(300.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -194,7 +199,8 @@ fun RowScope.PieSample3() {
                 spaceDegreeAnimExitSpec = tween(300),
                 selectedPaddingDegree = 4f,
                 style = Pie.Style.Stroke(),
-                spaceDegree = 7f
+                spaceDegree = 7f,
+                labelHelperProperties = labelHelperProperties
             )
         }
     }

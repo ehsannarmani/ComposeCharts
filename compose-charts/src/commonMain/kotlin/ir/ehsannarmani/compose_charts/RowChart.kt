@@ -176,8 +176,7 @@ fun RowChart(
             if (labelHelperProperties.enabled) {
                 RCChartLabelHelper(
                     data = data,
-                    textStyle = labelHelperProperties.textStyle,
-                    labelCountPerLine = labelHelperProperties.labelCountPerLine
+                    properties = labelHelperProperties
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }

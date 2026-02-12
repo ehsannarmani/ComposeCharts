@@ -148,10 +148,7 @@ fun RowScope.ColumnSample() {
                     position = IndicatorPosition.Horizontal.Start,
                 ),
                 gridProperties = columnGridProperties,
-                labelProperties = LabelProperties(
-                    enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
-                ),
+                labelProperties = labelProperties,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -169,7 +166,7 @@ fun RowScope.ColumnSample() {
                     },
                     containerColor = Color(0xff414141),
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 onBarClick = { popupData ->
                     println(popupData.bar)
                 },
@@ -351,10 +348,7 @@ fun RowScope.ColumnSample2() {
                     count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = columnGridProperties,
-                labelProperties = LabelProperties(
-                    enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
-                ),
+                labelProperties = labelProperties,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -372,7 +366,7 @@ fun RowScope.ColumnSample2() {
                     },
                     containerColor = Color(0xff414141),
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White))
+                labelHelperProperties = labelHelperProperties
             )
         }
     }

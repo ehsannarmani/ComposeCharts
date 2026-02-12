@@ -158,7 +158,7 @@ fun RowScope.LineSample() {
                         it.format(1) + " M"
                     },
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = false
             )
         }
@@ -242,7 +242,7 @@ fun RowScope.LineSample2() {
                         it.format(1) + " °C"
                     },
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = false,
                 maxValue = 100.0,
                 minValue = -20.0
@@ -340,7 +340,7 @@ fun RowScope.LineSample3() {
                         it.format(1) + " M"
                     }
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = false,
                 labelProperties = LabelProperties(
                     enabled = true,
@@ -423,7 +423,7 @@ fun RowScope.LineSample4() {
                         it.format(1) + " M"
                     }
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = true
             )
         }
@@ -488,7 +488,7 @@ fun RowScope.LineSample5() {
                         it.format(1) + " M"
                     }
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = false,
                 labelProperties = LabelProperties(
                     enabled = true,
@@ -602,7 +602,7 @@ fun RowScope.LineSample6() {
                         fontFamily = ubuntu, color = Color.White
                     ),
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = true
             )
         }
@@ -670,7 +670,7 @@ fun RowScope.LineSample7() {
                         it.format(1) + " M"
                     }
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = true
             )
         }
@@ -794,7 +794,7 @@ fun RowScope.LineSample9() {
                         it.format(1) + " M"
                     }
                 ),
-                labelHelperProperties = LabelHelperProperties(textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
+                labelHelperProperties = labelHelperProperties,
                 curvedEdges = false
             )
         }

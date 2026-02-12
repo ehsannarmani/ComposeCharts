@@ -157,10 +157,7 @@ fun PieChart(
             data.mapNotNull { line -> line.label?.let { line.label to SolidColor(line.color) } }
                 .takeIf { it.isNotEmpty() }
                 ?.let {
-                    LabelHelper(data = it,
-                        textStyle = labelHelperProperties.textStyle,
-
-                        labelCountPerLine = labelHelperProperties.labelCountPerLine)
+                    LabelHelper(data = it, properties = labelHelperProperties)
                     Spacer(modifier = Modifier.height(labelHelperPadding))
                 }
         }

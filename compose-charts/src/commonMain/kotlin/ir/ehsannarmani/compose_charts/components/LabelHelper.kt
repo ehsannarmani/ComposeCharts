@@ -23,16 +23,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import kotlin.math.min
 
 @Composable
 fun LabelHelper(
     data: List<Pair<String, Brush>>,
-    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp),
-    labelCountPerLine: Int
+    properties: LabelHelperProperties
 ) {
-    val numberOfGridCells = min(data.size, labelCountPerLine)
-    LazyVerticalGrid(columns = GridCells.Fixed(numberOfGridCells), modifier = Modifier) {
+    val numberOfGridCells = min(data.size, properties.labelCountPerLine)
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(numberOfGridCells),
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
         items(data) { (label, color) ->
             Row(
                 modifier = Modifier
@@ -48,7 +52,7 @@ fun LabelHelper(
                 )
                 BasicText(
                     text = label,
-                    style = textStyle,
+                    style = properties.textStyle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -63,8 +67,7 @@ fun LabelHelper(
 @Composable
 fun RCChartLabelHelper(
     data: List<Bars>,
-    textStyle: TextStyle = TextStyle.Default.copy(fontSize = 13.sp),
-    labelCountPerLine: Int
+    properties: LabelHelperProperties,
 ) {
     val labels = data.flatMap { it.values.map { it.label } }.distinct()
     val colors = labels.map { label ->
@@ -74,7 +77,6 @@ fun RCChartLabelHelper(
     }
     LabelHelper(
         data = labels.mapIndexed { index, label -> label.orEmpty() to colors[index] },
-        textStyle = textStyle,
-        labelCountPerLine
+        properties = properties
     )
 }

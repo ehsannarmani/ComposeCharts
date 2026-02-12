@@ -338,8 +338,7 @@ fun LineChart(
                 ?.let {
                     LabelHelper(
                         data = it,
-                        textStyle = labelHelperProperties.textStyle,
-                        labelCountPerLine = labelHelperProperties.labelCountPerLine
+                        properties = labelHelperProperties
                     )
                     Spacer(modifier = Modifier.height(labelHelperPadding))
                 }

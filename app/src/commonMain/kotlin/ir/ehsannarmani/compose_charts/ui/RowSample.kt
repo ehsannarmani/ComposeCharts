@@ -148,10 +148,7 @@ fun RowScope.RowSample() {
                     count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = rowGridProperties,
-                labelProperties = LabelProperties(
-                    enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
-                ),
+                labelProperties = labelProperties,
                 animationSpec = spring(
                     dampingRatio = .6f,
                     stiffness = Spring.StiffnessLow
@@ -357,10 +354,7 @@ fun RowScope.RowSample2() {
                     count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = rowGridProperties,
-                labelProperties = LabelProperties(
-                    enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
-                ),
+                labelProperties = labelProperties,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
@@ -431,10 +425,7 @@ fun RowScope.RowSample3() {
                     count = IndicatorCount.CountBased(count = 4),
                 ),
                 gridProperties = rowGridProperties,
-                labelProperties = LabelProperties(
-                    enabled = true,
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)
-                ),
+                labelProperties = labelProperties,
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
