@@ -73,21 +73,11 @@ fun RowScope.PieSample() {
         stiffness = Spring.StiffnessLow
     )
 
-    Card(modifier= Modifier
-        .height(270.dp)
-        .fillMaxWidth()
-        .weight(1f)
-        .border(2.dp, Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(300.dp,200.dp),
+                    .size(250.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -120,22 +110,11 @@ fun RowScope.PieSample2() {
         stiffness = Spring.StiffnessLow
     )
 
-    Card(modifier= Modifier
-        .height(270.dp)
-        .fillMaxWidth()
-        .weight(1f)
-        .border(2.dp, Color.Transparent, RoundedCornerShape(12.dp))
-,
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(300.dp,200.dp),
+                    .size(250.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -168,21 +147,11 @@ fun RowScope.PieSample3() {
         stiffness = Spring.StiffnessLow
     )
 
-    Card(modifier= Modifier
-        .height(270.dp)
-        .fillMaxWidth()
-        .weight(1f)
-        .border(2.dp, Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .size(300.dp,200.dp),
+                    .size(250.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")

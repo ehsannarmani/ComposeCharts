@@ -2,16 +2,10 @@ package ir.ehsannarmani.compose_charts.ui
 
 import androidx.compose.animation.core.EaseInOutCubic
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -131,13 +125,7 @@ fun RowScope.LineSample() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -187,13 +175,7 @@ fun RowScope.LineSample2() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -301,13 +283,7 @@ fun RowScope.LineSample3() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -385,13 +361,7 @@ fun RowScope.LineSample4() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -451,13 +421,7 @@ fun RowScope.LineSample5() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -557,13 +521,7 @@ fun RowScope.LineSample6() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -632,13 +590,7 @@ fun RowScope.LineSample7() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -699,13 +651,7 @@ fun RowScope.LineSample8() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -753,13 +699,7 @@ fun RowScope.LineSample9() {
             ),
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=Modifier.weight(1f)) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
