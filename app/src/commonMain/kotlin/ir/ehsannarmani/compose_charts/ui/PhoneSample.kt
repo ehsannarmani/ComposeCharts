@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,124 +40,69 @@ import ir.ehsannarmani.compose_charts.models.Pie
 fun PhoneSample() {
     LazyColumn(
         modifier = Modifier
-            .statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(28.dp)
+            .statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(28.dp),
+        contentPadding = PaddingValues(22.dp)
     ) {
+        // Pie
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    PieSample()
-                }
-                Row {
-                    PieSample2()
-                }
-                Row {
-                    PieSample3()
-                }
-            }
+            PieSample()
         }
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    ColumnSample()
-                }
-                Row {
-                    ColumnSample2()
-                }
-                Row {
-                    ColumnSample3()
-                }
-            }
+            PieSample2()
         }
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    RowSample()
-                }
-                Row {
-                    RowSample2()
-                }
-                Row {
-                    RowSample3()
-                }
-            }
+            PieSample3()
+        }
+
+        // Column
+        item {
+            ColumnSample()
         }
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    LineSample()
-                }
-                Row {
-                    LineSample2()
-                }
-                Row {
-                    LineSample4()
-                }
-            }
+            ColumnSample2()
         }
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    LineSample8()
-                }
-                Row {
-                    LineSample7()
-                }
-                Row {
-                    LineSample6()
-                }
-            }
+            ColumnSample3()
+        }
+
+        // Row
+        item {
+            RowSample()
         }
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(22.dp)
-            ) {
-                Row {
-                    LineSample5()
-                }
-                Row {
-                    LineSample3()
-                }
-                Row {
-                    LineSample9()
-                }
-            }
+            RowSample2()
         }
         item {
-            Spacer(modifier = Modifier.height(100.dp))
+            RowSample3()
+        }
+
+        // Line
+        item {
+            LineSample()
+        }
+        item {
+            LineSample2()
+        }
+        item {
+            LineSample4()
+        }
+        item {
+            LineSample8()
+        }
+        item {
+            LineSample7()
+        }
+        item {
+            LineSample6()
+        }
+        item {
+            LineSample5()
+        }
+        item {
+            LineSample3()
+        }
+        item {
+            LineSample9()
         }
     }
 }

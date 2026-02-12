@@ -63,7 +63,7 @@ private val pieData = listOf(
 )
 
 @Composable
-fun RowScope.PieSample() {
+fun PieSample(modifier: Modifier=Modifier) {
     var data by remember {
         mutableStateOf(pieData)
     }
@@ -73,7 +73,7 @@ fun RowScope.PieSample() {
         stiffness = Spring.StiffnessLow
     )
 
-    ChartParent(modifier=Modifier.weight(1f)){
+    ChartParent(modifier=modifier){
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
@@ -100,7 +100,7 @@ fun RowScope.PieSample() {
     }
 }
 @Composable
-fun RowScope.PieSample2() {
+fun PieSample2(modifier: Modifier=Modifier) {
     var data by remember {
         mutableStateOf(pieData)
     }
@@ -110,7 +110,7 @@ fun RowScope.PieSample2() {
         stiffness = Spring.StiffnessLow
     )
 
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=modifier) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
@@ -137,7 +137,7 @@ fun RowScope.PieSample2() {
     }
 }
 @Composable
-fun RowScope.PieSample3() {
+fun PieSample3(modifier: Modifier=Modifier) {
     var data by remember {
         mutableStateOf(pieData)
     }
@@ -147,7 +147,7 @@ fun RowScope.PieSample3() {
         stiffness = Spring.StiffnessLow
     )
 
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=modifier) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier

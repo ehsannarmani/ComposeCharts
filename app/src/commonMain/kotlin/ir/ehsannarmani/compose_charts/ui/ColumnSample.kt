@@ -42,7 +42,7 @@ val columnGridProperties = GridProperties(
 )
 
 @Composable
-fun RowScope.ColumnSample() {
+fun ColumnSample(modifier: Modifier=Modifier) {
 
     val data = remember {
         listOf(
@@ -123,13 +123,7 @@ fun RowScope.ColumnSample() {
             )
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             ColumnChart(
                 modifier= Modifier
@@ -178,7 +172,7 @@ fun RowScope.ColumnSample() {
     }
 }
 @Composable
-fun RowScope.ColumnSample2() {
+fun ColumnSample2(modifier: Modifier=Modifier) {
 
     val data = remember {
         listOf(
@@ -324,13 +318,7 @@ fun RowScope.ColumnSample2() {
             )
         )
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             ColumnChart(
                 modifier= Modifier
@@ -372,7 +360,7 @@ fun RowScope.ColumnSample2() {
     }
 }
 @Composable
-fun RowScope.ColumnSample3() {
+fun ColumnSample3(modifier: Modifier=Modifier) {
 
     val positiveBarColor = SolidColor(Color(0xFF42A5F5))
     val negativeBarColor = SolidColor(Color(0x9742A5F5))
@@ -390,13 +378,7 @@ fun RowScope.ColumnSample3() {
             )
         }
     }
-    Card(modifier=Modifier.height(270.dp).fillMaxWidth().weight(1f)
-        .border(2.dp,Color.Transparent, RoundedCornerShape(12.dp)),
-        elevation = CardDefaults.elevatedCardElevation(2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xff2D2D2D)
-        )
-    ) {
+    ChartParent(modifier=modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             ColumnChart(
                 modifier= Modifier

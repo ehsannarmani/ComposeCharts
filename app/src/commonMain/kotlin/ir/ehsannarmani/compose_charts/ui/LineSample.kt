@@ -56,7 +56,7 @@ val dividerProperties = DividerProperties(
     )
 )
 @Composable
-fun RowScope.LineSample() {
+fun LineSample(modifier: Modifier=Modifier) {
     val popupProperties = PopupProperties(
         textStyle = TextStyle(
             fontSize = 11.sp,
@@ -125,7 +125,7 @@ fun RowScope.LineSample() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -153,7 +153,7 @@ fun RowScope.LineSample() {
     }
 }
 @Composable
-fun RowScope.LineSample2() {
+fun LineSample2(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -175,7 +175,7 @@ fun RowScope.LineSample2() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -233,7 +233,7 @@ fun RowScope.LineSample2() {
     }
 }
 @Composable
-fun RowScope.LineSample3() {
+fun LineSample3(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -283,7 +283,7 @@ fun RowScope.LineSample3() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -331,7 +331,7 @@ fun RowScope.LineSample3() {
     }
 }
 @Composable
-fun RowScope.LineSample4() {
+fun LineSample4(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -361,7 +361,7 @@ fun RowScope.LineSample4() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -400,7 +400,7 @@ fun RowScope.LineSample4() {
     }
 }
 @Composable
-fun RowScope.LineSample5() {
+fun LineSample5(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -421,7 +421,7 @@ fun RowScope.LineSample5() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -467,7 +467,7 @@ fun RowScope.LineSample5() {
     }
 }
 @Composable
-fun RowScope.LineSample6() {
+fun LineSample6(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -521,7 +521,7 @@ fun RowScope.LineSample6() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -567,7 +567,7 @@ fun RowScope.LineSample6() {
     }
 }
 @Composable
-fun RowScope.LineSample7() {
+fun LineSample7(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -590,7 +590,7 @@ fun RowScope.LineSample7() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -630,7 +630,7 @@ fun RowScope.LineSample7() {
 }
 
 @Composable
-fun RowScope.LineSample8() {
+fun LineSample8(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -651,7 +651,7 @@ fun RowScope.LineSample8() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier
@@ -685,7 +685,7 @@ fun RowScope.LineSample8() {
 }
 
 @Composable
-fun RowScope.LineSample9() {
+fun LineSample9(modifier: Modifier=Modifier) {
     val data = remember {
         listOf(
             Line(
@@ -699,7 +699,7 @@ fun RowScope.LineSample9() {
             ),
         )
     }
-    ChartParent(modifier=Modifier.weight(1f)) {
+    ChartParent(modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize().padding(vertical = 12.dp)){
             LineChart(
                 modifier = Modifier

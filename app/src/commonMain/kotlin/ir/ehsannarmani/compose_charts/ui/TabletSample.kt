@@ -1,6 +1,8 @@
 package ir.ehsannarmani.compose_charts.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -10,80 +12,74 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TabletSample() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(28.dp)
-    ) {
-
-    Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        verticalArrangement = Arrangement.spacedBy(28.dp),
+        horizontalArrangement = Arrangement.spacedBy(28.dp),
+        contentPadding = PaddingValues(28.dp)
+    ){
+        // Pie
+        item {
             PieSample()
+        }
+        item {
             PieSample2()
+        }
+        item {
             PieSample3()
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+
+        // Column
+        item {
             ColumnSample()
+        }
+        item {
             ColumnSample2()
+        }
+        item {
             ColumnSample3()
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+
+        //Row
+        item {
             RowSample()
+        }
+        item {
             RowSample2()
+        }
+        item {
             RowSample3()
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+
+        // Line
+        item {
             LineSample()
+        }
+        item {
             LineSample2()
+        }
+        item {
             LineSample4()
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+        item {
             LineSample8()
+        }
+        item {
             LineSample7()
+        }
+        item {
             LineSample6()
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(48.dp)
-        ) {
+        item {
             LineSample5()
+        }
+        item {
             LineSample3()
+        }
+        item {
             LineSample9()
         }
-        Spacer(modifier = Modifier.height(100.dp))
+
     }
 }
 
