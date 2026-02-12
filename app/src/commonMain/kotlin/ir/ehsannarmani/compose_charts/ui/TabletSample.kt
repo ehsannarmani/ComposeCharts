@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun TabletSample() {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        columns = GridCells.Adaptive(250.dp),
         verticalArrangement = Arrangement.spacedBy(28.dp),
         horizontalArrangement = Arrangement.spacedBy(28.dp),
         contentPadding = PaddingValues(28.dp)
