@@ -13,9 +13,9 @@
 !!! Example
     ```kotlin linenums="1"
     val barProperties = BarProperties(
-    thickness = 15.dp,
-    spacing = 4.dp,
-    cornerRadius = Bars.Data.Radius.Circular(6.dp),
-    style = DrawStyle.Fill
+        thickness = 15.dp,
+        spacing = 4.dp,
+        cornerRadius = Bars.Data.Radius.Circular(6.dp),
+        style = DrawStyle.Fill
     )
     ```

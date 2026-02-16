@@ -6,6 +6,7 @@ In Row/Column/Line charts you can set running animations at the same time types:
 |------------|-------------------------------------------------------------------------------------------------------------------------|
 | `OneByOne` | Animations will run one by one, for example in line charts, lines will be drawn after previous line animation finished. |
 | `Together` | By default, animations will run async, but you can set delay for next animations                                        | 
+| `None`     | No animation at all                                                                                                     | 
 
 !!! Example
     ```kotlin linenums="1" hl_lines="3 8"

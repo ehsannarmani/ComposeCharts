@@ -1,4 +1,4 @@
-# Dot Properties]
+# Dot Properties
 
 !!! info "Usage"
     In Line Charts you can set data dot shape properties with this property

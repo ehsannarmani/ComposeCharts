@@ -11,10 +11,10 @@
 !!! Example
     ```kotlin linenums="1"
     val axisProperties = AxisProperties(
-    enabled = true,
-    style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
-    color = Color.Gray,
-    thickness = (.5).dp,
-    lineCount = 5
+        enabled = true,
+        style = StrokeStyle.Dashed(intervals = floatArrayOf(10f,10f)),
+        color = Color.Gray,
+        thickness = (.5).dp,
+        lineCount = 5
     )
     ```

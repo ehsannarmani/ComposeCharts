@@ -40,7 +40,7 @@ LineChart(
         listOf(
             Line(
                 label = "Temperature",
-                values = listOf(28.0, 41.0, -5.0, 10.0, 35.0),
+                values = listOf(28.0, 41.0, -15.0, 27.0, 54.0),
                 color = Brush.radialGradient(...)
             ),
         )
@@ -69,7 +69,7 @@ LineChart(
         listOf(
             Line(
                 label = "Linux",
-                values = listOf(28.0, 41.0, 5.0, 10.0, 35.0),
+                values = listOf(71.0, 0.0, 100.0, 50.0, 50.0),
                 color = Brush.radialGradient(...)
             ),
         )

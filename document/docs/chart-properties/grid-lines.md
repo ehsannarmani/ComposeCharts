@@ -10,7 +10,7 @@
 | `yAxisProperties` | AxisProperties | `AxisProperties(..)` | specifies grid vertical lines properties   |
 
 !!! Example
-```kotlin linenums="1"
+    ```kotlin linenums="1"
     val gridProperties = GridProperties(
         enabled = true,
         xAxisProperties = AxisProperties(

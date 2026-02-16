@@ -44,8 +44,8 @@ You can change chart style to stroke:
 ```kotlin linenums="1" hl_lines="3 4 5"
 PieChart(
     ...,
-spaceDegree = 7f,
-selectedPaddingDegree = 4f,
-style = Pie.Style.Stroke(width = 100f)
+    spaceDegree = 7f,
+    selectedPaddingDegree = 4f,
+    style = Pie.Style.Stroke(width = 100f)
 )
 ```
