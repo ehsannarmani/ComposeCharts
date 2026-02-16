@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.toSize
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.drawGridLines
 import ir.ehsannarmani.compose_charts.extensions.line_chart.PathData
+import ir.ehsannarmani.compose_charts.extensions.line_chart.Value
 import ir.ehsannarmani.compose_charts.extensions.line_chart.drawLineGradient
 import ir.ehsannarmani.compose_charts.extensions.line_chart.getLinePath
 import ir.ehsannarmani.compose_charts.extensions.line_chart.getPopupValue
@@ -266,8 +267,12 @@ fun LineChart(
             val positionX = position.x.coerceIn(0f, size.width.toFloat())
             val pathData = linesPathData[dataIndex]
 
-            if (positionX >= pathData.xPositions[pathData.startIndex] &&
-                positionX <= pathData.xPositions[pathData.endIndex]
+            val isSingleValue =  line.values.count() == 1
+
+            if (
+                positionX >= pathData.xPositions[pathData.startIndex] &&
+                positionX <= pathData.xPositions[pathData.endIndex] ||
+                isSingleValue
             ) {
                 val showOnPointsThreshold =
                     ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
@@ -276,26 +281,45 @@ fun LineChart(
                     it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold
                 }
 
-                if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null) {
+                if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null || isSingleValue) {
                     val relevantX =
                         if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
                             ?: 0f) else positionX
                     val fraction = (relevantX / size.width)
 
-                    val valueIndex = calculateValueIndex(
-                        fraction = fraction.toDouble(),
-                        values = line.values,
-                        pathData = pathData
-                    )
+                    val valueIndex = if(isSingleValue){
+                        0
+                    }else{
+                        calculateValueIndex(
+                            fraction = fraction.toDouble(),
+                            values = line.values,
+                            pathData = pathData
+                        )
+                    }
 
-                    val popupValue = getPopupValue(
-                        points = line.values,
-                        fraction = fraction.toDouble(),
-                        rounded = line.curvedEdges ?: curvedEdges,
-                        size = size.toSize(),
-                        minValue = minValue,
-                        maxValue = computedMaxValue
-                    )
+                    val popupValue = if(isSingleValue){
+                        Value(
+                            calculatedValue = line.values.first(),
+                            offset = Offset(
+                                x = 0f,
+                                y = size.height-calculateOffset(
+                                    maxValue = maxValue,
+                                    minValue = minValue,
+                                    value = line.values.first().toFloat(),
+                                    total = size.toSize().height
+                                ).toFloat()
+                            )
+                        )
+                    }else{
+                        getPopupValue(
+                            points = line.values,
+                            fraction = fraction.toDouble(),
+                            rounded = line.curvedEdges ?: curvedEdges,
+                            size = size.toSize(),
+                            minValue = minValue,
+                            maxValue = computedMaxValue
+                        )
+                    }
 
                     popups.add(
                         Popup(
@@ -756,7 +780,7 @@ fun DrawScope.drawDots(
                 )).toFloat()
 
             )
-            if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled) {
+            if (lastPosition != Offset.Unspecified && lastPosition.x >= dotOffset.x - 20 || !properties.animationEnabled || dataPoints.count() == 1) {
                 if (!value.animator.isRunning && properties.animationEnabled && value.animator.value != 1f) {
                     scope.launch {
                         value.animator.animateTo(1f, animationSpec = properties.animationSpec)
