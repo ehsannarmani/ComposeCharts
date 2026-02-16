@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
-import ir.ehsannarmani.compose_charts.extensions.isDegreeBetween
 import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.Pie
@@ -170,8 +169,9 @@ fun PieChart(
                     )
 
                     pieces.firstOrNull { piece ->
-                        isDegreeBetween(angleInDegree, piece.startFromDegree, piece.endToDegree)
-                                && isInsideCircle(offset, pieChartCenter, piece.radius) }
+                        angleInDegree in piece.startFromDegree..piece.endToDegree &&
+                                isInsideCircle(offset, pieChartCenter, piece.radius)
+                    }
                         ?.let {
                             val (id, _) = it
                             details.find { it.id == id }

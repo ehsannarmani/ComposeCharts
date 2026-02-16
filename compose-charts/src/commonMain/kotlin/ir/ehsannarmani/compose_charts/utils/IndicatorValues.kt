@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import ir.ehsannarmani.compose_charts.models.IndicatorCount
 
 @Composable
-fun rememberComputedChartMaxValue(minValue: Double, maxValue: Double, count: IndicatorCount) : Double {
+internal fun rememberComputedChartMaxValue(minValue: Double, maxValue: Double, count: IndicatorCount) : Double {
     return remember(minValue, maxValue, count) {
         computeChartMaxValue(minValue, maxValue, count)
     }

@@ -2,7 +2,7 @@ package ir.ehsannarmani.compose_charts.extensions
 
 import ir.ehsannarmani.compose_charts.models.IndicatorCount
 
-fun split(
+internal fun split(
     count: IndicatorCount,
     minValue: Double,
     maxValue: Double,

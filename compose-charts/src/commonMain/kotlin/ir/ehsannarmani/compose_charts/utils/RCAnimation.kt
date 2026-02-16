@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
  * RC means Row & Column
  */
 @Composable
-fun ImplementRCAnimation(
+internal fun ImplementRCAnimation(
     data:List<Bars>,
     animationMode: AnimationMode,
     spec: (Bars.Data)->AnimationSpec<Float>,

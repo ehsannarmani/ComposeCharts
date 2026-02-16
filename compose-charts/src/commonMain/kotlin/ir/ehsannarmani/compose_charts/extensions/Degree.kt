@@ -34,7 +34,3 @@ fun getAngleInDegree(touchTapOffset: Offset, pieceOffset: Offset): Float {
     }
     return angleInDegrees.toFloat()
 }
-
-fun isDegreeBetween(target: Float, start: Float, end: Float): Boolean {
-    return target in start..end
-}

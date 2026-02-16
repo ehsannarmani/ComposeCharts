@@ -744,7 +744,7 @@ private fun DrawScope.drawPopup(
     }
 }
 
-fun DrawScope.drawDots(
+private fun DrawScope.drawDots(
     dataPoints: List<DotInfo>,
     properties: DotProperties,
     linePath: Path,
