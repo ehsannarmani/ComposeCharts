@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-
 }
 
 kotlin {
@@ -80,7 +79,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "ir.ehsannarmani.compose_charts"
+        applicationId = "ir.ehsannarmani.compose_charts.app"
         minSdk = 23
         targetSdk = 36
         versionCode = 1

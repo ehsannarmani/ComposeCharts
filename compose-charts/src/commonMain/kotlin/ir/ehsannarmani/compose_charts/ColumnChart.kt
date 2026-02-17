@@ -118,7 +118,7 @@ fun ColumnChart(
         } ?: 0f
     }
     val averageSpacingBetweenBars = with(density) {
-        data.map { it.values }.flatten()
+        data.flatMap { it.values }
             .map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
     }
 
@@ -202,7 +202,7 @@ fun ColumnChart(
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         if (popupProperties.enabled) {
-                            detectHorizontalDragGestures { change, dragAmount ->
+                            detectHorizontalDragGestures { change, _ ->
                                 barWithRect
                                     .lastOrNull { popupData ->
                                         change.position.x in popupData.rect.left..popupData.rect.right
