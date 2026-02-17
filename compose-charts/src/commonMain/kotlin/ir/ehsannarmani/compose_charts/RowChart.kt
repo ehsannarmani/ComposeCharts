@@ -84,7 +84,7 @@ fun RowChart(
         } ?: 0f
     }
     val averageSpacingBetweenBars = with(density) {
-        data.map { it.values }.flatten()
+        data.flatMap { it.values }
             .map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
     }
 
@@ -162,7 +162,7 @@ fun RowChart(
                         .fillMaxSize()
                         .pointerInput(Unit) {
                             if (!popupProperties.enabled) return@pointerInput
-                            detectDragGestures { change, dragAmount ->
+                            detectDragGestures { change, _ ->
                                 barWithRect
                                     .lastOrNull { popupData ->
                                         change.position.y in popupData.rect.top..popupData.rect.bottom

@@ -24,10 +24,10 @@ sealed class StrokeStyle{
 
     val pathEffect:PathEffect? get() {
         return when(this){
-            is StrokeStyle.Normal->{
+            is Normal -> {
                 null
             }
-            is StrokeStyle.Dashed->{
+            is Dashed -> {
                 PathEffect.dashPathEffect(intervals = intervals, phase = phase)
             }
         }
