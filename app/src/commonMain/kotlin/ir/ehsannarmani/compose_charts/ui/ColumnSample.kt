@@ -136,11 +136,7 @@ fun ColumnSample(modifier: Modifier=Modifier) {
                     spacing = 3.dp,
                     thickness = 20.dp
                 ),
-                indicatorProperties = HorizontalIndicatorProperties(
-                    textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White),
-                    count = IndicatorCount.CountBased(count = 4),
-                    position = IndicatorPosition.Horizontal.Start,
-                ),
+                indicatorProperties = indicatorProperties,
                 gridProperties = columnGridProperties,
                 labelProperties = labelProperties,
                 animationSpec = spring(
