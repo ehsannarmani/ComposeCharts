@@ -3,9 +3,9 @@ package ir.ehsannarmani.compose_charts.ui
 import androidx.compose.animation.core.EaseInOutCubic
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -137,15 +137,7 @@ fun LineSample(modifier: Modifier=Modifier) {
                 }),
                 gridProperties = gridProperties,
                 dividerProperties = dividerProperties,
-                indicatorProperties = HorizontalIndicatorProperties(
-                    textStyle = TextStyle(
-                        fontSize = 11.sp,
-                        fontFamily = ubuntu, color = Color.White,
-                    ),
-                    contentBuilder = {
-                        it.format(1) + " M"
-                    },
-                ),
+                indicatorProperties = indicatorProperties,
                 labelHelperProperties = labelHelperProperties,
                 curvedEdges = false
             )
@@ -202,7 +194,7 @@ fun LineSample2(modifier: Modifier=Modifier) {
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
-                        color = Color.White,
+                        color = LocalContentColor.current,
                         fontFamily = ubuntu
                     ),
                     contentBuilder = { popup->
@@ -218,7 +210,8 @@ fun LineSample2(modifier: Modifier=Modifier) {
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
-                        fontFamily = ubuntu, color = Color.White
+                        fontFamily = ubuntu,
+                        color = LocalContentColor.current
                     ),
                     contentBuilder = {
                         it.format(1) + " °C"
@@ -233,7 +226,7 @@ fun LineSample2(modifier: Modifier=Modifier) {
     }
 }
 @Composable
-fun LineSample3(modifier: Modifier=Modifier) {
+fun LineSample3() {
     val data = remember {
         listOf(
             Line(

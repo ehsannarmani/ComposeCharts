@@ -1,33 +1,49 @@
 package ir.ehsannarmani.compose_charts.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import composecharts.app.generated.resources.Res
+import composecharts.app.generated.resources.dark_mode
+import composecharts.app.generated.resources.light_mode
+import ir.ehsannarmani.compose_charts.ui.theme.ComposeChartsTheme
+import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(){
-    val density = LocalDensity.current
-    var composableWidth by remember { mutableStateOf(0.dp) }
-
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color(0xff101010)).onGloballyPositioned { coordinates ->
-            composableWidth = with(density){ coordinates.size.width.toDp() }
-        }){
-        if (composableWidth >= 600.dp) {
-            TabletSample()
-        }else{
-            PhoneSample()
+fun App() {
+    val systemInDarkTheme = isSystemInDarkTheme()
+    var useDarkTheme: Boolean by remember(systemInDarkTheme) { mutableStateOf(systemInDarkTheme) }
+    ComposeChartsTheme(darkTheme = useDarkTheme) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text("Compose Charts")
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                useDarkTheme = !useDarkTheme
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (useDarkTheme) Res.drawable.light_mode else Res.drawable.dark_mode
+                                ),
+                                contentDescription = if (useDarkTheme) "Switch to light mode" else "Switch to dark mode"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                TabletSample()
+            }
         }
     }
 }
