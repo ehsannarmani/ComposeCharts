@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -18,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.DotProperties
-import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 
@@ -54,7 +52,7 @@ fun TabletSample() {
                     },
                     dotsProperties = DotProperties(
                         enabled = true,
-                        color = SolidColor(Color.White)
+                        color = SolidColor(MaterialTheme.colorScheme.onSurface)
                     ),
                     modifier = Modifier.padding(22.dp),
                     animationMode = AnimationMode.None,
