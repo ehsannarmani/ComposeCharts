@@ -35,13 +35,16 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.inset
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -71,13 +74,15 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
+import ir.ehsannarmani.compose_charts.utils.InsetPad
+import ir.ehsannarmani.compose_charts.utils.bounds
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
-import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.max
+import kotlin.math.min
 
 private data class Popup(
     val properties: PopupProperties,
@@ -116,16 +121,6 @@ fun LineChart(
         line.values.minOfOrNull { it } ?: 0.0
     } ?: 0.0 else 0.0
 ) {
-    if (data.isNotEmpty()) {
-        require(minValue <= (data.minOfOrNull { line -> line.values.minOfOrNull { it } ?: 0.0 }
-            ?: 0.0)) {
-            "Chart data must be at least $minValue (Specified Min Value)"
-        }
-        require(maxValue >= (data.maxOfOrNull { line -> line.values.maxOfOrNull { it } ?: 0.0 }
-            ?: 0.0)) {
-            "Chart data must be at most $maxValue (Specified Max Value)"
-        }
-    }
 
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
@@ -158,13 +153,20 @@ fun LineChart(
         mutableStateListOf<PathData>()
     }
 
-    val computedMaxValue =
-        rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
-    val indicators = remember(indicatorProperties.indicators, minValue, maxValue) {
+    val computedMaxValue = remember(maxValue, indicatorProperties.indicators) {
+        val indicatorMax = indicatorProperties.indicators.maxOrNull() ?: return@remember maxValue
+        max(maxValue, indicatorMax)
+    }
+    val computedMinValue = remember(minValue, indicatorProperties.indicators) {
+        val indicatorMin = indicatorProperties.indicators.minOrNull() ?: return@remember minValue
+        min(minValue, indicatorMin)
+    }
+
+    val indicators = remember(indicatorProperties.indicators, computedMinValue, maxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
                 count = indicatorProperties.count,
-                minValue = minValue,
+                minValue = computedMinValue,
                 maxValue = computedMaxValue
             )
         }
@@ -228,7 +230,7 @@ fun LineChart(
         }
     }
 
-    LaunchedEffect(data, minValue, computedMaxValue) {
+    LaunchedEffect(data, computedMinValue, computedMaxValue) {
         linesPathData.clear()
     }
 
@@ -251,7 +253,7 @@ fun LineChart(
             if (!properties.enabled) return@forEachIndexed
 
             val bounds = insetPad.toBounds(size)
-            val positionX = position.x.coerceIn(bounds.xMin, bounds.xMax)
+            val positionX = position.x.coerceIn(bounds.left, bounds.right)
             val pathData = linesPathData[dataIndex]
 
             val isSingleValue = line.values.count() == 1
@@ -303,7 +305,7 @@ fun LineChart(
                             fraction = fraction.toDouble(),
                             rounded = line.curvedEdges ?: curvedEdges,
                             size = Size(insetPad.width(size), insetPad.height(size)),
-                            minValue = minValue,
+                            minValue = computedMinValue,
                             maxValue = computedMaxValue
                         )
                     }
@@ -359,7 +361,7 @@ fun LineChart(
                 LineChartCanvas(
                     data = data,
                     maxValue = computedMaxValue,
-                    minValue = minValue,
+                    minValue = computedMinValue,
                     indicators = indicators,
                     indicatorProperties = indicatorProperties,
                     labelProperties = labelProperties,
@@ -380,7 +382,7 @@ fun LineChart(
                 ) { xTicks, yTicks ->
                     val drawZeroLine = {
                         val zeroY = size.height - calculateOffset(
-                            minValue = minValue,
+                            minValue = computedMinValue,
                             maxValue = computedMaxValue,
                             total = size.height,
                             value = 0f
@@ -398,7 +400,7 @@ fun LineChart(
                             getLinePath(
                                 dataPoints = it.values.mapIndexed { index, v -> index.toFloat() to v.toFloat() },
                                 maxValue = computedMaxValue.toFloat(),
-                                minValue = minValue.toFloat(),
+                                minValue = computedMinValue.toFloat(),
                                 rounded = it.curvedEdges ?: curvedEdges,
                                 size = size
                             )
@@ -443,46 +445,48 @@ fun LineChart(
                                 drawStyle.width.toPx()
                             }
                         }
-                        drawPath(
-                            path = segmentedPath,
-                            brush = line.color,
-                            style = Stroke(width = stroke, pathEffect = pathEffect)
-                        )
-
-                        var startOffset = 0f
-                        var endOffset = size.width
-                        if (pathData.startIndex > 0) {
-                            startOffset = pathData.xPositions[pathData.startIndex].toFloat()
-                        }
-
-                        if (pathData.endIndex < line.values.size - 1) {
-                            endOffset = pathData.xPositions[pathData.endIndex].toFloat()
-                        }
-
-                        if (line.firstGradientFillColor.isSpecified) {
-                            drawLineGradient(
-                                path = pathData.path,
-                                color1 = line.firstGradientFillColor,
-                                color2 = line.secondGradientFillColor.takeOrElse { line.firstGradientFillColor },
-                                progress = line.gradientProgress.value,
-                                size = size,
-                                startOffset,
-                                endOffset
+                        clipRect {
+                            drawPath(
+                                path = segmentedPath,
+                                brush = line.color,
+                                style = Stroke(width = stroke, pathEffect = pathEffect)
                             )
-                        } else if (line.drawStyle is DrawStyle.Fill) {
-                            var fillColor = Color.Unspecified
-                            if (line.color is SolidColor) {
-                                fillColor = line.color.value
+
+                            var startOffset = 0f
+                            var endOffset = size.width
+                            if (pathData.startIndex > 0) {
+                                startOffset = pathData.xPositions[pathData.startIndex].toFloat()
                             }
-                            drawLineGradient(
-                                path = pathData.path,
-                                color1 = fillColor,
-                                color2 = fillColor,
-                                progress = 1f,
-                                size = size,
-                                startOffset,
-                                endOffset
-                            )
+
+                            if (pathData.endIndex < line.values.size - 1) {
+                                endOffset = pathData.xPositions[pathData.endIndex].toFloat()
+                            }
+
+                            if (line.firstGradientFillColor.isSpecified) {
+                                drawLineGradient(
+                                    path = pathData.path,
+                                    color1 = line.firstGradientFillColor,
+                                    color2 = line.secondGradientFillColor.takeOrElse { line.firstGradientFillColor },
+                                    progress = line.gradientProgress.value,
+                                    size = size,
+                                    startOffset,
+                                    endOffset
+                                )
+                            } else if (line.drawStyle is DrawStyle.Fill) {
+                                var fillColor = Color.Unspecified
+                                if (line.color is SolidColor) {
+                                    fillColor = line.color.value
+                                }
+                                drawLineGradient(
+                                    path = pathData.path,
+                                    color1 = fillColor,
+                                    color2 = fillColor,
+                                    progress = 1f,
+                                    size = size,
+                                    startOffset,
+                                    endOffset
+                                )
+                            }
                         }
 
                         if ((line.dotProperties?.enabled ?: dotsProperties.enabled)) {
@@ -500,7 +504,7 @@ fun LineChart(
                                 properties = line.dotProperties ?: dotsProperties,
                                 linePath = segmentedPath,
                                 maxValue = computedMaxValue.toFloat(),
-                                minValue = minValue.toFloat(),
+                                minValue = computedMinValue.toFloat(),
                                 pathMeasure = pathMeasure,
                                 scope = scope,
                                 startIndex = pathData.startIndex,
@@ -598,7 +602,7 @@ private fun DrawScope.drawPopup(
 
     }
     if (offsetAnimator != null) {
-        val animatedOffset = if (popup.properties.mode is PopupProperties.Mode.PointMode) {
+        var animatedOffset = if (popup.properties.mode is PopupProperties.Mode.PointMode) {
             rectOffset
         } else {
             Offset(
@@ -606,10 +610,18 @@ private fun DrawScope.drawPopup(
                 y = offsetAnimator.second.value
             )
         }
-        val rect = Rect(
+        var rect = Rect(
             offset = animatedOffset,
             size = rectSize
         )
+        if (rect.top < 0) rect = rect.copy(top = 0f, bottom = rect.height)
+        if (rect.bottom > size.height) rect =
+            rect.copy(top = size.height - rect.height, bottom = size.height)
+        if (rect.left < 0) rect = rect.copy(left = 0f, right = rect.width)
+        if (rect.right > size.width) rect =
+            rect.copy(left = size.width - rect.width, right = size.width)
+
+        animatedOffset = Offset(rect.left, rect.top)
         drawPath(
             path = Path().apply {
                 addRoundRect(
@@ -766,97 +778,86 @@ data class DotInfo(
     val value: Float,
 )
 
-data class InsetBounds(
-    val xMin: Float,
-    val xMax: Float,
-    val yMin: Float,
-    val yMax: Float,
-) {
-    fun xWithin(x: Float): Boolean {
-        return x in xMin..xMax
-    }
-
-    fun yWithin(y: Float): Boolean {
-        return y in yMin..yMax
-    }
-
-    fun pointWithin(x: Float, y: Float): Boolean {
-        return xWithin(x) && yWithin(y)
-    }
-}
-
-data class InsetPad(
-    var left: Float,
-    var right: Float,
-    var top: Float,
-    var bottom: Float,
-) {
-    fun width(size: IntSize): Float {
-        return size.width - left - right
-    }
-
-    fun height(size: IntSize): Float {
-        return size.height - top - bottom
-    }
-
-    fun toBounds(size: IntSize) = InsetBounds(
-        left, size.width - right, top, size.height - bottom
-    )
-}
-
-fun DrawScope.inset(insetPad: InsetPad, block: DrawScope.() -> Unit) =
+fun DrawScope.inset(insetPad: InsetPad, block: DrawScope.() -> Unit) {
+    val mostLeft = size.width / 2f
+    val mostTop = size.height / 2f
     inset(
-        left = insetPad.left,
-        right = insetPad.right,
-        top = insetPad.top,
-        bottom = insetPad.bottom
+        left = insetPad.left.coerceAtMost(mostLeft),
+        right = insetPad.right.coerceAtMost(size.width - mostLeft),
+        top = insetPad.top.coerceAtMost(mostTop),
+        bottom = insetPad.bottom.coerceAtMost(size.height - mostTop),
     ) {
         block()
     }
+}
+
+data class MinLabelPadding(
+    val minLeft: Float,
+    val minRight: Float,
+    val minBottom: Float,
+    val shouldRotate: Boolean
+)
+
+fun getLabelMinPadding(
+    labels: List<String>,
+    labelProperties: LabelProperties,
+    measureLabel: (String) -> TextLayoutResult
+): MinLabelPadding {
+    if (labels.isEmpty()) return MinLabelPadding(0f, 0f, 0f, false)
+    val measuredLabels = labels.map { measureLabel(it) }
+    val labelPad = measureLabel("M").size.width
+    val maxLabelWidth = measuredLabels.maxOf { it.size.width }
+    val minLabelWidth = measuredLabels.minOf { it.size.width }
+    val shouldRotate = labelProperties.rotation.mode == LabelProperties.Rotation.Mode.Force ||
+            ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotation.degree != 0f)
+    if (shouldRotate) {
+        val rotatedBounds =
+            measuredLabels.map { it.bounds.rotate(-labelProperties.rotation.degree) }
+        return MinLabelPadding(
+            rotatedBounds[0].width / 2f,
+            rotatedBounds.last().width / 2f,
+            rotatedBounds.maxOf { it.height } + labelPad,
+            true
+        )
+    }
+    return MinLabelPadding(
+        measuredLabels[0].size.width / 2f,
+        measuredLabels.last().size.width / 2f,
+        measuredLabels.maxOf { it.size.height }.toFloat() + labelPad,
+        false
+    )
+}
 
 fun getInsetPad(
-    textMeasurer: TextMeasurer,
+    measureLabel: (String) -> TextLayoutResult,
+    measureIndicator: (String) -> TextLayoutResult,
     indicators: List<Double>,
     indicatorProperties: HorizontalIndicatorProperties,
     labelProperties: LabelProperties
 ): InsetPad {
-    val measureLabel =
-        { text: String -> textMeasurer.measure(text, style = labelProperties.textStyle) }
-    val measureIndicator =
-        { text: String -> textMeasurer.measure(text, style = indicatorProperties.textStyle) }
     val labels = labelProperties.labels
-    val insetPad = InsetPad(0f, 0f, 0f, 0f)
+    val (minLeft, minRight, minBottom, shouldRotate) =
+        getLabelMinPadding(labels, labelProperties, measureLabel)
+    val insetPad = InsetPad(0f, 0f, 0f, 0f, shouldRotate)
     if (indicators.isNotEmpty() && indicatorProperties.enabled) {
         val indicatorPad = measureIndicator("M").size.width
         val textIndicators = indicators.map(indicatorProperties.contentBuilder)
         val maxIndicatorWidth = textIndicators.maxOf { measureIndicator(it).size.width }
         val maxIndicatorHeight = textIndicators.maxOf { measureIndicator(it).size.height }
         insetPad.top = maxIndicatorHeight / 2f
-        if (labels.isNotEmpty()) {
-            val labelPad = measureLabel("M").size.width
-            insetPad.bottom = labels.maxOf { measureLabel(it).size.height }.toFloat() + labelPad
-            if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                insetPad.left =
-                    max(measureLabel(labels[0]).size.width / 2f, maxIndicatorWidth.toFloat()) +
-                            indicatorPad.toFloat()
-                insetPad.right = measureLabel(labels.last()).size.width / 2f
-            } else {
-                insetPad.left = measureLabel(labels[0]).size.width / 2f
-                insetPad.right =
-                    max(measureLabel(labels.last()).size.width / 2f, maxIndicatorWidth.toFloat()) +
-                            indicatorPad.toFloat()
-            }
+        insetPad.bottom = max(maxIndicatorHeight / 2f, minBottom)
+        val indicatorSidePad = max(minLeft, maxIndicatorWidth.toFloat()) + indicatorPad.toFloat()
+        if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+            insetPad.left = indicatorSidePad
+            insetPad.right = minRight
         } else {
-            insetPad.bottom = (maxIndicatorHeight) / 2f
-            if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                insetPad.left = (maxIndicatorWidth + indicatorPad).toFloat()
-            } else {
-                insetPad.right = (maxIndicatorWidth + indicatorPad).toFloat()
-            }
+            insetPad.left = minLeft
+            insetPad.right = indicatorSidePad
         }
     } else if (labels.isNotEmpty()) {
-        insetPad.left = measureLabel(labels[0]).size.width / 2f
-        insetPad.right = measureLabel(labels.last()).size.width / 2f
+        insetPad.left = minLeft
+        insetPad.right = minRight
+        insetPad.bottom = minBottom
     }
     return insetPad
 }
@@ -943,7 +944,17 @@ private fun RowScope.LineChartCanvas(
     insetDrawScope: DrawScope.(xTicks: List<Float>, yTicks: List<Float>) -> Unit,
 ) {
     val textMeasurer = rememberTextMeasurer()
-    val insetPad = getInsetPad(textMeasurer, indicators, indicatorProperties, labelProperties)
+    val measureIndicator =
+        { text: String -> textMeasurer.measure(text, style = indicatorProperties.textStyle) }
+    val measureLabel =
+        { text: String -> textMeasurer.measure(text, style = labelProperties.textStyle) }
+    val insetPad = getInsetPad(
+        measureLabel = measureLabel,
+        measureIndicator = measureIndicator,
+        indicators = indicators,
+        indicatorProperties = indicatorProperties,
+        labelProperties = labelProperties
+    )
     val modifier = calculateModifier(
         data = data,
         minValue = minValue,
@@ -957,68 +968,109 @@ private fun RowScope.LineChartCanvas(
         onPressJobChange = onPressJobChange
     )
     Canvas(modifier = modifier) {
-        val yTicks = if (indicators.isNotEmpty() && indicatorProperties.enabled) {
-            val measureIndicator =
-                { text: String ->
-                    textMeasurer.measure(
-                        text,
-                        style = indicatorProperties.textStyle
+        val yTicks = getTicksAndDrawIndicators(
+            indicators,
+            indicatorProperties,
+            minValue,
+            maxValue,
+            measureIndicator,
+            insetPad,
+            textMeasurer,
+        )
+        val xTicks = getTicksAndDrawLabels(labelProperties, measureLabel, insetPad, textMeasurer)
+        inset(insetPad) {
+            insetDrawScope(xTicks + listOf(0f, size.width), yTicks + listOf(0f, size.height))
+        }
+    }
+}
+
+fun DrawScope.getTicksAndDrawIndicators(
+    indicators: List<Double>,
+    indicatorProperties: HorizontalIndicatorProperties,
+    minValue: Double,
+    maxValue: Double,
+    measureIndicator: (String) -> TextLayoutResult,
+    insetPad: InsetPad,
+    textMeasurer: TextMeasurer
+): List<Float> {
+    return if (indicators.isNotEmpty() && indicatorProperties.enabled) {
+        val sortedIndicators = indicators.sortedBy { -it }.filter { it in minValue..maxValue }
+        val maxIndicatorWidth = sortedIndicators.maxOf {
+            measureIndicator(indicatorProperties.contentBuilder(it)).size.width
+        }
+        val drawingHeight = size.height - insetPad.top - insetPad.bottom
+        val getTick = { value: Double ->
+            drawingHeight - calculateOffset(
+                maxValue,
+                minValue,
+                drawingHeight,
+                value.toFloat()
+            )
+        }
+        sortedIndicators.map {
+            val tick = getTick(it)
+            val offset = tick + insetPad.top
+            val text = indicatorProperties.contentBuilder(it)
+            val textSize = measureIndicator(text)
+            if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = text,
+                    style = indicatorProperties.textStyle,
+                    topLeft = Offset(
+                        (maxIndicatorWidth - textSize.size.width).toFloat(),
+                        offset.toFloat() - textSize.size.height / 2f
                     )
-                }
-            val sortedIndicators = indicators.sortedBy { -it }
-            val maxIndicatorWidth = sortedIndicators.maxOf {
-                measureIndicator(indicatorProperties.contentBuilder(it)).size.width
-            }
-            val drawingHeight = size.height - insetPad.top - insetPad.bottom
-            val getOffset = { value: Double ->
-                drawingHeight + insetPad.top - calculateOffset(
-                    maxValue,
-                    minValue,
-                    drawingHeight,
-                    value.toFloat()
+                )
+            } else {
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = text,
+                    style = indicatorProperties.textStyle,
+                    topLeft = Offset(
+                        (size.width - maxIndicatorWidth),
+                        offset.toFloat() - textSize.size.height / 2f
+                    )
                 )
             }
-            sortedIndicators.map {
-                val offset = getOffset(it)
-                val text = indicatorProperties.contentBuilder(it)
-                val textSize = measureIndicator(text)
-                if (indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+            tick.toFloat()
+        }
+    } else emptyList()
+}
+
+fun DrawScope.getTicksAndDrawLabels(
+    labelProperties: LabelProperties,
+    measureLabel: (String) -> TextLayoutResult,
+    insetPad: InsetPad,
+    textMeasurer: TextMeasurer
+): List<Float> {
+    return if (labelProperties.labels.isNotEmpty() && labelProperties.enabled) {
+        val labels = labelProperties.labels
+        val maxLabelHeight = labels.maxOf {
+            measureLabel(it).size.height
+        }
+        val insetBounds = insetPad.toBounds(size)
+        val bottomStart = insetBounds.bottom + measureLabel("M").size.width.let {
+            if (insetPad.shouldRotate) it*2f/3 else it.toFloat()
+        }
+        labels.mapIndexed { index, label ->
+            val tick = insetBounds.width * index / (labels.size - 1)
+            val offset = insetBounds.left + tick
+            val textSize = measureLabel(label)
+            if (insetPad.shouldRotate) {
+                val degrees = labelProperties.rotation.degree
+                val bounds = textSize.bounds
+                val rotatedBounds = bounds.rotate(-degrees)
+                val center = Offset(offset, bottomStart + rotatedBounds.height / 2f)
+                rotate(degrees, pivot = center) {
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = text,
-                        style = indicatorProperties.textStyle,
-                        topLeft = Offset(
-                            (maxIndicatorWidth - textSize.size.width).toFloat(),
-                            offset.toFloat() - textSize.size.height / 2f
-                        )
-                    )
-                } else {
-                    drawText(
-                        textMeasurer = textMeasurer,
-                        text = text,
-                        style = indicatorProperties.textStyle,
-                        topLeft = Offset(
-                            (size.width - maxIndicatorWidth),
-                            offset.toFloat() - textSize.size.height / 2f
-                        )
+                        text = label,
+                        style = labelProperties.textStyle,
+                        topLeft = center - Offset(textSize.size.width/2f, textSize.size.height/2f)
                     )
                 }
-                (offset - insetPad.top).toFloat()
-            }
-        } else emptyList()
-        val xTicks = if (labelProperties.labels.isNotEmpty() && labelProperties.enabled) {
-            val measureLabel =
-                { text: String -> textMeasurer.measure(text, style = labelProperties.textStyle) }
-            val labels = labelProperties.labels
-            val maxLabelHeight = labels.maxOf {
-                measureLabel(it).size.height
-            }
-            val start = insetPad.left
-            val end = size.width - insetPad.right
-            val range = end - start
-            labels.mapIndexed { index, label ->
-                val offset = start + range * index / (labels.size - 1)
-                val textSize = measureLabel(label)
+            } else {
                 drawText(
                     textMeasurer = textMeasurer,
                     text = label,
@@ -1028,13 +1080,8 @@ private fun RowScope.LineChartCanvas(
                         size.height - maxLabelHeight
                     )
                 )
-                offset - start
             }
-        } else emptyList()
-        inset(insetPad) {
-            insetDrawScope(xTicks, yTicks)
+            tick
         }
-    }
+    } else emptyList()
 }
-
-

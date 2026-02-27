@@ -18,6 +18,7 @@ import ir.ehsannarmani.compose_charts.models.AnimationMode
 import ir.ehsannarmani.compose_charts.models.DotProperties
 import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
 import ir.ehsannarmani.compose_charts.models.IndicatorPosition
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 
@@ -70,6 +71,10 @@ fun PhoneSample() {
                     indicatorProperties = HorizontalIndicatorProperties(
                         indicators = (0..7).map { it.toDouble() } + listOf(5.5),
                         position = IndicatorPosition.Horizontal.End
+                    ),
+                    labelProperties = LabelProperties(
+                        enabled = true,
+                        labels = "these labels will rotate".split(' '),
                     )
                 )
             }
