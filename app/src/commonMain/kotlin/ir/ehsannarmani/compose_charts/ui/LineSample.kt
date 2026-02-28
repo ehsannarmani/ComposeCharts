@@ -3,7 +3,6 @@ package ir.ehsannarmani.compose_charts.ui
 import androidx.compose.animation.core.EaseInOutCubic
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -136,7 +135,6 @@ fun LineSample(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 indicatorProperties = HorizontalIndicatorProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -189,14 +187,6 @@ fun LineSample2(modifier: Modifier=Modifier) {
                     yAxisProperties = GridProperties.AxisProperties(enabled = false),
                     xAxisProperties = gridProperties.xAxisProperties.copy(
                         thickness = .5.dp
-                    )
-                ),
-                dividerProperties = DividerProperties(
-                    yAxisProperties = LineProperties(enabled = false),
-                    xAxisProperties = LineProperties(
-                        thickness = .5.dp,
-                        color = SolidColor(Color.Gray.copy(alpha = .5f)),
-                        style = StrokeStyle.Dashed(intervals = floatArrayOf(15f,15f), phase = 10f),
                     )
                 ),
                 popupProperties = PopupProperties(
@@ -294,7 +284,6 @@ fun LineSample3(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -372,7 +361,6 @@ fun LineSample4(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -432,7 +420,6 @@ fun LineSample5(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -532,7 +519,6 @@ fun LineSample6(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -601,7 +587,6 @@ fun LineSample7(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
@@ -660,7 +645,6 @@ fun LineSample8(modifier: Modifier=Modifier) {
                 animationMode = AnimationMode.Together(delayBuilder = {
                     it * 500L
                 }),
-                dividerProperties = DividerProperties(enabled = false),
                 gridProperties = GridProperties(enabled = false),
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
@@ -710,7 +694,6 @@ fun LineSample9(modifier: Modifier=Modifier) {
                     it * 500L
                 }),
                 gridProperties = gridProperties,
-                dividerProperties = dividerProperties,
                 popupProperties = PopupProperties(
                     textStyle = TextStyle(
                         fontSize = 11.sp,
