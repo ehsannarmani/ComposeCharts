@@ -264,8 +264,11 @@ fun LineChart(
             val properties = line.popupProperties ?: popupProperties
             if (!properties.enabled) return@forEachIndexed
 
+            if (line.values.isEmpty()) return@forEachIndexed
+            val pathData = linesPathData.getOrNull(dataIndex) ?: return@forEachIndexed
+            if (pathData.xPositions.isEmpty()) return@forEachIndexed
+
             val positionX = position.x.coerceIn(0f, size.width.toFloat())
-            val pathData = linesPathData[dataIndex]
 
             val isSingleValue =  line.values.count() == 1
 
