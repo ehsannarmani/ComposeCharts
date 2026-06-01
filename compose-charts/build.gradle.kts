@@ -11,35 +11,44 @@ plugins {
 }
 mavenPublishing{
     coordinates(
-        groupId = "io.github.ehsannarmani",
+        groupId = "com.seanproctor",
         artifactId = "compose-charts",
         version = "0.2.5"
     )
     pom{
         name.set("Compose Charts")
-        description.set("https://github.com/ehsannarmani/ComposeCharts")
+        description.set("Kotlin Multiplatform charts library for Compose Multiplatform.")
         inceptionYear.set("2024")
-        url.set("https://github.com/ehsannarmani/ComposeCharts")
+        url.set("https://github.com/sproctor/ComposeCharts")
 
         licenses {
             license {
-                name.set("MIT")
-                url.set("https://opensource.org/licenses/MIT")
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
 
         // Specify developers information
         developers {
+            // Original author
             developer {
                 id.set("ehsannarmani")
                 name.set("Ehsan Narmani")
                 email.set("ehsan.enk.narmani@gmail.com")
             }
+            // Current maintainer
+            developer {
+                id.set("sproctor")
+                name.set("Sean Proctor")
+                email.set("sproctor@gmail.com")
+            }
         }
 
         // Specify SCM information
         scm {
-            url.set("https://github.com/ehsannarmani/ComposeCharts")
+            url.set("https://github.com/sproctor/ComposeCharts")
+            connection.set("scm:git:https://github.com/sproctor/ComposeCharts.git")
+            developerConnection.set("scm:git:ssh://git@github.com/sproctor/ComposeCharts.git")
         }
     }
     publishToMavenCentral()
