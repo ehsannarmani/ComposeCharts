@@ -223,7 +223,7 @@ fun PieChart(
                         )
                     }
                 } else {
-                    val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
+                    val beforeItems = data.filterIndexed { filterIndex, _ -> filterIndex < index }
                     val startFromDegree = beforeItems.sumOf { (it.data * 360) / total }
 
                     val arcRect = Rect(
