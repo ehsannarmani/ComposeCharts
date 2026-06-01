@@ -22,9 +22,7 @@ data class PopupProperties(
     val contentBuilder: (Popup) -> String = { popup ->
         popup.value.format(1)
     },
-    val confirmDraw: (Popup) -> Boolean = { popup ->
-        true
-    }
+    val confirmDraw: (Popup) -> Boolean = { true },
 ) {
     data class Popup(
         val dataIndex: Int,
