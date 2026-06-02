@@ -258,16 +258,21 @@ fun LineChart(
         size: IntSize,
         position: Offset
     ) {
+        if (data.isEmpty() || linesPathData.isEmpty() || linesPathData.size != data.size) {
+            return
+        }
+
         popups.clear()
 
         data.forEachIndexed { dataIndex, line ->
             val properties = line.popupProperties ?: popupProperties
             if (!properties.enabled) return@forEachIndexed
+            if (line.values.isEmpty()) return@forEachIndexed
 
             val positionX = position.x.coerceIn(0f, size.width.toFloat())
-            val pathData = linesPathData[dataIndex]
+            val pathData = linesPathData.getOrNull(dataIndex) ?: return@forEachIndexed
 
-            val isSingleValue =  line.values.count() == 1
+            val isSingleValue = line.values.count() == 1
 
             if (
                 positionX >= pathData.xPositions[pathData.startIndex] &&
@@ -385,6 +390,7 @@ fun LineChart(
                         .pointerInput(data, minValue, computedMaxValue, linesPathData) {
                             if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
                                 return@pointerInput
+                            if (data.isEmpty() || linesPathData.isEmpty()) return@pointerInput
 
                             detectHorizontalDragGestures(
                                 onDragEnd = {
@@ -401,9 +407,10 @@ fun LineChart(
                                 }
                             )
                         }
-                        .pointerInput(Unit) {
+                        .pointerInput(data, minValue, computedMaxValue, linesPathData) {
                             if (!popupProperties.enabled || data.all { it.popupProperties?.enabled == false })
                                 return@pointerInput
+                            if (data.isEmpty() || linesPathData.isEmpty()) return@pointerInput
 
                             detectTapGestures(
                                 onPress = {
