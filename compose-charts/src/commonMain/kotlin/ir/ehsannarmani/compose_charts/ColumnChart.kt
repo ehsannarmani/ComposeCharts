@@ -58,6 +58,7 @@ import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.models.asRadiusPx
 import ir.ehsannarmani.compose_charts.utils.HorizontalLabels
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
@@ -84,6 +85,7 @@ fun ColumnChart(
         textStyle = TextStyle.Default
     ),
     dividerProperties: DividerProperties = DividerProperties(),
+    zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
     gridProperties: GridProperties = GridProperties(),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     animationMode: AnimationMode = AnimationMode.Together { it * 200L },
@@ -132,6 +134,17 @@ fun ColumnChart(
 
     val popupAnimation = remember {
         Animatable(0f)
+    }
+
+    val zeroLineAnimation = remember(data) {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(data, zeroLineProperties.enabled) {
+        if (zeroLineProperties.enabled) {
+            zeroLineAnimation.snapTo(0f)
+            zeroLineAnimation.animateTo(1f, animationSpec = zeroLineProperties.animationSpec)
+        }
     }
 
     val computedMaxValue =
@@ -319,6 +332,22 @@ fun ColumnChart(
                         gridEnabled = gridProperties.enabled
                     )
 
+                    val drawZeroLine = {
+                        drawLine(
+                            brush = zeroLineProperties.color,
+                            start = Offset(x = xPadding, y = zeroY),
+                            end = Offset(
+                                x = xPadding + barsAreaWidth * zeroLineAnimation.value,
+                                y = zeroY
+                            ),
+                            pathEffect = zeroLineProperties.style.pathEffect,
+                            strokeWidth = zeroLineProperties.thickness.toPx()
+                        )
+                    }
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+                        drawZeroLine()
+                    }
+
                     data.forEachIndexed { dataIndex, columnChart ->
                         columnChart.values.forEachIndexed { valueIndex, col ->
                             if (col.value != 0.0) {
@@ -372,6 +401,9 @@ fun ColumnChart(
                                 )
                             }
                         }
+                    }
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+                        drawZeroLine()
                     }
                     selectedValue.value?.let { selectedValue ->
                         drawPopup(
