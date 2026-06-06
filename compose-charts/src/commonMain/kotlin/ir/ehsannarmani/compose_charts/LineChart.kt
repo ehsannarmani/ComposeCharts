@@ -584,6 +584,7 @@ fun LineChart(
                                 pathMeasure = pathMeasure,
                                 scope = scope,
                                 size = size,
+                                xPositions = pathData.xPositions,
                                 startIndex = pathData.startIndex,
                                 endIndex = pathData.endIndex
                             )
@@ -798,6 +799,7 @@ private fun DrawScope.drawDots(
     pathMeasure: PathMeasure,
     scope: CoroutineScope,
     size: Size? = null,
+    xPositions: List<Double>,
     startIndex: Int,
     endIndex: Int,
 ) {
@@ -812,11 +814,11 @@ private fun DrawScope.drawDots(
             properties.confirmDraw(DotProperties.Dot(value.dataIndex, valueIndex, value.value.toDouble())) &&
             valueIndex in startIndex..endIndex
         ) {
+            val dotX = xPositions.getOrElse(valueIndex) {
+                if (dataPoints.size <= 1) 0.0 else valueIndex * _size.width.toDouble() / (dataPoints.size - 1)
+            }.toFloat()
             val dotOffset = Offset(
-                x = _size.width.spaceBetween(
-                    itemCount = dataPoints.count(),
-                    index = valueIndex
-                ),
+                x = dotX,
                 y = (_size.height - calculateOffset(
                     maxValue = maxValue.toDouble(),
                     minValue = minValue.toDouble(),
