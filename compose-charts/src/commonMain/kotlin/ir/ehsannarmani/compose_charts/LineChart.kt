@@ -81,6 +81,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 private data class Popup(
     val properties: PopupProperties,
@@ -277,32 +278,42 @@ fun LineChart(
                 val showOnPointsThreshold =
                     ((properties.mode as? PopupProperties.Mode.PointMode)?.threshold
                         ?: 0.dp).toPx()
-                val pointX = pathData.xPositions.find {
-                    it in positionX - showOnPointsThreshold..positionX + showOnPointsThreshold
+                val pointIndex = if (properties.mode is PopupProperties.Mode.PointMode && !isSingleValue) {
+                    findNearestValueIndex(
+                        x = positionX,
+                        pathData = pathData,
+                        valuesCount = line.values.size,
+                        threshold = showOnPointsThreshold
+                    )
+                } else {
+                    null
                 }
 
-                if (properties.mode !is PopupProperties.Mode.PointMode || pointX != null || isSingleValue) {
-                    val relevantX =
-                        if (properties.mode is PopupProperties.Mode.PointMode) (pointX?.toFloat()
-                            ?: 0f) else positionX
-                    val fraction = (relevantX / size.width)
+                if (properties.mode !is PopupProperties.Mode.PointMode || pointIndex != null || isSingleValue) {
+                    val relevantX = when {
+                        isSingleValue -> 0f
+                        pointIndex != null -> pathData.xPositions[pointIndex].toFloat()
+                        else -> positionX
+                    }
+                    val fraction = relevantX / size.width
 
-                    val valueIndex = if(isSingleValue){
-                        0
-                    }else{
-                        calculateValueIndex(
+                    val valueIndex = when {
+                        isSingleValue -> 0
+                        pointIndex != null -> pointIndex
+                        else -> calculateValueIndex(
                             fraction = fraction.toDouble(),
                             values = line.values,
-                            pathData = pathData
+                            pathData = pathData,
+                            chartWidth = size.width.toFloat()
                         )
                     }
 
-                    val popupValue = if(isSingleValue){
+                    val popupValue = if (isSingleValue) {
                         Value(
                             calculatedValue = line.values.first(),
                             offset = Offset(
                                 x = 0f,
-                                y = size.height-calculateOffset(
+                                y = size.height - calculateOffset(
                                     maxValue = maxValue,
                                     minValue = minValue,
                                     value = line.values.first().toFloat(),
@@ -310,7 +321,21 @@ fun LineChart(
                                 ).toFloat()
                             )
                         )
-                    }else{
+                    } else if (pointIndex != null && properties.mode is PopupProperties.Mode.PointMode) {
+                        val value = line.values[pointIndex]
+                        Value(
+                            calculatedValue = value,
+                            offset = Offset(
+                                x = pathData.xPositions[pointIndex].toFloat(),
+                                y = size.height - calculateOffset(
+                                    maxValue = computedMaxValue,
+                                    minValue = minValue,
+                                    total = size.height.toFloat(),
+                                    value = value.toFloat()
+                                ).toFloat()
+                            )
+                        )
+                    } else {
                         getPopupValue(
                             points = line.values,
                             fraction = fraction.toDouble(),
@@ -622,16 +647,36 @@ private fun Indicators(
     }
 }
 
+private fun findNearestValueIndex(
+    x: Float,
+    pathData: PathData,
+    valuesCount: Int,
+    threshold: Float? = null,
+): Int? {
+    if (valuesCount <= 0) return null
+    val lastIndex = valuesCount - 1
+    val nearestIndex = pathData.xPositions.indices
+        .filter { it <= lastIndex }
+        .minByOrNull { abs(pathData.xPositions[it] - x) }
+        ?: return null
+    if (threshold != null && abs(pathData.xPositions[nearestIndex] - x) > threshold) {
+        return null
+    }
+    return nearestIndex
+}
+
 private fun calculateValueIndex(
     fraction: Double,
     values: List<Double>,
-    pathData: PathData
+    pathData: PathData,
+    chartWidth: Float,
 ): Int {
-    val xPosition = (fraction * pathData.path.getBounds().width).toFloat()
-    val closestXIndex = pathData.xPositions.indexOfFirst { x ->
-        x >= xPosition
-    }
-    return if (closestXIndex >= 0) closestXIndex else values.size - 1
+    if (values.size <= 1) return 0
+    return findNearestValueIndex(
+        x = (fraction * chartWidth).toFloat(),
+        pathData = pathData,
+        valuesCount = values.size
+    ) ?: values.lastIndex
 }
 
 private fun DrawScope.drawPopup(
