@@ -60,6 +60,7 @@ import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.models.asRadiusPx
 import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.VerticalLabels
@@ -86,6 +87,7 @@ fun RowChart(
     indicatorProperties: VerticalIndicatorProperties = VerticalIndicatorProperties(textStyle = TextStyle.Default),
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     dividerProperties: DividerProperties = DividerProperties(),
+    zeroLineProperties: ZeroLineProperties = ZeroLineProperties(),
     gridProperties: GridProperties = GridProperties(),
     animationMode: AnimationMode = AnimationMode.Together { it * 200L },
     animationSpec: AnimationSpec<Float> = tween(500),
@@ -133,6 +135,17 @@ fun RowChart(
 
     val popupAnimation = remember {
         Animatable(0f)
+    }
+
+    val zeroLineAnimation = remember(data) {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(data, zeroLineProperties.enabled) {
+        if (zeroLineProperties.enabled) {
+            zeroLineAnimation.snapTo(0f)
+            zeroLineAnimation.animateTo(1f, animationSpec = zeroLineProperties.animationSpec)
+        }
     }
 
     val computedMaxValue = rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
@@ -295,6 +308,23 @@ fun RowChart(
                         gridEnabled = gridProperties.enabled,
                         yPadding = yPadding
                     )
+
+                    val drawZeroLine = {
+                        drawLine(
+                            brush = zeroLineProperties.color,
+                            start = Offset(x = zeroX.toFloat(), y = yPadding),
+                            end = Offset(
+                                x = zeroX.toFloat(),
+                                y = yPadding + barAreaHeight * zeroLineAnimation.value
+                            ),
+                            pathEffect = zeroLineProperties.style.pathEffect,
+                            strokeWidth = zeroLineProperties.thickness.toPx()
+                        )
+                    }
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+                        drawZeroLine()
+                    }
+
                     data.forEachIndexed { dataIndex, bars ->
                         bars.values.forEachIndexed { barIndex, bar ->
                             if (bar.value != 0.0) {
@@ -353,6 +383,9 @@ fun RowChart(
                                 )
                             }
                         }
+                    }
+                    if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+                        drawZeroLine()
                     }
                     if (indicatorProperties.enabled) {
                         indicators.reversed().forEachIndexed { index, indicator ->
