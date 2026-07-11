@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
-import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
+import ir.ehsannarmani.compose_charts.extensions.isInsidePie
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
@@ -173,7 +173,12 @@ fun PieChart(
 
                     pieces.firstOrNull { piece ->
                         normalizedAngle in piece.startFromDegree..piece.endToDegree &&
-                                isInsideCircle(offset, pieChartCenter, piece.radius)
+                                isInsidePie(
+                                    touchTapOffset = offset,
+                                    pieceOffset = pieChartCenter,
+                                    radius = piece.radius,
+                                    style = style
+                                )
                     }
                         ?.let {
                             val (id, _) = it
