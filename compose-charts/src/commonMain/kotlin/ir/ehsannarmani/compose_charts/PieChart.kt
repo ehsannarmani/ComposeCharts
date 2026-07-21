@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ir.ehsannarmani.compose_charts.components.LabelHelper
 import ir.ehsannarmani.compose_charts.extensions.getAngleInDegree
-import ir.ehsannarmani.compose_charts.extensions.isInsideCircle
+import ir.ehsannarmani.compose_charts.extensions.isInsidePie
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
@@ -45,6 +45,7 @@ import kotlin.random.Random
 fun PieChart(
     modifier: Modifier = Modifier,
     data: List<Pie>,
+    startDegree: Float = 0f,
     spaceDegree: Float = 0f,
     onPieClick: (Pie) -> Unit = {},
     selectedScale: Float = 1.1f,
@@ -161,16 +162,23 @@ fun PieChart(
                 }
         }
         Canvas(modifier = modifier
-            .pointerInput(Unit) {
+            .pointerInput(pieces.size, startDegree, data) {
                 detectTapGestures { offset ->
                     val angleInDegree = getAngleInDegree(
                         touchTapOffset = offset,
                         pieceOffset = pieChartCenter
                     )
+                    val normalizedAngle =
+                        ((angleInDegree - startDegree) % 360f + 360f) % 360f
 
                     pieces.firstOrNull { piece ->
-                        angleInDegree in piece.startFromDegree..piece.endToDegree &&
-                                isInsideCircle(offset, pieChartCenter, piece.radius)
+                        normalizedAngle in piece.startFromDegree..piece.endToDegree &&
+                                isInsidePie(
+                                    touchTapOffset = offset,
+                                    pieceOffset = pieChartCenter,
+                                    radius = piece.radius,
+                                    style = style
+                                )
                     }
                         ?.let {
                             val (id, _) = it
@@ -224,15 +232,16 @@ fun PieChart(
                     }
                 } else {
                     val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
-                    val startFromDegree = beforeItems.sumOf { (it.data * 360) / total }
+                    val sliceStart = beforeItems.sumOf { (it.data * 360) / total }.toFloat()
 
                     val arcRect = Rect(
                         center = center,
                         radius = radius * detail.scale.value
                     )
 
-                    val arcStart = startFromDegree.toFloat() + detail.space.value
+                    val arcStart = sliceStart + detail.space.value + startDegree
                     val arcSweep = degree.toFloat() - ((detail.space.value * 2) + spaceDegree)
+                    val sliceEnd = sliceStart + detail.space.value + arcSweep
 
                     val piecePath = Path().apply {
                         arcTo(arcRect, arcStart, arcSweep, true)
@@ -260,8 +269,8 @@ fun PieChart(
                         PiePiece(
                             id = detail.id,
                             radius = radius * detail.scale.value,
-                            startFromDegree = arcStart,
-                            endToDegree = if (arcStart + arcSweep >= 360f) 360f else arcStart + arcSweep,
+                            startFromDegree = sliceStart + detail.space.value,
+                            endToDegree = if (sliceEnd >= 360f) 360f else sliceEnd,
                         )
                     )
                     piecePath

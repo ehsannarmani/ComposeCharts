@@ -33,6 +33,7 @@ import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
+import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 
 val rowGridProperties = GridProperties(
     enabled = true,
@@ -428,7 +429,12 @@ fun RowSample3(modifier: Modifier=Modifier) {
                     containerColor = Color(0xff414141),
                 ),
                 minValue = -75.0,
-                maxValue = 75.0
+                maxValue = 75.0,
+                zeroLineProperties = ZeroLineProperties(
+                    enabled = true,
+                    color = SolidColor(Color(0xFFAD1457)),
+                    thickness = 1.dp,
+                ),
             )
         }
     }
