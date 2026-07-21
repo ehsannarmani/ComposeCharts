@@ -61,6 +61,10 @@ internal fun DrawScope.getLinePath(
 
         xPositions.add(x1.toDouble())
     }
-    xPositions.add(_size.width.toDouble())
+    if (dataPoints.size == 1) {
+        xPositions.add(0.0)
+    } else {
+        xPositions.add(_size.width.toDouble())
+    }
     return PathData(path = path, xPositions = xPositions,startIndex,endIndex)
 }
