@@ -814,9 +814,13 @@ private fun DrawScope.drawDots(
             properties.confirmDraw(DotProperties.Dot(value.dataIndex, valueIndex, value.value.toDouble())) &&
             valueIndex in startIndex..endIndex
         ) {
-            val dotX = xPositions.getOrElse(valueIndex) {
-                if (dataPoints.size <= 1) 0.0 else valueIndex * _size.width.toDouble() / (dataPoints.size - 1)
-            }.toFloat()
+            val dotX = if (dataPoints.size == 1) {
+                0f
+            } else {
+                xPositions.getOrElse(valueIndex) {
+                    valueIndex * _size.width.toDouble() / (dataPoints.size - 1)
+                }.toFloat()
+            }
             val dotOffset = Offset(
                 x = dotX,
                 y = (_size.height - calculateOffset(
