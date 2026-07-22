@@ -72,7 +72,7 @@ fun PieChart(
     spaceDegreeAnimExitSpec: AnimationSpec<Float> = spaceDegreeAnimEnterSpec,
     labelHelperProperties: LabelHelperProperties = LabelHelperProperties(),
     labelHelperPadding: Dp = 26.dp,
-    labelMode: LabelMode = LabelMode.OnPie(),
+    labelMode: LabelMode = LabelMode.Heading,
     style: Pie.Style = Pie.Style.Fill
 ) {
 
@@ -226,16 +226,16 @@ fun PieChart(
             }
         ) {
             pieChartCenter = center
-            val labelSpace = if (labelMode is LabelMode.OnPie) 64.dp.toPx() else 0f  // outer space for label
-            val radius: Float = when (style) {
-                is Pie.Style.Fill -> {
-                    (minOf(size.width, size.height) / 2) - labelSpace
-                }
 
-                is Pie.Style.Stroke -> {
-                    (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2) - labelSpace
-                }
+            // outer space for label
+            val labelSpace = if (labelMode is LabelMode.OnPie) {
+                (labelMode.outerLineSize.first + labelMode.outerLineSize.second + 24.dp).toPx()
+            } else {
+                0f
             }
+
+            val dataContainsDifferentPieStyles = data.map { it.style ?: style }.toSet().count() > 1
+
             val total = details.sumOf { it.pie.data } // 360 degree for total
             details.forEachIndexed { index, detail ->
                 val degree = ((detail.pie.data * 360) / total)
@@ -244,6 +244,31 @@ fun PieChart(
                     Stroke(width = ((detail.pie.style ?: style) as Pie.Style.Stroke).width.toPx())
                 } else {
                     Fill
+                }
+                var radius: Float = when (style) {
+                    is Pie.Style.Fill -> {
+                        (minOf(size.width, size.height) / 2) - labelSpace
+                    }
+
+                    is Pie.Style.Stroke -> {
+                        (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2) - labelSpace
+                    }
+                }
+
+                // Equalize radius with highest radius
+                if(dataContainsDifferentPieStyles){
+                    val highestStroke = data
+                        .map { it.style ?: style }
+                        .filterIsInstance<Pie.Style.Stroke>()
+                        .maxByOrNull { it.width.toPx() }
+                    highestStroke?.let { stroke->
+                        if (drawStyle is Fill){
+                            radius += stroke.width.toPx()/2
+                        }else if (drawStyle is Stroke){
+                            val strokeDiff = stroke.width.toPx()-drawStyle.width
+                            radius += strokeDiff/2
+                        }
+                    }
                 }
                 val piecePath = if (degree >= 360.0) {
                     // draw circle instead of arc
@@ -330,7 +355,7 @@ fun PieChart(
                         textMeasurer = textMeasurer,
                         pathMeasure = pathMeasure,
                         labelHelperProperties = labelHelperProperties,
-                        style = style
+                        style = detail.pie.style ?: style
                     )
                 }
             }
@@ -353,7 +378,7 @@ private fun DrawScope.drawOnPieLabel(
     style: Pie.Style,
     labelHelperProperties: LabelHelperProperties
 ) {
-    val beforeItems = data.subList(0, index)
+    val beforeItems = data.filterIndexed { filterIndex, chart -> filterIndex < index }
     // Slice center angle (canvas: 0 = 3 o'clock, clockwise)
     val midDegree = if (degree >= 360.0) {
         -90f // Any angle is suitable for a perfect circle.

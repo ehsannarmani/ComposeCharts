@@ -1,13 +1,19 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package ir.ehsannarmani.compose_charts.models
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.random.Random
 
+private val pieIdCounter = AtomicInt(0)
+
 data class Pie(
-    val id:String = Random.nextInt(0, 999999).toString(),
+    val id:String = pieIdCounter.fetchAndAdd(1).toString(),
     val label: String? = null,
     val data: Double,
     val color: Color,

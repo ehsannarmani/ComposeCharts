@@ -166,7 +166,7 @@ fun PieSample3(modifier: Modifier=Modifier) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
             PieChart(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .size(250.dp,200.dp),
                 data = data,
                 onPieClick = {
                     println("${it.label} Clicked")
@@ -185,14 +185,7 @@ fun PieSample3(modifier: Modifier=Modifier) {
                 style = Pie.Style.Stroke(),
                 spaceDegree = 7f,
                 labelHelperProperties = labelHelperProperties,
-                labelMode = LabelMode.OnPie(
-                    innerLabelStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                )
+                labelMode = LabelMode.Heading
             )
         }
     }
