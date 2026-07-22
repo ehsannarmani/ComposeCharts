@@ -234,11 +234,7 @@ fun PieChart(
                 0f
             }
 
-                                    style = details
-                                        .firstOrNull { it.pie.id == piece.id }
-                                        ?.pie
-                                        ?.style
-                                        ?: style
+            val dataContainsDifferentPieStyles = data.map { it.style ?: style }.toSet().count() > 1
 
             val total = details.sumOf { it.pie.data } // 360 degree for total
             details.forEachIndexed { index, detail ->
