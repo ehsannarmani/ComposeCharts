@@ -212,7 +212,11 @@ fun PieChart(
                                     touchTapOffset = offset,
                                     pieceOffset = pieChartCenter,
                                     radius = piece.radius,
-                                    style = style
+                                    style = details
+                                        .firstOrNull { it.pie.id == piece.id }
+                                        ?.pie
+                                        ?.style
+                                        ?: style
                                 )
                     }
                         ?.let {
