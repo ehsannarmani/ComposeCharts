@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TabletSample() {
+fun Samples() {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(250.dp),
-        verticalArrangement = Arrangement.spacedBy(28.dp),
-        horizontalArrangement = Arrangement.spacedBy(28.dp),
-        contentPadding = PaddingValues(28.dp)
+        columns = GridCells.Adaptive(300.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        contentPadding = PaddingValues(22.dp)
     ){
         // Pie
         item {

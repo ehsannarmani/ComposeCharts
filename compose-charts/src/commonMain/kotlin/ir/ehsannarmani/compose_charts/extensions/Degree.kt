@@ -34,3 +34,4 @@ fun getAngleInDegree(touchTapOffset: Offset, pieceOffset: Offset): Float {
     }
     return angleInDegrees.toFloat()
 }
+fun Float.degreeToRadians() = this * PI / 180.0

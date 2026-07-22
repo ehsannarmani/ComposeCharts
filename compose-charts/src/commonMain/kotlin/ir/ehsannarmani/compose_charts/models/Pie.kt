@@ -4,8 +4,10 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.random.Random
 
 data class Pie(
+    val id:String = Random.nextInt(0, 999999).toString(),
     val label: String? = null,
     val data: Double,
     val color: Color,
