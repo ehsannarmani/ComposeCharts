@@ -185,7 +185,6 @@ fun PieSample3(modifier: Modifier=Modifier) {
                 style = Pie.Style.Stroke(),
                 spaceDegree = 7f,
                 labelHelperProperties = labelHelperProperties,
-                labelMode = LabelMode.Heading
             )
         }
     }
