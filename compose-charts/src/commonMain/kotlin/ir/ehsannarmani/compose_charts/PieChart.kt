@@ -230,6 +230,7 @@ fun PieChart(
             }
         ) {
             pieChartCenter = center
+            pieces.clear()
 
             // outer space for label
             val labelSpace = if (labelMode is LabelMode.OnPie) {
