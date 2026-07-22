@@ -245,13 +245,13 @@ fun PieChart(
                 } else {
                     Fill
                 }
-                var radius: Float = when (style) {
-                    is Pie.Style.Fill -> {
+                var radius: Float = when (drawStyle) {
+                    is Fill -> {
                         (minOf(size.width, size.height) / 2) - labelSpace
                     }
 
-                    is Pie.Style.Stroke -> {
-                        (minOf(size.width, size.height) / 2) - (style.width.toPx() / 2) - labelSpace
+                    is Stroke -> {
+                        (minOf(size.width, size.height) / 2) - (drawStyle.width / 2) - labelSpace
                     }
                 }
 
