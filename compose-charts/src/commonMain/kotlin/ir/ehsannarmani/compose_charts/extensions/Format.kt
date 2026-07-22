@@ -13,3 +13,4 @@ fun Double.format(decimalPlaces: Int): String {
     val roundedValue = kotlin.math.round(this * factor) / factor
     return roundedValue.toString()
 }
+fun Float.format(decimalPlaces: Int) = toDouble().format(decimalPlaces)
