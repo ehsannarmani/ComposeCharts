@@ -111,7 +111,7 @@ fun ColumnChart(
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
-    scrollMode: ScrollMode = ScrollMode.Disabled,
+    scrollMode: ScrollMode = ScrollMode.Auto(4.dp),
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
@@ -349,34 +349,34 @@ fun ColumnChart(
     // Shared pointer-input modifier for drag / tap / long-press on bars
     val chartPointerModifier = Modifier
         .pointerInput(Unit) {
-//            if (popupProperties.enabled) {
-//                detectHorizontalDragGestures { change, _ ->
-//                    barWithRect
-//                        .lastOrNull { popupData ->
-//                            change.position.x in popupData.rect.left..popupData.rect.right
-//                        }
-//                        ?.let { popupData ->
-//                            selectedValue.value = SelectedBar(
-//                                bar = popupData.bar,
-//                                rect = popupData.rect,
-//                                offset = Offset(
-//                                    popupData.rect.left,
-//                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
-//                                ),
-//                                dataIndex = popupData.dataIndex,
-//                                valueIndex = popupData.valueIndex
-//                            )
-//                            scope.launch {
-//                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-//                                    popupAnimation.animateTo(
-//                                        1f,
-//                                        animationSpec = popupProperties.animationSpec
-//                                    )
-//                                }
-//                            }
-//                        }
-//                }
-//            }
+            if (popupProperties.enabled) {
+                detectHorizontalDragGestures { change, _ ->
+                    barWithRect
+                        .lastOrNull { popupData ->
+                            change.position.x in popupData.rect.left..popupData.rect.right
+                        }
+                        ?.let { popupData ->
+                            selectedValue.value = SelectedBar(
+                                bar = popupData.bar,
+                                rect = popupData.rect,
+                                offset = Offset(
+                                    popupData.rect.left,
+                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
+                                ),
+                                dataIndex = popupData.dataIndex,
+                                valueIndex = popupData.valueIndex
+                            )
+                            scope.launch {
+                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                    popupAnimation.animateTo(
+                                        1f,
+                                        animationSpec = popupProperties.animationSpec
+                                    )
+                                }
+                            }
+                        }
+                }
+            }
         }
         .pointerInput(Unit) {
             detectTapGestures(

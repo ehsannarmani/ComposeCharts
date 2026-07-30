@@ -38,13 +38,16 @@ internal fun computeScrollConfig(
         is ScrollMode.Disabled -> ScrollConfig(availableSize, scrollEnabled = false)
 
         is ScrollMode.Auto -> {
-            val maxSpacingPx = with(density) { scrollMode.maxBarSpacing.toPx() }
-            // Natural step between consecutive group start positions
+            val targetGapPx = with(density) { scrollMode.maxBarSpacing.toPx() }
+            // Natural step between consecutive group start positions in disabled layout
             val naturalStep = (availableSize - everyDataSize) / (dataCount - 1)
+            // Natural empty gap between consecutive groups
+            val naturalGap = naturalStep - everyDataSize
 
-            if (naturalStep < maxSpacingPx) {
-                // Bars are too compressed — expand content using maxBarSpacing
-                val effectiveSize = everyDataSize + (dataCount - 1) * maxSpacingPx
+            if (naturalGap < targetGapPx) {
+                // Bars are too compressed — expand content using targetGapPx as empty space between bars
+                val targetStep = everyDataSize + targetGapPx
+                val effectiveSize = everyDataSize + (dataCount - 1) * targetStep
                 ScrollConfig(effectiveSize, scrollEnabled = effectiveSize > availableSize)
             } else {
                 // Enough room — keep the normal non-scrollable layout
@@ -53,8 +56,9 @@ internal fun computeScrollConfig(
         }
 
         is ScrollMode.Always -> {
-            val spacingPx = with(density) { scrollMode.barSpacing.toPx() }
-            val effectiveSize = everyDataSize + (dataCount - 1) * spacingPx
+            val targetGapPx = with(density) { scrollMode.barSpacing.toPx() }
+            val targetStep = everyDataSize + targetGapPx
+            val effectiveSize = everyDataSize + (dataCount - 1) * targetStep
             ScrollConfig(effectiveSize, scrollEnabled = true)
         }
     }
