@@ -22,7 +22,7 @@ data class LabelProperties(
         val padding: Dp? = null
     ){
         enum class Mode{
-            Force,IfNecessary
+            Force,IfNecessary,Never
         }
     }
 }

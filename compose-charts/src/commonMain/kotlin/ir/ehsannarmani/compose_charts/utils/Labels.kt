@@ -57,10 +57,15 @@ fun HorizontalLabels(
         val minLabelWidth = labelWidths.min()
 
         var textModifier: Modifier = Modifier
-        var shouldRotate = labelProperties.rotation.mode == LabelProperties.Rotation.Mode.Force
-        if ((maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotation.degree != 0f) {
+
+        val shouldCompact = (maxLabelWidth / minLabelWidth.toDouble()) >= 1.5 && labelProperties.rotation.degree != 0f
+        val shouldRotate = when(labelProperties.rotation.mode){
+            LabelProperties.Rotation.Mode.Force -> true
+            LabelProperties.Rotation.Mode.Never -> false
+            LabelProperties.Rotation.Mode.IfNecessary -> shouldCompact
+        }
+        if (shouldCompact) {
             textModifier = textModifier.width((minLabelWidth / density.density).dp)
-            shouldRotate = true
         }
         Row(
             modifier = widthModifier
