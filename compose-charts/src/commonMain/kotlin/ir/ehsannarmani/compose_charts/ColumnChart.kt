@@ -213,11 +213,13 @@ fun ColumnChart(
         }
     )
 
-    // Shared drawing logic — parameterised by xPadding and whether to draw indicators
+    // Shared drawing logic — parameterised by xPadding and whether to draw indicators/grid/bars
     fun DrawScope.drawChartContent(
         barsAreaWidth: Float,
         drawXPadding: Float,
-        shouldDrawIndicators: Boolean
+        shouldDrawIndicators: Boolean,
+        shouldDrawGrid: Boolean = true,
+        shouldDrawBars: Boolean = true
     ) {
         chartWidth.value = barsAreaWidth
         val zeroY = size.height - calculateOffset(
@@ -253,15 +255,17 @@ fun ColumnChart(
             }
         }
 
-        drawGridLines(
-            xPadding = drawXPadding,
-            size = size.copy(width = barsAreaWidth),
-            dividersProperties = dividerProperties,
-            indicatorPosition = indicatorProperties.position,
-            xAxisProperties = gridProperties.xAxisProperties,
-            yAxisProperties = gridProperties.yAxisProperties,
-            gridEnabled = gridProperties.enabled
-        )
+        if (shouldDrawGrid) {
+            drawGridLines(
+                xPadding = drawXPadding,
+                size = size.copy(width = barsAreaWidth),
+                dividersProperties = dividerProperties,
+                indicatorPosition = indicatorProperties.position,
+                xAxisProperties = gridProperties.xAxisProperties,
+                yAxisProperties = gridProperties.yAxisProperties,
+                gridEnabled = gridProperties.enabled
+            )
+        }
 
         val drawZeroLine = {
             drawLine(
@@ -275,74 +279,76 @@ fun ColumnChart(
                 strokeWidth = zeroLineProperties.thickness.toPx()
             )
         }
-        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+        if (shouldDrawGrid && zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
             drawZeroLine()
         }
 
-        data.forEachIndexed { dataIndex, columnChart ->
-            columnChart.values.forEachIndexed { valueIndex, col ->
-                if (col.value != 0.0) {
-                    val stroke =
-                        (col.properties?.thickness ?: barProperties.thickness).toPx()
-                    val spacing =
-                        (col.properties?.spacing ?: barProperties.spacing).toPx()
+        if (shouldDrawBars) {
+            data.forEachIndexed { dataIndex, columnChart ->
+                columnChart.values.forEachIndexed { valueIndex, col ->
+                    if (col.value != 0.0) {
+                        val stroke =
+                            (col.properties?.thickness ?: barProperties.thickness).toPx()
+                        val spacing =
+                            (col.properties?.spacing ?: barProperties.spacing).toPx()
 
-                    val barHeight =
-                        ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
-                    val everyBarWidth = (stroke + spacing)
+                        val barHeight =
+                            ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
+                        val everyBarWidth = (stroke + spacing)
 
-                    val barX =
-                        (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
-                            itemCount = data.count(),
-                            index = dataIndex
-                        ) + drawXPadding + (averageSpacingBetweenBars / 2).toFloat()
-                    val rect = Rect(
-                        offset = Offset(
-                            x = barX,
-                            y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
-                        ),
-                        size = Size(
-                            width = stroke,
-                            height = barHeight.absoluteValue.toFloat()
-                        ),
-                    )
-                    if (barWithRect.none { it.rect == rect }) {
-                        barWithRect.add(BarPopupData(col, rect, dataIndex, valueIndex))
+                        val barX =
+                            (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
+                                itemCount = data.count(),
+                                index = dataIndex
+                            ) + drawXPadding + (averageSpacingBetweenBars / 2).toFloat()
+                        val rect = Rect(
+                            offset = Offset(
+                                x = barX,
+                                y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
+                            ),
+                            size = Size(
+                                width = stroke,
+                                height = barHeight.absoluteValue.toFloat()
+                            ),
+                        )
+                        if (barWithRect.none { it.rect == rect }) {
+                            barWithRect.add(BarPopupData(col, rect, dataIndex, valueIndex))
+                        }
+                        val path = Path()
+
+                        var radius =
+                            (col.properties?.cornerRadius ?: barProperties.cornerRadius)
+                        if (col.value < 0) {
+                            radius = radius.reverse()
+                        }
+
+                        path.addRoundRect(rect = rect, radius = radius.asRadiusPx(this))
+                        val alpha = if (rect == selectedValue.value?.rect) {
+                            1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
+                        } else {
+                            1f
+                        }
+                        drawPath(
+                            path = path,
+                            brush = col.color,
+                            alpha = alpha,
+                            style = (col.properties?.style
+                                ?: barProperties.style).getStyle(density.density)
+                        )
                     }
-                    val path = Path()
-
-                    var radius =
-                        (col.properties?.cornerRadius ?: barProperties.cornerRadius)
-                    if (col.value < 0) {
-                        radius = radius.reverse()
-                    }
-
-                    path.addRoundRect(rect = rect, radius = radius.asRadiusPx(this))
-                    val alpha = if (rect == selectedValue.value?.rect) {
-                        1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
-                    } else {
-                        1f
-                    }
-                    drawPath(
-                        path = path,
-                        brush = col.color,
-                        alpha = alpha,
-                        style = (col.properties?.style
-                            ?: barProperties.style).getStyle(density.density)
-                    )
                 }
             }
-        }
-        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
-            drawZeroLine()
-        }
-        selectedValue.value?.let { selectedValue ->
-            drawPopup(
-                selectedBar = selectedValue,
-                properties = popupProperties,
-                textMeasurer = textMeasurer,
-                progress = popupAnimation.value
-            )
+            if (shouldDrawGrid && zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+                drawZeroLine()
+            }
+            selectedValue.value?.let { selectedValue ->
+                drawPopup(
+                    selectedBar = selectedValue,
+                    properties = popupProperties,
+                    textMeasurer = textMeasurer,
+                    progress = popupAnimation.value
+                )
+            }
         }
     }
 
@@ -466,7 +472,7 @@ fun ColumnChart(
                         }
                     }
 
-                    // Scrollable bar area
+                    // Bar area with fixed grid lines layer and scrollable bars layer
                     BoxWithConstraints(
                         modifier = Modifier
                             .weight(1f)
@@ -482,23 +488,39 @@ fun ColumnChart(
                         )
                         scrollEnabled.value = scrollConfig.scrollEnabled
 
-                        val canvasModifier = if (scrollConfig.scrollEnabled) {
-                            Modifier
-                                .horizontalScroll(scrollState)
-                                .width(with(density) { scrollConfig.effectiveSize.toDp() })
-                                .fillMaxHeight()
-                        } else {
-                            Modifier.fillMaxWidth().fillMaxHeight()
-                        }
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            // Fixed grid lines layer (does not scroll)
+                            Canvas(modifier = Modifier.fillMaxSize()) {
+                                drawChartContent(
+                                    barsAreaWidth = size.width,
+                                    drawXPadding = 0f,
+                                    shouldDrawIndicators = false,
+                                    shouldDrawGrid = true,
+                                    shouldDrawBars = false
+                                )
+                            }
 
-                        Canvas(
-                            modifier = canvasModifier.then(chartPointerModifier)
-                        ) {
-                            drawChartContent(
-                                barsAreaWidth = size.width,
-                                drawXPadding = 0f,
-                                shouldDrawIndicators = false
-                            )
+                            // Scrollable bars layer
+                            val canvasModifier = if (scrollConfig.scrollEnabled) {
+                                Modifier
+                                    .horizontalScroll(scrollState)
+                                    .width(with(density) { scrollConfig.effectiveSize.toDp() })
+                                    .fillMaxHeight()
+                            } else {
+                                Modifier.fillMaxWidth().fillMaxHeight()
+                            }
+
+                            Canvas(
+                                modifier = canvasModifier.then(chartPointerModifier)
+                            ) {
+                                drawChartContent(
+                                    barsAreaWidth = size.width,
+                                    drawXPadding = 0f,
+                                    shouldDrawIndicators = false,
+                                    shouldDrawGrid = false,
+                                    shouldDrawBars = true
+                                )
+                            }
                         }
                     }
 
