@@ -160,7 +160,8 @@ fun RowChart(
         }
     }
 
-    val computedMaxValue = rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
+    val computedMaxValue =
+        rememberComputedChartMaxValue(minValue, maxValue, indicatorProperties.count)
     val indicators = remember(minValue, computedMaxValue) {
         indicatorProperties.indicators.ifEmpty {
             split(
@@ -356,33 +357,43 @@ fun RowChart(
 
     // Shared pointer-input modifier for drag / tap / long-press on bars
     val chartPointerModifier = Modifier
-        .pointerInput(scrollEnabled.value) {
-            if (!popupProperties.enabled || scrollEnabled.value) return@pointerInput
-            detectVerticalDragGestures { change, _ ->
-                barWithRect
-                    .lastOrNull { popupData ->
-                        change.position.y in popupData.rect.top..popupData.rect.bottom
-                    }
-                    ?.let { popupData ->
-                        selectedBar.value = SelectedBar(
-                            bar = popupData.bar,
-                            rect = popupData.rect,
-                            offset = Offset(
-                                x = if (popupData.bar.value > 0) popupData.rect.right else popupData.rect.left,
-                                y = popupData.rect.top
-                            ),
-                            dataIndex = popupData.dataIndex,
-                            valueIndex = popupData.valueIndex
-                        )
-                        scope.launch {
-                            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                popupAnimation.animateTo(
-                                    1f,
-                                    animationSpec = popupProperties.animationSpec
-                                )
+        .pointerInput(scrollEnabled.value, popupProperties.enabled) {
+            if (scrollEnabled.value) {
+                /** Manually dispatch drag delta to the ScrollState because Compose Desktop
+                 * does not support touch-like drag scrolling by default.
+                 * This allows users to pan the chart content by clicking and dragging with a mouse.
+                 **/
+                detectVerticalDragGestures { change, dragAmount ->
+                    change.consume()
+                    scrollState.dispatchRawDelta(-dragAmount)
+                }
+            } else if (popupProperties.enabled) {
+                detectVerticalDragGestures { change, _ ->
+                    barWithRect
+                        .lastOrNull { popupData ->
+                            change.position.y in popupData.rect.top..popupData.rect.bottom
+                        }
+                        ?.let { popupData ->
+                            selectedBar.value = SelectedBar(
+                                bar = popupData.bar,
+                                rect = popupData.rect,
+                                offset = Offset(
+                                    x = if (popupData.bar.value > 0) popupData.rect.right else popupData.rect.left,
+                                    y = popupData.rect.top
+                                ),
+                                dataIndex = popupData.dataIndex,
+                                valueIndex = popupData.valueIndex
+                            )
+                            scope.launch {
+                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                    popupAnimation.animateTo(
+                                        1f,
+                                        animationSpec = popupProperties.animationSpec
+                                    )
+                                }
                             }
                         }
-                    }
+                }
             }
         }
         .pointerInput(Unit) {
@@ -464,7 +475,8 @@ fun RowChart(
                 val isScrollable = scrollConfig.scrollEnabled
                 scrollEnabled.value = isScrollable
 
-                val barAreaHeight = if (isScrollable) scrollConfig.effectiveSize else availableHeightPx
+                val barAreaHeight =
+                    if (isScrollable) scrollConfig.effectiveSize else availableHeightPx
 
                 if (isScrollMode) {
                     // ── Scroll layout: indicators in separate fixed Canvases ──
@@ -597,7 +609,8 @@ fun RowChart(
                                                 x = (size.width - measureResult.size.width).spaceBetween(
                                                     itemCount = indicators.count(),
                                                     index = index
-                                                ), y = indicatorProperties.padding.value * density.density
+                                                ),
+                                                y = indicatorProperties.padding.value * density.density
                                             )
                                         )
                                     }

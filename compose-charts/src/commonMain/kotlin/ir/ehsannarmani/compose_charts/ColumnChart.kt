@@ -349,33 +349,43 @@ fun ColumnChart(
 
     // Shared pointer-input modifier for drag / tap / long-press on bars
     val chartPointerModifier = Modifier
-        .pointerInput(scrollEnabled.value) {
-            if (!popupProperties.enabled || scrollEnabled.value) return@pointerInput
-            detectHorizontalDragGestures { change, _ ->
-                barWithRect
-                    .lastOrNull { popupData ->
-                        change.position.x in popupData.rect.left..popupData.rect.right
-                    }
-                    ?.let { popupData ->
-                        selectedValue.value = SelectedBar(
-                            bar = popupData.bar,
-                            rect = popupData.rect,
-                            offset = Offset(
-                                popupData.rect.left,
-                                if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
-                            ),
-                            dataIndex = popupData.dataIndex,
-                            valueIndex = popupData.valueIndex
-                        )
-                        scope.launch {
-                            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                popupAnimation.animateTo(
-                                    1f,
-                                    animationSpec = popupProperties.animationSpec
-                                )
+        .pointerInput(scrollEnabled.value, popupProperties.enabled) {
+            if (scrollEnabled.value) {
+                /** Manually dispatch drag delta to the ScrollState because Compose Desktop
+                 * does not support touch-like drag scrolling by default.
+                 * This allows users to pan the chart content by clicking and dragging with a mouse.
+                 **/
+                detectHorizontalDragGestures { change, dragAmount ->
+                    change.consume()
+                    scrollState.dispatchRawDelta(-dragAmount)
+                }
+            } else if (popupProperties.enabled) {
+                detectHorizontalDragGestures { change, _ ->
+                    barWithRect
+                        .lastOrNull { popupData ->
+                            change.position.x in popupData.rect.left..popupData.rect.right
+                        }
+                        ?.let { popupData ->
+                            selectedValue.value = SelectedBar(
+                                bar = popupData.bar,
+                                rect = popupData.rect,
+                                offset = Offset(
+                                    popupData.rect.left,
+                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
+                                ),
+                                dataIndex = popupData.dataIndex,
+                                valueIndex = popupData.valueIndex
+                            )
+                            scope.launch {
+                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                    popupAnimation.animateTo(
+                                        1f,
+                                        animationSpec = popupProperties.animationSpec
+                                    )
+                                }
                             }
                         }
-                    }
+                }
             }
         }
         .pointerInput(Unit) {
@@ -449,7 +459,8 @@ fun ColumnChart(
                 val isScrollable = scrollConfig.scrollEnabled
                 scrollEnabled.value = isScrollable
 
-                val barsAreaWidth = if (isScrollable) scrollConfig.effectiveSize else availableWidthPx
+                val barsAreaWidth =
+                    if (isScrollable) scrollConfig.effectiveSize else availableWidthPx
 
                 Column(modifier = Modifier.fillMaxSize()) {
                     Row(
