@@ -74,6 +74,8 @@ import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.calculateAverageSpacingBetweenBars
+import ir.ehsannarmani.compose_charts.utils.calculateEveryDataSize
 import ir.ehsannarmani.compose_charts.utils.computeScrollConfig
 import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.delay
@@ -121,18 +123,11 @@ fun ColumnChart(
     val onBarClick by rememberUpdatedState(onBarClick)
     val onBarLongClick by rememberUpdatedState(onBarLongClick)
 
-    val everyDataWidth = with(density) {
-        data.maxOfOrNull { rowData ->
-            rowData.values.map {
-                (it.properties?.thickness
-                    ?: barProperties.thickness).toPx() + (it.properties?.spacing
-                    ?: barProperties.spacing).toPx()
-            }.sum()
-        } ?: 0f
+    val everyDataWidth = remember(data, barProperties, density) {
+        calculateEveryDataSize(data, barProperties, density)
     }
-    val averageSpacingBetweenBars = with(density) {
-        data.map { it.values }.flatten()
-            .map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
+    val averageSpacingBetweenBars = remember(data, barProperties, density) {
+        calculateAverageSpacingBetweenBars(data, barProperties, density)
     }
 
     val barWithRect = remember {

@@ -77,6 +77,9 @@ import ir.ehsannarmani.compose_charts.utils.VerticalLabels
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.calculateAverageSpacingBetweenBars
+import ir.ehsannarmani.compose_charts.utils.calculateEveryDataSize
+import ir.ehsannarmani.compose_charts.utils.calculateLabelAreaDimensionDp
 import ir.ehsannarmani.compose_charts.utils.computeScrollConfig
 import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.delay
@@ -123,18 +126,11 @@ fun RowChart(
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    val everyDataHeight = with(density) {
-        data.maxOfOrNull { rowData ->
-            rowData.values.map {
-                (it.properties?.thickness
-                    ?: barProperties.thickness).toPx() + (it.properties?.spacing
-                    ?: barProperties.spacing).toPx()
-            }.sum()
-        } ?: 0f
+    val everyDataHeight = remember(data, barProperties, density) {
+        calculateEveryDataSize(data, barProperties, density)
     }
-    val averageSpacingBetweenBars = with(density) {
-        data.map { it.values }.flatten()
-            .map { (it.properties?.spacing ?: barProperties.spacing).toPx() }.average()
+    val averageSpacingBetweenBars = remember(data, barProperties, density) {
+        calculateAverageSpacingBetweenBars(data, barProperties, density)
     }
 
     val barWithRect = remember {
@@ -184,16 +180,8 @@ fun RowChart(
     val scrollEnabled = remember(scrollMode) { mutableStateOf(scrollMode is ScrollMode.Always) }
 
     // Pre-compute VerticalLabels width (used for fixed-indicator spacer alignment)
-    val verticalLabelAreaWidthDp = remember(labelProperties, data) {
-        if (labelProperties.enabled) {
-            val labels = labelProperties.labels.ifEmpty { data.map { it.label } }
-            if (labels.isNotEmpty()) {
-                val maxTextWidth = labels.maxOf {
-                    textMeasurer.measure(it, style = labelProperties.textStyle).size.width
-                }
-                (maxTextWidth / density.density).dp + labelProperties.padding
-            } else 0.dp
-        } else 0.dp
+    val verticalLabelAreaWidthDp = remember(labelProperties, data, textMeasurer, density) {
+        calculateLabelAreaDimensionDp(labelProperties, data, textMeasurer, density, isWidth = true)
     }
 
     LaunchedEffect(selectedBar.value) {

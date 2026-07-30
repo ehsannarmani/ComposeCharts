@@ -1,6 +1,12 @@
 package ir.ehsannarmani.compose_charts.utils
 
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import ir.ehsannarmani.compose_charts.models.BarProperties
+import ir.ehsannarmani.compose_charts.models.Bars
+import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.ScrollMode
 
 /**
@@ -62,4 +68,55 @@ internal fun computeScrollConfig(
             ScrollConfig(effectiveSize, scrollEnabled = true)
         }
     }
+}
+
+/**
+ * Calculates the total size in pixels occupied by a single data group's bars
+ * (sum of thickness + spacing for all bars in the widest/tallest group).
+ */
+internal fun calculateEveryDataSize(
+    data: List<Bars>,
+    defaultBarProperties: BarProperties,
+    density: Density
+): Float = with(density) {
+    data.maxOfOrNull { group ->
+        group.values.sumOf { bar ->
+            ((bar.properties?.thickness ?: defaultBarProperties.thickness).toPx() +
+             (bar.properties?.spacing ?: defaultBarProperties.spacing).toPx()).toDouble()
+        }.toFloat()
+    } ?: 0f
+}
+
+/**
+ * Calculates the average bar spacing across all bars in pixel space.
+ */
+internal fun calculateAverageSpacingBetweenBars(
+    data: List<Bars>,
+    defaultBarProperties: BarProperties,
+    density: Density
+): Double = with(density) {
+    data.flatMap { it.values }
+        .map { (it.properties?.spacing ?: defaultBarProperties.spacing).toPx().toDouble() }
+        .average()
+}
+
+/**
+ * Calculates the maximum text dimension (height or width) in Dp for labels, including padding.
+ */
+internal fun calculateLabelAreaDimensionDp(
+    labelProperties: LabelProperties,
+    data: List<Bars>,
+    textMeasurer: TextMeasurer,
+    density: Density,
+    isWidth: Boolean
+): Dp {
+    if (!labelProperties.enabled) return 0.dp
+    val labels = labelProperties.labels.ifEmpty { data.map { it.label } }
+    if (labels.isEmpty()) return 0.dp
+
+    val maxDimension = labels.maxOf { label ->
+        val measuredSize = textMeasurer.measure(label, style = labelProperties.textStyle).size
+        if (isWidth) measuredSize.width else measuredSize.height
+    }
+    return (maxDimension / density.density).dp + labelProperties.padding
 }
