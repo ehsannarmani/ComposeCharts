@@ -475,7 +475,6 @@ fun ColumnChart(
                     BoxWithConstraints(
                         modifier = Modifier
                             .weight(1f)
-                            .clipToBounds()
                     ) {
                         val availableWidthPx = constraints.maxWidth.toFloat()
                         val scrollConfig = computeScrollConfig(
@@ -574,7 +573,6 @@ fun ColumnChart(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clipToBounds()
                     ) {
                         val labelModifier = if (scrollEnabled.value && chartWidth.value > 0f) {
                             Modifier

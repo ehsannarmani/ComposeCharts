@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -484,7 +483,6 @@ fun RowChart(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
-                            .clipToBounds()
                     ) {
                         val availableHeightPx = constraints.maxHeight.toFloat()
                         val scrollConfig = computeScrollConfig(
