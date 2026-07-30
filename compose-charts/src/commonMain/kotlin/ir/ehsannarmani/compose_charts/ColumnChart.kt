@@ -185,10 +185,6 @@ fun ColumnChart(
         }
     }
 
-    val chartWidth = remember {
-        mutableFloatStateOf(0f)
-    }
-
     val isScrollMode = scrollMode !is ScrollMode.Disabled
     val scrollState = rememberScrollState()
     val scrollEnabled = remember(scrollMode) { mutableStateOf(scrollMode is ScrollMode.Always) }
@@ -221,7 +217,6 @@ fun ColumnChart(
         shouldDrawGrid: Boolean = true,
         shouldDrawBars: Boolean = true
     ) {
-        chartWidth.value = barsAreaWidth
         val zeroY = size.height - calculateOffset(
             maxValue = computedMaxValue,
             minValue = minValue,
@@ -436,181 +431,198 @@ fun ColumnChart(
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
-            Row(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                if (isScrollMode) {
-                    // ── Scroll layout: indicators in separate fixed Canvases ──
+                val totalWidthPx = constraints.maxWidth.toFloat()
+                val availableWidthPx = (totalWidthPx - indicatorAreaWidth).coerceAtLeast(0f)
 
-                    // Fixed Y-axis indicators (Start position)
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                        Canvas(
-                            modifier = Modifier
-                                .width(with(density) { indicatorAreaWidth.toDp() })
-                                .fillMaxHeight()
-                        ) {
-                            indicators.forEachIndexed { index, indicator ->
-                                val measureResult =
-                                    textMeasurer.measure(
-                                        indicatorProperties.contentBuilder(indicator),
-                                        style = indicatorProperties.textStyle
-                                    )
-                                drawText(
-                                    textLayoutResult = measureResult,
-                                    topLeft = Offset(
-                                        x = 0f,
-                                        y = (size.height - measureResult.size.height).spaceBetween(
-                                            itemCount = indicators.count(),
-                                            index
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    }
+                val scrollConfig = computeScrollConfig(
+                    scrollMode = scrollMode,
+                    availableSize = availableWidthPx,
+                    everyDataSize = everyDataWidth,
+                    dataCount = data.count(),
+                    density = density
+                )
+                val isScrollable = scrollConfig.scrollEnabled
+                scrollEnabled.value = isScrollable
 
-                    // Bar area with fixed grid lines layer and scrollable bars layer
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        val availableWidthPx = constraints.maxWidth.toFloat()
-                        val scrollConfig = computeScrollConfig(
-                            scrollMode = scrollMode,
-                            availableSize = availableWidthPx,
-                            everyDataSize = everyDataWidth,
-                            dataCount = data.count(),
-                            density = density
-                        )
-                        scrollEnabled.value = scrollConfig.scrollEnabled
+                val barsAreaWidth = if (isScrollable) scrollConfig.effectiveSize else availableWidthPx
 
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            // Fixed grid lines layer (does not scroll)
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                drawChartContent(
-                                    barsAreaWidth = size.width,
-                                    drawXPadding = 0f,
-                                    shouldDrawIndicators = false,
-                                    shouldDrawGrid = true,
-                                    shouldDrawBars = false
-                                )
-                            }
-
-                            // Scrollable bars layer
-                            val canvasModifier = if (scrollEnabled.value) {
-                                Modifier
-                                    .horizontalScroll(scrollState)
-                                    .width(with(density) { scrollConfig.effectiveSize.toDp() })
-                                    .fillMaxHeight()
-                            } else {
-                                Modifier.fillMaxWidth().fillMaxHeight()
-                            }
-
-                            Canvas(
-                                modifier = canvasModifier.then(chartPointerModifier)
-                            ) {
-                                drawChartContent(
-                                    barsAreaWidth = size.width,
-                                    drawXPadding = 0f,
-                                    shouldDrawIndicators = false,
-                                    shouldDrawGrid = false,
-                                    shouldDrawBars = true
-                                )
-                            }
-                        }
-                    }
-
-                    // Fixed Y-axis indicators (End position)
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                        Canvas(
-                            modifier = Modifier
-                                .width(with(density) { indicatorAreaWidth.toDp() })
-                                .fillMaxHeight()
-                        ) {
-                            indicators.forEachIndexed { index, indicator ->
-                                val measureResult =
-                                    textMeasurer.measure(
-                                        indicatorProperties.contentBuilder(indicator),
-                                        style = indicatorProperties.textStyle
-                                    )
-                                drawText(
-                                    textLayoutResult = measureResult,
-                                    topLeft = Offset(
-                                        x = indicatorProperties.padding.value * density.density,
-                                        y = (size.height - measureResult.size.height).spaceBetween(
-                                            itemCount = indicators.count(),
-                                            index
-                                        )
-                                    )
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    // ── Disabled layout: original single Canvas ──
-                    Canvas(
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .then(chartPointerModifier)
+                            .weight(1f)
                     ) {
-                        drawChartContent(
-                            barsAreaWidth = size.width - indicatorAreaWidth,
-                            drawXPadding = xPadding,
-                            shouldDrawIndicators = true
+                        if (isScrollMode) {
+                            // ── Scroll layout: indicators in separate fixed Canvases ──
+
+                            // Fixed Y-axis indicators (Start position)
+                            if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                                Canvas(
+                                    modifier = Modifier
+                                        .width(with(density) { indicatorAreaWidth.toDp() })
+                                        .fillMaxHeight()
+                                ) {
+                                    indicators.forEachIndexed { index, indicator ->
+                                        val measureResult =
+                                            textMeasurer.measure(
+                                                indicatorProperties.contentBuilder(indicator),
+                                                style = indicatorProperties.textStyle
+                                            )
+                                        drawText(
+                                            textLayoutResult = measureResult,
+                                            topLeft = Offset(
+                                                x = 0f,
+                                                y = (size.height - measureResult.size.height).spaceBetween(
+                                                    itemCount = indicators.count(),
+                                                    index
+                                                )
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Bar area with fixed grid lines layer and scrollable bars layer
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    // Fixed grid lines layer (does not scroll)
+                                    Canvas(modifier = Modifier.fillMaxSize()) {
+                                        drawChartContent(
+                                            barsAreaWidth = barsAreaWidth,
+                                            drawXPadding = 0f,
+                                            shouldDrawIndicators = false,
+                                            shouldDrawGrid = true,
+                                            shouldDrawBars = false
+                                        )
+                                    }
+
+                                    // Scrollable bars layer
+                                    val canvasModifier = if (isScrollable) {
+                                        Modifier
+                                            .horizontalScroll(scrollState)
+                                            .width(with(density) { barsAreaWidth.toDp() })
+                                            .fillMaxHeight()
+                                    } else {
+                                        Modifier.fillMaxWidth().fillMaxHeight()
+                                    }
+
+                                    Canvas(
+                                        modifier = canvasModifier.then(chartPointerModifier)
+                                    ) {
+                                        drawChartContent(
+                                            barsAreaWidth = barsAreaWidth,
+                                            drawXPadding = 0f,
+                                            shouldDrawIndicators = false,
+                                            shouldDrawGrid = false,
+                                            shouldDrawBars = true
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Fixed Y-axis indicators (End position)
+                            if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                                Canvas(
+                                    modifier = Modifier
+                                        .width(with(density) { indicatorAreaWidth.toDp() })
+                                        .fillMaxHeight()
+                                ) {
+                                    indicators.forEachIndexed { index, indicator ->
+                                        val measureResult =
+                                            textMeasurer.measure(
+                                                indicatorProperties.contentBuilder(indicator),
+                                                style = indicatorProperties.textStyle
+                                            )
+                                        drawText(
+                                            textLayoutResult = measureResult,
+                                            topLeft = Offset(
+                                                x = indicatorProperties.padding.value * density.density,
+                                                y = (size.height - measureResult.size.height).spaceBetween(
+                                                    itemCount = indicators.count(),
+                                                    index
+                                                )
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            // ── Disabled layout: original single Canvas ──
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .then(chartPointerModifier)
+                            ) {
+                                drawChartContent(
+                                    barsAreaWidth = availableWidthPx,
+                                    drawXPadding = xPadding,
+                                    shouldDrawIndicators = true
+                                )
+                            }
+                        }
+                    }
+
+                    // X-axis labels
+                    if (isScrollMode) {
+                        Row {
+                            if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                                Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                            ) {
+                                val labelModifier = if (isScrollable) {
+                                    Modifier
+                                        .horizontalScroll(scrollState)
+                                        .width(with(density) { barsAreaWidth.toDp() })
+                                } else {
+                                    Modifier.fillMaxWidth()
+                                }
+                                Box(modifier = labelModifier) {
+                                    HorizontalLabels(
+                                        labelProperties = labelProperties,
+                                        labels = labelProperties.labels.ifEmpty {
+                                            data.map { it.label }
+                                        },
+                                        indicatorProperties = indicatorProperties,
+                                        chartWidth = barsAreaWidth,
+                                        density = density,
+                                        textMeasurer = textMeasurer,
+                                        xPadding = 0f,
+                                        everyDataWidth = everyDataWidth,
+                                        averageSpacingBetweenBars = averageSpacingBetweenBars
+                                    )
+                                }
+                            }
+                            if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                                Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
+                            }
+                        }
+                    } else {
+                        HorizontalLabels(
+                            labelProperties = labelProperties,
+                            labels = labelProperties.labels.ifEmpty {
+                                data.map { it.label }
+                            },
+                            indicatorProperties = indicatorProperties,
+                            chartWidth = availableWidthPx,
+                            density = density,
+                            textMeasurer = textMeasurer,
+                            xPadding = xPadding,
+                            everyDataWidth = everyDataWidth,
+                            averageSpacingBetweenBars = averageSpacingBetweenBars
                         )
                     }
                 }
-            }
-
-            // X-axis labels
-            if (isScrollMode) {
-                Row {
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                        Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        val labelModifier = if (scrollEnabled.value && chartWidth.value > 0f) {
-                            Modifier
-                                .horizontalScroll(scrollState)
-                                .width(with(density) { chartWidth.value.toDp() })
-                        } else {
-                            Modifier.fillMaxWidth()
-                        }
-                        Box(modifier = labelModifier) {
-                            HorizontalLabels(
-                                labelProperties = labelProperties,
-                                labels = labelProperties.labels.ifEmpty {
-                                    data.map { it.label }
-                                },
-                                indicatorProperties = indicatorProperties,
-                                chartWidth = chartWidth.value,
-                                density = density,
-                                textMeasurer = textMeasurer,
-                                xPadding = 0f
-                            )
-                        }
-                    }
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                        Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
-                    }
-                }
-            } else {
-                HorizontalLabels(
-                    labelProperties = labelProperties,
-                    labels = labelProperties.labels.ifEmpty {
-                        data.map { it.label }
-                    },
-                    indicatorProperties = indicatorProperties,
-                    chartWidth = chartWidth.value,
-                    density = density,
-                    textMeasurer = textMeasurer,
-                    xPadding = xPadding
-                )
             }
         }
     }
