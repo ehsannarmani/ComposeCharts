@@ -65,6 +65,7 @@ import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.ScrollMode
 import ir.ehsannarmani.compose_charts.models.SelectedBar
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 import ir.ehsannarmani.compose_charts.models.asRadiusPx
@@ -73,6 +74,7 @@ import ir.ehsannarmani.compose_charts.utils.ImplementRCAnimation
 import ir.ehsannarmani.compose_charts.utils.calculateOffset
 import ir.ehsannarmani.compose_charts.utils.checkRCMaxValue
 import ir.ehsannarmani.compose_charts.utils.checkRCMinValue
+import ir.ehsannarmani.compose_charts.utils.computeScrollConfig
 import ir.ehsannarmani.compose_charts.utils.rememberComputedChartMaxValue
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -109,6 +111,7 @@ fun ColumnChart(
     barAlphaDecreaseOnPopup: Float = .4f,
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
+    scrollMode: ScrollMode = ScrollMode.Disabled,
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
@@ -174,11 +177,23 @@ fun ColumnChart(
         }
     }
 
+    val xPadding = remember {
+        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+            indicatorAreaWidth
+        } else {
+            0f
+        }
+    }
+
     val chartWidth = remember {
         mutableFloatStateOf(0f)
     }
 
+    val isScrollMode = scrollMode !is ScrollMode.Disabled
     val scrollState = rememberScrollState()
+    val scrollEnabled = remember(scrollMode) { mutableStateOf(scrollMode is ScrollMode.Always) }
+
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(selectedValue.value) {
         if (selectedValue.value != null) {
@@ -197,6 +212,216 @@ fun ColumnChart(
             barWithRect.clear()
         }
     )
+
+    // Shared drawing logic — parameterised by xPadding and whether to draw indicators
+    fun DrawScope.drawChartContent(
+        barsAreaWidth: Float,
+        drawXPadding: Float,
+        shouldDrawIndicators: Boolean
+    ) {
+        chartWidth.value = barsAreaWidth
+        val zeroY = size.height - calculateOffset(
+            maxValue = computedMaxValue,
+            minValue = minValue,
+            total = size.height,
+            value = 0.0f
+        ).toFloat()
+
+        // Draw Y-axis indicators inside the Canvas (Disabled mode only)
+        if (shouldDrawIndicators && indicatorProperties.enabled) {
+            indicators.forEachIndexed { index, indicator ->
+                val measureResult =
+                    textMeasurer.measure(
+                        indicatorProperties.contentBuilder(indicator),
+                        style = indicatorProperties.textStyle
+                    )
+                val x = when (indicatorProperties.position) {
+                    IndicatorPosition.Horizontal.Start -> 0f
+                    IndicatorPosition.Horizontal.End ->
+                        barsAreaWidth + indicatorProperties.padding.value * density.density
+                }
+                drawText(
+                    textLayoutResult = measureResult,
+                    topLeft = Offset(
+                        x = x,
+                        y = (size.height - measureResult.size.height).spaceBetween(
+                            itemCount = indicators.count(),
+                            index
+                        )
+                    )
+                )
+            }
+        }
+
+        drawGridLines(
+            xPadding = drawXPadding,
+            size = size.copy(width = barsAreaWidth),
+            dividersProperties = dividerProperties,
+            indicatorPosition = indicatorProperties.position,
+            xAxisProperties = gridProperties.xAxisProperties,
+            yAxisProperties = gridProperties.yAxisProperties,
+            gridEnabled = gridProperties.enabled
+        )
+
+        val drawZeroLine = {
+            drawLine(
+                brush = zeroLineProperties.color,
+                start = Offset(x = drawXPadding, y = zeroY),
+                end = Offset(
+                    x = drawXPadding + barsAreaWidth * zeroLineAnimation.value,
+                    y = zeroY
+                ),
+                pathEffect = zeroLineProperties.style.pathEffect,
+                strokeWidth = zeroLineProperties.thickness.toPx()
+            )
+        }
+        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
+            drawZeroLine()
+        }
+
+        data.forEachIndexed { dataIndex, columnChart ->
+            columnChart.values.forEachIndexed { valueIndex, col ->
+                if (col.value != 0.0) {
+                    val stroke =
+                        (col.properties?.thickness ?: barProperties.thickness).toPx()
+                    val spacing =
+                        (col.properties?.spacing ?: barProperties.spacing).toPx()
+
+                    val barHeight =
+                        ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
+                    val everyBarWidth = (stroke + spacing)
+
+                    val barX =
+                        (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
+                            itemCount = data.count(),
+                            index = dataIndex
+                        ) + drawXPadding + (averageSpacingBetweenBars / 2).toFloat()
+                    val rect = Rect(
+                        offset = Offset(
+                            x = barX,
+                            y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
+                        ),
+                        size = Size(
+                            width = stroke,
+                            height = barHeight.absoluteValue.toFloat()
+                        ),
+                    )
+                    if (barWithRect.none { it.rect == rect }) {
+                        barWithRect.add(BarPopupData(col, rect, dataIndex, valueIndex))
+                    }
+                    val path = Path()
+
+                    var radius =
+                        (col.properties?.cornerRadius ?: barProperties.cornerRadius)
+                    if (col.value < 0) {
+                        radius = radius.reverse()
+                    }
+
+                    path.addRoundRect(rect = rect, radius = radius.asRadiusPx(this))
+                    val alpha = if (rect == selectedValue.value?.rect) {
+                        1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
+                    } else {
+                        1f
+                    }
+                    drawPath(
+                        path = path,
+                        brush = col.color,
+                        alpha = alpha,
+                        style = (col.properties?.style
+                            ?: barProperties.style).getStyle(density.density)
+                    )
+                }
+            }
+        }
+        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
+            drawZeroLine()
+        }
+        selectedValue.value?.let { selectedValue ->
+            drawPopup(
+                selectedBar = selectedValue,
+                properties = popupProperties,
+                textMeasurer = textMeasurer,
+                progress = popupAnimation.value
+            )
+        }
+    }
+
+    // Shared pointer-input modifier for drag / tap / long-press on bars
+    val chartPointerModifier = Modifier
+        .pointerInput(Unit) {
+//            if (popupProperties.enabled) {
+//                detectHorizontalDragGestures { change, _ ->
+//                    barWithRect
+//                        .lastOrNull { popupData ->
+//                            change.position.x in popupData.rect.left..popupData.rect.right
+//                        }
+//                        ?.let { popupData ->
+//                            selectedValue.value = SelectedBar(
+//                                bar = popupData.bar,
+//                                rect = popupData.rect,
+//                                offset = Offset(
+//                                    popupData.rect.left,
+//                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
+//                                ),
+//                                dataIndex = popupData.dataIndex,
+//                                valueIndex = popupData.valueIndex
+//                            )
+//                            scope.launch {
+//                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+//                                    popupAnimation.animateTo(
+//                                        1f,
+//                                        animationSpec = popupProperties.animationSpec
+//                                    )
+//                                }
+//                            }
+//                        }
+//                }
+//            }
+        }
+        .pointerInput(Unit) {
+            detectTapGestures(
+                onTap = {
+                    val position = Offset(it.x, it.y)
+                    barWithRect
+                        .lastOrNull { popupData ->
+                            popupData.rect.contains(position)
+                        }
+                        ?.let { popupData ->
+                            if (popupProperties.enabled) {
+                                selectedValue.value = SelectedBar(
+                                    bar = popupData.bar,
+                                    rect = popupData.rect,
+                                    offset = Offset(
+                                        popupData.rect.left,
+                                        if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
+                                    ),
+                                    dataIndex = popupData.dataIndex,
+                                    valueIndex = popupData.valueIndex
+                                )
+                                scope.launch {
+                                    popupAnimation.snapTo(0f)
+                                    popupAnimation.animateTo(
+                                        1f,
+                                        animationSpec = popupProperties.animationSpec
+                                    )
+                                }
+                            }
+                            onBarClick?.invoke(popupData)
+                        }
+                },
+                onLongPress = {
+                    val position = Offset(it.x, it.y)
+                    barWithRect
+                        .lastOrNull { popupData ->
+                            popupData.rect.contains(position)
+                        }
+                        ?.let { popupData ->
+                            onBarLongClick?.invoke(popupData)
+                        }
+                }
+            )
+        }
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Column(modifier = modifier) {
             if (labelHelperProperties.enabled) {
@@ -211,298 +436,162 @@ fun ColumnChart(
                     .fillMaxSize()
                     .weight(1f)
             ) {
-                val scope = rememberCoroutineScope()
+                if (isScrollMode) {
+                    // ── Scroll layout: indicators in separate fixed Canvases ──
 
-                // Fixed Y-axis indicators (Start position)
-                if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                    Canvas(
-                        modifier = Modifier
-                            .width((indicatorAreaWidth / density.density).dp)
-                            .fillMaxHeight()
-                    ) {
-                        indicators.forEachIndexed { index, indicator ->
-                            val measureResult =
-                                textMeasurer.measure(
-                                    indicatorProperties.contentBuilder(indicator),
-                                    style = indicatorProperties.textStyle
-                                )
-                            drawText(
-                                textLayoutResult = measureResult,
-                                topLeft = Offset(
-                                    x = 0f,
-                                    y = (size.height - measureResult.size.height).spaceBetween(
-                                        itemCount = indicators.count(),
-                                        index
+                    // Fixed Y-axis indicators (Start position)
+                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                        Canvas(
+                            modifier = Modifier
+                                .width(with(density) { indicatorAreaWidth.toDp() })
+                                .fillMaxHeight()
+                        ) {
+                            indicators.forEachIndexed { index, indicator ->
+                                val measureResult =
+                                    textMeasurer.measure(
+                                        indicatorProperties.contentBuilder(indicator),
+                                        style = indicatorProperties.textStyle
+                                    )
+                                drawText(
+                                    textLayoutResult = measureResult,
+                                    topLeft = Offset(
+                                        x = 0f,
+                                        y = (size.height - measureResult.size.height).spaceBetween(
+                                            itemCount = indicators.count(),
+                                            index
+                                        )
                                     )
                                 )
-                            )
-                        }
-                    }
-                }
-
-                // Scrollable bar area
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clipToBounds()
-                ) {
-                    val availableWidthPx = constraints.maxWidth.toFloat()
-                    val minBarGap = with(density) { 12.dp.toPx() }
-                    val minContentWidth = (everyDataWidth + minBarGap) * data.count()
-                    val effectiveWidth = maxOf(availableWidthPx, minContentWidth)
-                    val effectiveWidthDp = with(density) { effectiveWidth.toDp() }
-
-                    Canvas(
-                        modifier = Modifier
-                        .horizontalScroll(scrollState)
-                        .width(effectiveWidthDp)
-                        .fillMaxHeight()
-                        .pointerInput(Unit) {
-                            if (popupProperties.enabled) {
-                                detectHorizontalDragGestures { change, dragAmount ->
-                                    barWithRect
-                                        .lastOrNull { popupData ->
-                                            change.position.x in popupData.rect.left..popupData.rect.right
-                                        }
-                                        ?.let { popupData ->
-                                            selectedValue.value = SelectedBar(
-                                                bar = popupData.bar,
-                                                rect = popupData.rect,
-                                                offset = Offset(
-                                                    popupData.rect.left,
-                                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
-                                                ),
-                                                dataIndex = popupData.dataIndex,
-                                                valueIndex = popupData.valueIndex
-                                            )
-                                            scope.launch {
-                                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                                    popupAnimation.animateTo(
-                                                        1f,
-                                                        animationSpec = popupProperties.animationSpec
-                                                    )
-                                                }
-                                            }
-                                        }
-                                }
                             }
                         }
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = {
-                                    val position = Offset(it.x, it.y)
-                                    barWithRect
-                                        .lastOrNull { popupData ->
-                                            popupData.rect.contains(position)
-                                        }
-                                        ?.let { popupData ->
-                                            if (popupProperties.enabled) {
-                                                selectedValue.value = SelectedBar(
-                                                    bar = popupData.bar,
-                                                    rect = popupData.rect,
-                                                    offset = Offset(
-                                                        popupData.rect.left,
-                                                        if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
-                                                    ),
-                                                    dataIndex = popupData.dataIndex,
-                                                    valueIndex = popupData.valueIndex
-                                                )
-                                                scope.launch {
-                                                    popupAnimation.snapTo(0f)
-                                                    popupAnimation.animateTo(
-                                                        1f,
-                                                        animationSpec = popupProperties.animationSpec
-                                                    )
-                                                }
-                                            }
-                                            onBarClick?.invoke(popupData)
-                                        }
-                                },
-                                onLongPress = {
-                                    val position = Offset(it.x, it.y)
-                                    barWithRect
-                                        .lastOrNull { popupData ->
-                                            popupData.rect.contains(position)
-                                        }
-                                        ?.let { popupData ->
-                                            onBarLongClick?.invoke(popupData)
-                                        }
-                                }
-                            )
-                        }
+                    }
+
+                    // Scrollable bar area
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clipToBounds()
                     ) {
-
-                        val barsAreaWidth = size.width
-                        chartWidth.value = barsAreaWidth
-                        val zeroY = size.height - calculateOffset(
-                            maxValue = computedMaxValue,
-                            minValue = minValue,
-                            total = size.height,
-                            value = 0.0f
-                        ).toFloat()
-
-                        // Indicators are drawn in a separate fixed Canvas
-
-                        drawGridLines(
-                            xPadding = 0f,
-                            size = size,
-                            dividersProperties = dividerProperties,
-                            indicatorPosition = indicatorProperties.position,
-                            xAxisProperties = gridProperties.xAxisProperties,
-                            yAxisProperties = gridProperties.yAxisProperties,
-                            gridEnabled = gridProperties.enabled
+                        val availableWidthPx = constraints.maxWidth.toFloat()
+                        val scrollConfig = computeScrollConfig(
+                            scrollMode = scrollMode,
+                            availableSize = availableWidthPx,
+                            everyDataSize = everyDataWidth,
+                            dataCount = data.count(),
+                            density = density
                         )
+                        scrollEnabled.value = scrollConfig.scrollEnabled
 
-                        val drawZeroLine = {
-                            drawLine(
-                                brush = zeroLineProperties.color,
-                                start = Offset(x = 0f, y = zeroY),
-                                end = Offset(
-                                    x = barsAreaWidth * zeroLineAnimation.value,
-                                    y = zeroY
-                                ),
-                                pathEffect = zeroLineProperties.style.pathEffect,
-                                strokeWidth = zeroLineProperties.thickness.toPx()
+                        val canvasModifier = if (scrollConfig.scrollEnabled) {
+                            Modifier
+                                .horizontalScroll(scrollState)
+                                .width(with(density) { scrollConfig.effectiveSize.toDp() })
+                                .fillMaxHeight()
+                        } else {
+                            Modifier.fillMaxWidth().fillMaxHeight()
+                        }
+
+                        Canvas(
+                            modifier = canvasModifier.then(chartPointerModifier)
+                        ) {
+                            drawChartContent(
+                                barsAreaWidth = size.width,
+                                drawXPadding = 0f,
+                                shouldDrawIndicators = false
                             )
                         }
-                        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Under) {
-                            drawZeroLine()
-                        }
+                    }
 
-                        data.forEachIndexed { dataIndex, columnChart ->
-                            columnChart.values.forEachIndexed { valueIndex, col ->
-                                if (col.value != 0.0) {
-                                    val stroke =
-                                        (col.properties?.thickness ?: barProperties.thickness).toPx()
-                                    val spacing =
-                                        (col.properties?.spacing ?: barProperties.spacing).toPx()
-
-                                    val barHeight =
-                                        ((col.value * size.height) / (computedMaxValue - minValue)) * col.animator.value
-                                    val everyBarWidth = (stroke + spacing)
-
-                                    val barX =
-                                        (valueIndex * everyBarWidth) + (barsAreaWidth - everyDataWidth).spaceBetween(
-                                            itemCount = data.count(),
-                                            index = dataIndex
-                                        ) + (averageSpacingBetweenBars / 2).toFloat()
-                                    val rect = Rect(
-                                        offset = Offset(
-                                            x = barX,
-                                            y = (zeroY - barHeight.toFloat().coerceAtLeast(0f))
-                                        ),
-                                        size = Size(
-                                            width = stroke,
-                                            height = barHeight.absoluteValue.toFloat()
-                                        ),
+                    // Fixed Y-axis indicators (End position)
+                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                        Canvas(
+                            modifier = Modifier
+                                .width(with(density) { indicatorAreaWidth.toDp() })
+                                .fillMaxHeight()
+                        ) {
+                            indicators.forEachIndexed { index, indicator ->
+                                val measureResult =
+                                    textMeasurer.measure(
+                                        indicatorProperties.contentBuilder(indicator),
+                                        style = indicatorProperties.textStyle
                                     )
-                                    if (barWithRect.none { it.rect == rect }) {
-                                        barWithRect.add(BarPopupData(col, rect, dataIndex, valueIndex))
-                                    }
-                                    val path = Path()
-
-                                    var radius =
-                                        (col.properties?.cornerRadius ?: barProperties.cornerRadius)
-                                    if (col.value < 0) {
-                                        radius = radius.reverse()
-                                    }
-
-                                    path.addRoundRect(rect = rect, radius = radius.asRadiusPx(this))
-                                    val alpha = if (rect == selectedValue.value?.rect) {
-                                        1f - (barAlphaDecreaseOnPopup * popupAnimation.value)
-                                    } else {
-                                        1f
-                                    }
-                                    drawPath(
-                                        path = path,
-                                        brush = col.color,
-                                        alpha = alpha,
-                                        style = (col.properties?.style
-                                            ?: barProperties.style).getStyle(density.density)
+                                drawText(
+                                    textLayoutResult = measureResult,
+                                    topLeft = Offset(
+                                        x = indicatorProperties.padding.value * density.density,
+                                        y = (size.height - measureResult.size.height).spaceBetween(
+                                            itemCount = indicators.count(),
+                                            index
+                                        )
                                     )
-                                }
+                                )
                             }
                         }
-                        if (zeroLineProperties.enabled && zeroLineProperties.zType == ZeroLineProperties.ZType.Above) {
-                            drawZeroLine()
-                        }
-                        selectedValue.value?.let { selectedValue ->
-                            drawPopup(
-                                selectedBar = selectedValue,
-                                properties = popupProperties,
-                                textMeasurer = textMeasurer,
-                                progress = popupAnimation.value
-                            )
-                        }
-
                     }
-                }
-
-                // Fixed Y-axis indicators (End position)
-                if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                } else {
+                    // ── Disabled layout: original single Canvas ──
                     Canvas(
                         modifier = Modifier
-                            .width((indicatorAreaWidth / density.density).dp)
-                            .fillMaxHeight()
+                            .fillMaxSize()
+                            .then(chartPointerModifier)
                     ) {
-                        indicators.forEachIndexed { index, indicator ->
-                            val measureResult =
-                                textMeasurer.measure(
-                                    indicatorProperties.contentBuilder(indicator),
-                                    style = indicatorProperties.textStyle
-                                )
-                            drawText(
-                                textLayoutResult = measureResult,
-                                topLeft = Offset(
-                                    x = indicatorProperties.padding.value * density.density,
-                                    y = (size.height - measureResult.size.height).spaceBetween(
-                                        itemCount = indicators.count(),
-                                        index
-                                    )
-                                )
-                            )
-                        }
+                        drawChartContent(
+                            barsAreaWidth = size.width - indicatorAreaWidth,
+                            drawXPadding = xPadding,
+                            shouldDrawIndicators = true
+                        )
                     }
                 }
             }
 
-            // X-axis labels with synchronized scroll
-            Row {
-                if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
-                    Spacer(Modifier.width((indicatorAreaWidth / density.density).dp))
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clipToBounds()
-                ) {
+            // X-axis labels
+            if (isScrollMode) {
+                Row {
+                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.Start) {
+                        Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
+                    }
                     Box(
                         modifier = Modifier
-                            .horizontalScroll(scrollState)
-                            .then(
-                                if (chartWidth.value > 0f)
-                                    Modifier.width((chartWidth.value / density.density).dp)
-                                else
-                                    Modifier.fillMaxWidth()
-                            )
+                            .weight(1f)
+                            .clipToBounds()
                     ) {
-                        HorizontalLabels(
-                            labelProperties = labelProperties,
-                            labels = labelProperties.labels.ifEmpty {
-                                data
-                                    .map { it.label }
-                            },
-                            indicatorProperties = indicatorProperties,
-                            chartWidth = chartWidth.value,
-                            density = density,
-                            textMeasurer = textMeasurer,
-                            xPadding = 0f
-                        )
+                        val labelModifier = if (scrollEnabled.value && chartWidth.value > 0f) {
+                            Modifier
+                                .horizontalScroll(scrollState)
+                                .width(with(density) { chartWidth.value.toDp() })
+                        } else {
+                            Modifier.fillMaxWidth()
+                        }
+                        Box(modifier = labelModifier) {
+                            HorizontalLabels(
+                                labelProperties = labelProperties,
+                                labels = labelProperties.labels.ifEmpty {
+                                    data.map { it.label }
+                                },
+                                indicatorProperties = indicatorProperties,
+                                chartWidth = chartWidth.value,
+                                density = density,
+                                textMeasurer = textMeasurer,
+                                xPadding = 0f
+                            )
+                        }
+                    }
+                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
+                        Spacer(Modifier.width(with(density) { indicatorAreaWidth.toDp() }))
                     }
                 }
-                if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Horizontal.End) {
-                    Spacer(Modifier.width((indicatorAreaWidth / density.density).dp))
-                }
+            } else {
+                HorizontalLabels(
+                    labelProperties = labelProperties,
+                    labels = labelProperties.labels.ifEmpty {
+                        data.map { it.label }
+                    },
+                    indicatorProperties = indicatorProperties,
+                    chartWidth = chartWidth.value,
+                    density = density,
+                    textMeasurer = textMeasurer,
+                    xPadding = xPadding
+                )
             }
         }
     }
