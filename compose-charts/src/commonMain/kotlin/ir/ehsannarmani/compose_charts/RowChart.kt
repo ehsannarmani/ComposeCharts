@@ -445,59 +445,65 @@ fun RowChart(
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            if (isScrollMode) {
-                // ── Scroll layout: indicators in separate fixed Canvases ──
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // Fixed value indicators (Top position)
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Vertical.Top) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            if (labelProperties.enabled) {
-                                Spacer(Modifier.width(verticalLabelAreaWidthDp))
-                            }
-                            Canvas(
-                                modifier = Modifier
-                                    .height(with(density) { indicatorAreaHeight.toDp() })
-                                    .fillMaxWidth()
-                            ) {
-                                indicators.reversed().forEachIndexed { index, indicator ->
-                                    val measureResult =
-                                        textMeasurer.measure(
-                                            indicatorProperties.contentBuilder(indicator),
-                                            style = indicatorProperties.textStyle,
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+            ) {
+                val totalHeightPx = constraints.maxHeight.toFloat()
+                val availableHeightPx = (totalHeightPx - indicatorAreaHeight).coerceAtLeast(0f)
+                val availableWidthPx = constraints.maxWidth.toFloat()
+
+                val scrollConfig = computeScrollConfig(
+                    scrollMode = scrollMode,
+                    availableSize = availableHeightPx,
+                    everyDataSize = everyDataHeight,
+                    dataCount = data.count(),
+                    density = density
+                )
+                val isScrollable = scrollConfig.scrollEnabled
+                scrollEnabled.value = isScrollable
+
+                val barAreaHeight = if (isScrollable) scrollConfig.effectiveSize else availableHeightPx
+
+                if (isScrollMode) {
+                    // ── Scroll layout: indicators in separate fixed Canvases ──
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Fixed value indicators (Top position)
+                        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Vertical.Top) {
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                if (labelProperties.enabled) {
+                                    Spacer(Modifier.width(verticalLabelAreaWidthDp))
+                                }
+                                Canvas(
+                                    modifier = Modifier
+                                        .height(with(density) { indicatorAreaHeight.toDp() })
+                                        .fillMaxWidth()
+                                ) {
+                                    indicators.reversed().forEachIndexed { index, indicator ->
+                                        val measureResult =
+                                            textMeasurer.measure(
+                                                indicatorProperties.contentBuilder(indicator),
+                                                style = indicatorProperties.textStyle,
+                                            )
+                                        drawText(
+                                            textLayoutResult = measureResult,
+                                            topLeft = Offset(
+                                                x = (size.width - measureResult.size.width).spaceBetween(
+                                                    itemCount = indicators.count(),
+                                                    index = index
+                                                ), y = 0f
+                                            )
                                         )
-                                    drawText(
-                                        textLayoutResult = measureResult,
-                                        topLeft = Offset(
-                                            x = (size.width - measureResult.size.width).spaceBetween(
-                                                itemCount = indicators.count(),
-                                                index = index
-                                            ), y = 0f
-                                        )
-                                    )
+                                    }
                                 }
                             }
                         }
-                    }
-
-                    // Bar area with fixed grid lines layer and scrollable content layer (bars + labels)
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        val availableHeightPx = constraints.maxHeight.toFloat()
-                        val scrollConfig = computeScrollConfig(
-                            scrollMode = scrollMode,
-                            availableSize = availableHeightPx,
-                            everyDataSize = everyDataHeight,
-                            dataCount = data.count(),
-                            density = density
-                        )
-                        scrollEnabled.value = scrollConfig.scrollEnabled
 
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
+                                .weight(1f)
+                                .fillMaxWidth()
                                 .clipToBounds()
                         ) {
                             // Fixed grid lines layer (always measured to viewport size)
@@ -522,7 +528,7 @@ fun RowChart(
                             }
 
                             // Scrollable content area (bars + labels)
-                            val rowContainerModifier = if (scrollEnabled.value) {
+                            val rowContainerModifier = if (isScrollable) {
                                 Modifier
                                     .fillMaxSize()
                                     .verticalScroll(scrollState)
@@ -540,11 +546,14 @@ fun RowChart(
                                     indicatorAreaHeight = 0f,
                                     density = density,
                                     indicatorProperties = indicatorProperties,
-                                    everyDataHeight = everyDataHeight
+                                    everyDataHeight = everyDataHeight,
+                                    chartHeight = barAreaHeight,
+                                    averageSpacingBetweenBars = averageSpacingBetweenBars,
+                                    textMeasurer = textMeasurer
                                 )
-                                val canvasModifier = if (scrollEnabled.value) {
+                                val canvasModifier = if (isScrollable) {
                                     Modifier
-                                        .height(with(density) { scrollConfig.effectiveSize.toDp() })
+                                        .height(with(density) { barAreaHeight.toDp() })
                                         .fillMaxWidth()
                                 } else {
                                     Modifier.fillMaxHeight().weight(1f)
@@ -554,7 +563,7 @@ fun RowChart(
                                     modifier = canvasModifier.then(chartPointerModifier)
                                 ) {
                                     drawRowContent(
-                                        barAreaHeight = size.height,
+                                        barAreaHeight = barAreaHeight,
                                         barAreaWidth = size.width,
                                         drawYPadding = 0f,
                                         shouldDrawIndicators = false,
@@ -564,69 +573,70 @@ fun RowChart(
                                 }
                             }
                         }
-                    }
 
-                    // Fixed value indicators (Bottom position)
-                    if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Vertical.Bottom) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            if (labelProperties.enabled) {
-                                Spacer(Modifier.width(verticalLabelAreaWidthDp))
-                            }
-                            Canvas(
-                                modifier = Modifier
-                                    .height(with(density) { indicatorAreaHeight.toDp() })
-                                    .fillMaxWidth()
-                            ) {
-                                indicators.reversed().forEachIndexed { index, indicator ->
-                                    val measureResult =
-                                        textMeasurer.measure(
-                                            indicatorProperties.contentBuilder(indicator),
-                                            style = indicatorProperties.textStyle,
+                        // Fixed value indicators (Bottom position)
+                        if (indicatorProperties.enabled && indicatorProperties.position == IndicatorPosition.Vertical.Bottom) {
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                if (labelProperties.enabled) {
+                                    Spacer(Modifier.width(verticalLabelAreaWidthDp))
+                                }
+                                Canvas(
+                                    modifier = Modifier
+                                        .height(with(density) { indicatorAreaHeight.toDp() })
+                                        .fillMaxWidth()
+                                ) {
+                                    indicators.reversed().forEachIndexed { index, indicator ->
+                                        val measureResult =
+                                            textMeasurer.measure(
+                                                indicatorProperties.contentBuilder(indicator),
+                                                style = indicatorProperties.textStyle,
+                                            )
+                                        drawText(
+                                            textLayoutResult = measureResult,
+                                            topLeft = Offset(
+                                                x = (size.width - measureResult.size.width).spaceBetween(
+                                                    itemCount = indicators.count(),
+                                                    index = index
+                                                ), y = indicatorProperties.padding.value * density.density
+                                            )
                                         )
-                                    drawText(
-                                        textLayoutResult = measureResult,
-                                        topLeft = Offset(
-                                            x = (size.width - measureResult.size.width).spaceBetween(
-                                                itemCount = indicators.count(),
-                                                index = index
-                                            ), y = indicatorProperties.padding.value * density.density
-                                        )
-                                    )
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            } else {
-                // ── Disabled layout: original single-Canvas Row ──
-                Row(modifier = Modifier.fillMaxSize()) {
-                    VerticalLabels(
-                        labelProperties = labelProperties,
-                        labels = labelProperties.labels.ifEmpty {
-                            data.map { it.label }
-                        },
-                        dataCount = data.count(),
-                        indicatorAreaHeight = indicatorAreaHeight,
-                        density = density,
-                        indicatorProperties = indicatorProperties,
-                        everyDataHeight = everyDataHeight
-                    )
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .then(chartPointerModifier)
-                    ) {
-                        val barAreaHeight = size.height - indicatorAreaHeight
-                        val barAreaWidth = size.width
-                        val yPadding =
-                            if (indicatorProperties.position == IndicatorPosition.Vertical.Top) indicatorAreaHeight else 0f
-
-                        drawRowContent(
-                            barAreaHeight = barAreaHeight,
-                            barAreaWidth = barAreaWidth,
-                            drawYPadding = yPadding,
-                            shouldDrawIndicators = true
+                } else {
+                    // ── Disabled layout: original single-Canvas Row ──
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        VerticalLabels(
+                            labelProperties = labelProperties,
+                            labels = labelProperties.labels.ifEmpty {
+                                data.map { it.label }
+                            },
+                            dataCount = data.count(),
+                            indicatorAreaHeight = indicatorAreaHeight,
+                            density = density,
+                            indicatorProperties = indicatorProperties,
+                            everyDataHeight = everyDataHeight,
+                            chartHeight = availableHeightPx,
+                            averageSpacingBetweenBars = averageSpacingBetweenBars,
+                            textMeasurer = textMeasurer
                         )
+                        Canvas(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(chartPointerModifier)
+                        ) {
+                            val yPadding =
+                                if (indicatorProperties.position == IndicatorPosition.Vertical.Top) indicatorAreaHeight else 0f
+
+                            drawRowContent(
+                                barAreaHeight = availableHeightPx,
+                                barAreaWidth = availableWidthPx,
+                                drawYPadding = yPadding,
+                                shouldDrawIndicators = true
+                            )
+                        }
                     }
                 }
             }

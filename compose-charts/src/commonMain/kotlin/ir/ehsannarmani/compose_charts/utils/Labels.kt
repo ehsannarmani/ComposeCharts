@@ -159,34 +159,87 @@ fun VerticalLabels(
     indicatorAreaHeight: Float,
     density: Density,
     indicatorProperties: VerticalIndicatorProperties,
-    everyDataHeight: Float
+    everyDataHeight: Float,
+    chartHeight: Float = 0f,
+    averageSpacingBetweenBars: Double = 0.0,
+    textMeasurer: TextMeasurer? = null
 ) {
     if (labelProperties.enabled && labels.isNotEmpty()) {
         val paddingY = (indicatorAreaHeight / density.density).dp
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(IntrinsicSize.Max)
-                .padding(
-                    top = if (indicatorProperties.position == IndicatorPosition.Vertical.Top) paddingY else 0.dp,
-                    bottom = if (indicatorProperties.position == IndicatorPosition.Vertical.Bottom) paddingY else 0.dp
-                )
-                .padding(vertical = (((everyDataHeight) / dataCount) / density.density).dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            labels.forEachIndexed { index,label->
-                if (labelProperties.builder != null){
-                    labelProperties.builder.invoke(Modifier,label,false,index)
-                }else{
-                    BasicText(
-                        text = label,
-                        style = labelProperties.textStyle,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
 
+        if (chartHeight > 0f && everyDataHeight > 0f) {
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(IntrinsicSize.Max)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height((chartHeight / density.density).dp)
+                        .width(IntrinsicSize.Max)
+                ) {
+                    labels.forEachIndexed { index, label ->
+                        val labelHeight = textMeasurer?.measure(
+                            label,
+                            style = labelProperties.textStyle,
+                            maxLines = 1
+                        )?.size?.height?.toFloat()
+                            ?: 0f
+
+                        val drawYPadding = if (indicatorProperties.position == IndicatorPosition.Vertical.Top) indicatorAreaHeight else 0f
+                        val groupY = (chartHeight - everyDataHeight).spaceBetween(labels.count(), index) + (averageSpacingBetweenBars / 2).toFloat() + drawYPadding
+                        val groupCenterY = groupY + (everyDataHeight / 2f)
+                        val labelTopPx = groupCenterY - (labelHeight / 2f)
+                        val labelTopDp = (labelTopPx / density.density).dp
+
+                        val modifier = Modifier
+                            .offset(y = labelTopDp)
+                            .fillMaxWidth()
+
+                        if (labelProperties.builder != null) {
+                            labelProperties.builder.invoke(modifier, label, false, index)
+                        } else {
+                            BasicText(
+                                text = label,
+                                style = labelProperties.textStyle,
+                                modifier = modifier
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.width(labelProperties.padding))
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(IntrinsicSize.Max)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(IntrinsicSize.Max)
+                        .padding(
+                            top = if (indicatorProperties.position == IndicatorPosition.Vertical.Top) paddingY else 0.dp,
+                            bottom = if (indicatorProperties.position == IndicatorPosition.Vertical.Bottom) paddingY else 0.dp
+                        )
+                        .padding(vertical = (((everyDataHeight) / dataCount) / density.density).dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    labels.forEachIndexed { index, label ->
+                        if (labelProperties.builder != null) {
+                            labelProperties.builder.invoke(Modifier, label, false, index)
+                        } else {
+                            BasicText(
+                                text = label,
+                                style = labelProperties.textStyle,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.width(labelProperties.padding))
             }
         }
-        Spacer(modifier = Modifier.width(labelProperties.padding))
     }
 }
