@@ -491,27 +491,36 @@ fun ColumnChart(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
+                                    .fillMaxHeight()
+                                    .clipToBounds()
                             ) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    // Fixed grid lines layer (does not scroll)
-                                    Canvas(modifier = Modifier.fillMaxSize()) {
-                                        drawChartContent(
-                                            barsAreaWidth = barsAreaWidth,
-                                            drawXPadding = 0f,
-                                            shouldDrawIndicators = false,
-                                            shouldDrawGrid = true,
-                                            shouldDrawBars = false
-                                        )
-                                    }
+                                // Grid lines layer (always measured to viewport size)
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    drawChartContent(
+                                        barsAreaWidth = availableWidthPx,
+                                        drawXPadding = 0f,
+                                        shouldDrawIndicators = false,
+                                        shouldDrawGrid = true,
+                                        shouldDrawBars = false
+                                    )
+                                }
 
-                                    // Scrollable bars layer
+                                // Scrollable bars layer
+                                val barsContainerModifier = if (isScrollable) {
+                                    Modifier
+                                        .fillMaxSize()
+                                        .horizontalScroll(scrollState)
+                                } else {
+                                    Modifier.fillMaxSize()
+                                }
+
+                                Box(modifier = barsContainerModifier) {
                                     val canvasModifier = if (isScrollable) {
                                         Modifier
-                                            .horizontalScroll(scrollState)
                                             .width(with(density) { barsAreaWidth.toDp() })
                                             .fillMaxHeight()
                                     } else {
-                                        Modifier.fillMaxWidth().fillMaxHeight()
+                                        Modifier.fillMaxSize()
                                     }
 
                                     Canvas(

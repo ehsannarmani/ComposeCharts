@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -494,8 +495,12 @@ fun RowChart(
                         )
                         scrollEnabled.value = scrollConfig.scrollEnabled
 
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            // Fixed grid lines layer (does not scroll)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clipToBounds()
+                        ) {
+                            // Fixed grid lines layer (always measured to viewport size)
                             Row(modifier = Modifier.fillMaxSize()) {
                                 if (labelProperties.enabled) {
                                     Spacer(Modifier.width(verticalLabelAreaWidthDp))
@@ -517,16 +522,15 @@ fun RowChart(
                             }
 
                             // Scrollable content area (bars + labels)
-                            val rowModifier = if (scrollEnabled.value) {
+                            val rowContainerModifier = if (scrollEnabled.value) {
                                 Modifier
+                                    .fillMaxSize()
                                     .verticalScroll(scrollState)
-                                    .height(with(density) { scrollConfig.effectiveSize.toDp() })
-                                    .fillMaxWidth()
                             } else {
                                 Modifier.fillMaxSize()
                             }
 
-                            Row(modifier = rowModifier) {
+                            Row(modifier = rowContainerModifier) {
                                 VerticalLabels(
                                     labelProperties = labelProperties,
                                     labels = labelProperties.labels.ifEmpty {
@@ -538,11 +542,16 @@ fun RowChart(
                                     indicatorProperties = indicatorProperties,
                                     everyDataHeight = everyDataHeight
                                 )
+                                val canvasModifier = if (scrollEnabled.value) {
+                                    Modifier
+                                        .height(with(density) { scrollConfig.effectiveSize.toDp() })
+                                        .fillMaxWidth()
+                                } else {
+                                    Modifier.fillMaxHeight().weight(1f)
+                                }
+
                                 Canvas(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .weight(1f)
-                                        .then(chartPointerModifier)
+                                    modifier = canvasModifier.then(chartPointerModifier)
                                 ) {
                                     drawRowContent(
                                         barAreaHeight = size.height,
