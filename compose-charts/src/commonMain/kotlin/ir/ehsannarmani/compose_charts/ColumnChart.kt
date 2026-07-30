@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
@@ -114,10 +115,10 @@ fun ColumnChart(
     maxValue: Double = data.maxOfOrNull { it.values.maxOfOrNull { it.value } ?: 0.0 } ?: 0.0,
     minValue: Double = if (data.any { it.values.any { it.value < 0 } }) -maxValue else 0.0,
     scrollMode: ScrollMode = ScrollMode.Auto(4.dp),
+    scrollState: ScrollState = rememberScrollState()
 ) {
     checkRCMinValue(minValue, data)
     checkRCMaxValue(maxValue, data)
-
     val density = LocalDensity.current
 
     val onBarClick by rememberUpdatedState(onBarClick)
@@ -181,7 +182,6 @@ fun ColumnChart(
     }
 
     val isScrollMode = scrollMode !is ScrollMode.Disabled
-    val scrollState = rememberScrollState()
     val scrollEnabled = remember(scrollMode) { mutableStateOf(scrollMode is ScrollMode.Always) }
 
     val scope = rememberCoroutineScope()
