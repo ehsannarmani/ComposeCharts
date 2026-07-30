@@ -71,3 +71,25 @@ RowChart(
 By default, max value is the highest value of given data, min value is 0 when there is no value
 under the zero in given data, otherwise if there is value under zero, min value will be (-maxValue)
 
+### Scroll Mode
+
+You can enable vertical scrolling for `RowChart` using the `scrollMode` parameter:
+
+```kotlin linenums="1" hl_lines="3"
+RowChart(
+    data = chartData,
+    scrollMode = ScrollMode.Auto(maxBarSpacing = 16.dp)
+)
+```
+
+Supported modes:
+
+- `ScrollMode.Disabled`: Fits all bars within the visible viewport (default).
+- `ScrollMode.Auto(maxBarSpacing)`: Automatically enables scrolling if bars become too compressed.
+- `ScrollMode.Always(barSpacing)`: Always enables vertical scrolling with fixed empty gap between bars.
+
+On Desktop, click-and-drag with mouse is supported when scrolling is enabled.
+
+See [Scroll Mode Documentation](../chart-properties/scroll-mode.md) for complete details.
+
+

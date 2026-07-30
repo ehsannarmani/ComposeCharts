@@ -32,6 +32,7 @@ import ir.ehsannarmani.compose_charts.models.IndicatorCount
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.ScrollMode
 import ir.ehsannarmani.compose_charts.models.VerticalIndicatorProperties
 import ir.ehsannarmani.compose_charts.models.ZeroLineProperties
 
@@ -435,6 +436,7 @@ fun RowSample3(modifier: Modifier=Modifier) {
                     color = SolidColor(Color(0xFFAD1457)),
                     thickness = 1.dp,
                 ),
+                scrollMode = ScrollMode.Auto(15.dp)
             )
         }
     }

@@ -33,6 +33,7 @@ import ir.ehsannarmani.compose_charts.models.IndicatorPosition
 import ir.ehsannarmani.compose_charts.models.LabelHelperProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.PopupProperties
+import ir.ehsannarmani.compose_charts.models.ScrollMode
 
 
 val columnGridProperties = GridProperties(
@@ -120,6 +121,106 @@ fun ColumnSample(modifier: Modifier=Modifier) {
                         )
                     ),
                 )
+            ),
+            Bars(
+                label = "Feb",
+                values = listOf(
+                    Bars.Data(
+                        label = "Linux",
+                        value = 60.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFFE65100),
+                                Color(0xFFFFD54F),
+                            )
+                        )
+                    ),
+                    Bars.Data(
+                        label = "Windows",
+                        value = 50.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF7E57C2),
+                                Color(0xFF7986CB),
+                            )
+                        )
+                    ),
+                )
+            ),
+            Bars(
+                label = "Feb",
+                values = listOf(
+                    Bars.Data(
+                        label = "Linux",
+                        value = 60.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFFE65100),
+                                Color(0xFFFFD54F),
+                            )
+                        )
+                    ),
+                    Bars.Data(
+                        label = "Windows",
+                        value = 50.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF7E57C2),
+                                Color(0xFF7986CB),
+                            )
+                        )
+                    ),
+                )
+            ),
+            Bars(
+                label = "Feb",
+                values = listOf(
+                    Bars.Data(
+                        label = "Linux",
+                        value = 60.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFFE65100),
+                                Color(0xFFFFD54F),
+                            )
+                        )
+                    ),
+                    Bars.Data(
+                        label = "Windows",
+                        value = 50.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF7E57C2),
+                                Color(0xFF7986CB),
+                            )
+                        )
+                    ),
+                )
+            ),
+            Bars(
+                label = "Feb",
+                values = listOf(
+                    Bars.Data(
+                        label = "Linux",
+                        value = 60.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFFE65100),
+                                Color(0xFFFFD54F),
+                            )
+                        )
+                    ),
+                    Bars.Data(
+                        label = "Windows",
+                        value = 50.0,
+                        color = Brush.verticalGradient(
+                            listOf(
+                                Color(0xFF7E57C2),
+                                Color(0xFF7986CB),
+                            )
+                        )
+                    ),
+                )
             )
         )
     }
@@ -166,7 +267,8 @@ fun ColumnSample(modifier: Modifier=Modifier) {
                 },
                 onBarLongClick = { popupData ->
                     println("long: ${popupData.bar}")
-                }
+                },
+                scrollMode = ScrollMode.Always(barSpacing = 12.dp)
             )
         }
     }
@@ -417,7 +519,8 @@ fun ColumnSample3(modifier: Modifier=Modifier) {
                 animationDelay = 300,
                 labelHelperProperties = LabelHelperProperties(enabled = false, textStyle = TextStyle(fontSize = 12.sp, fontFamily = ubuntu, color = Color.White)),
                 minValue = -75.0,
-                maxValue = 75.0
+                maxValue = 75.0,
+                scrollMode = ScrollMode.Auto(maxBarSpacing = 15.dp)
             )
         }
     }

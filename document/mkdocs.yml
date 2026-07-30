@@ -49,6 +49,7 @@ nav:
       - chart-properties/labels.md
       - chart-properties/label-helpers.md
       - chart-properties/popups.md
+      - chart-properties/scroll-mode.md
   - todos.md
 
 markdown_extensions:
