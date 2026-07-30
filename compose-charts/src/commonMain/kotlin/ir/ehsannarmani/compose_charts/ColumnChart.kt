@@ -354,34 +354,33 @@ fun ColumnChart(
 
     // Shared pointer-input modifier for drag / tap / long-press on bars
     val chartPointerModifier = Modifier
-        .pointerInput(Unit) {
-            if (popupProperties.enabled) {
-                detectHorizontalDragGestures { change, _ ->
-                    barWithRect
-                        .lastOrNull { popupData ->
-                            change.position.x in popupData.rect.left..popupData.rect.right
-                        }
-                        ?.let { popupData ->
-                            selectedValue.value = SelectedBar(
-                                bar = popupData.bar,
-                                rect = popupData.rect,
-                                offset = Offset(
-                                    popupData.rect.left,
-                                    if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
-                                ),
-                                dataIndex = popupData.dataIndex,
-                                valueIndex = popupData.valueIndex
-                            )
-                            scope.launch {
-                                if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
-                                    popupAnimation.animateTo(
-                                        1f,
-                                        animationSpec = popupProperties.animationSpec
-                                    )
-                                }
+        .pointerInput(scrollEnabled.value) {
+            if (!popupProperties.enabled || scrollEnabled.value) return@pointerInput
+            detectHorizontalDragGestures { change, _ ->
+                barWithRect
+                    .lastOrNull { popupData ->
+                        change.position.x in popupData.rect.left..popupData.rect.right
+                    }
+                    ?.let { popupData ->
+                        selectedValue.value = SelectedBar(
+                            bar = popupData.bar,
+                            rect = popupData.rect,
+                            offset = Offset(
+                                popupData.rect.left,
+                                if (popupData.bar.value < 0) popupData.rect.bottom else popupData.rect.top
+                            ),
+                            dataIndex = popupData.dataIndex,
+                            valueIndex = popupData.valueIndex
+                        )
+                        scope.launch {
+                            if (popupAnimation.value != 1f && !popupAnimation.isRunning) {
+                                popupAnimation.animateTo(
+                                    1f,
+                                    animationSpec = popupProperties.animationSpec
+                                )
                             }
                         }
-                }
+                    }
             }
         }
         .pointerInput(Unit) {
@@ -501,7 +500,7 @@ fun ColumnChart(
                             }
 
                             // Scrollable bars layer
-                            val canvasModifier = if (scrollConfig.scrollEnabled) {
+                            val canvasModifier = if (scrollEnabled.value) {
                                 Modifier
                                     .horizontalScroll(scrollState)
                                     .width(with(density) { scrollConfig.effectiveSize.toDp() })

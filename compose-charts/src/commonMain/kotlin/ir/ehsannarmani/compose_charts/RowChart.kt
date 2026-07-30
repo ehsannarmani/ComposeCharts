@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -355,9 +356,9 @@ fun RowChart(
 
     // Shared pointer-input modifier for drag / tap / long-press on bars
     val chartPointerModifier = Modifier
-        .pointerInput(Unit) {
-            if (!popupProperties.enabled) return@pointerInput
-            detectDragGestures { change, _ ->
+        .pointerInput(scrollEnabled.value) {
+            if (!popupProperties.enabled || scrollEnabled.value) return@pointerInput
+            detectVerticalDragGestures { change, _ ->
                 barWithRect
                     .lastOrNull { popupData ->
                         change.position.y in popupData.rect.top..popupData.rect.bottom
@@ -518,7 +519,7 @@ fun RowChart(
                             }
 
                             // Scrollable content area (bars + labels)
-                            val rowModifier = if (scrollConfig.scrollEnabled) {
+                            val rowModifier = if (scrollEnabled.value) {
                                 Modifier
                                     .verticalScroll(scrollState)
                                     .height(with(density) { scrollConfig.effectiveSize.toDp() })
