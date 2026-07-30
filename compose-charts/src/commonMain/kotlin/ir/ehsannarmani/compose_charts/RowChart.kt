@@ -632,7 +632,7 @@ fun RowChart(
 
                             drawRowContent(
                                 barAreaHeight = availableHeightPx,
-                                barAreaWidth = availableWidthPx,
+                                barAreaWidth = size.width,
                                 drawYPadding = yPadding,
                                 shouldDrawIndicators = true
                             )
