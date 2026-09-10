@@ -19,5 +19,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ComposeCharts"
-include(":app")
 include(":compose-charts")
+include(":demo:shared")
+include(":demo:androidApp")
+include(":demo:desktopApp")
+include(":demo:webApp")

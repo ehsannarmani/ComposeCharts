@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import ir.ehsannarmani.compose_charts.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,

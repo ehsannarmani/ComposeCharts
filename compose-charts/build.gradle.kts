@@ -1,10 +1,9 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.maven.publish)
@@ -57,7 +56,7 @@ kotlin {
                 }
             }
         }
-        binaries.library()
+        binaries.executable()
     }
 
     js {
@@ -70,18 +69,16 @@ kotlin {
                 }
             }
         }
-        binaries.library()
+        binaries.executable()
     }
 
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_1_8)
-        }
-        publishLibraryVariants("release","debug")
+    android {
+        namespace = "ir.ehsannarmani.compose_charts"
+        compileSdk = 37
+        minSdk = 21
     }
 
     jvm("desktop")
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
@@ -92,29 +89,5 @@ kotlin {
             // and add a dependency on ui-tooling to the androidDebug variant
             //implementation(libs.compose.ui.tooling.preview)
         }
-    }
-}
-
-android {
-    namespace = "ir.ehsannarmani.compose_charts"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 21
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
